@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tienda Muebles y Colchones</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f2f5;color:#222;font-size:14px}
+header{background:#1a5276;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header h1{font-size:18px;font-weight:700}
+header span{font-size:12px;opacity:.8}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #e0e0e0;overflow-x:auto}
+.tab{padding:12px 20px;cursor:pointer;font-weight:600;font-size:13px;color:#666;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab.active{color:#1a5276;border-bottom-color:#1a5276}
+.tab:hover{background:#f5f5f5}
+.section{display:none;padding:16px;max-width:1100px;margin:0 auto}
+.section.active{display:block}
+.card{background:#fff;border-radius:10px;padding:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card h2{font-size:15px;font-weight:700;margin-bottom:14px;color:#1a5276;display:flex;align-items:center;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:600px){.grid2,.grid3,.grid4{grid-template-columns:1fr 1fr}.grid4{grid-template-columns:1fr 1fr}}
+label{display:block;font-size:12px;color:#555;margin-bottom:4px;font-weight:600}
+input,select,textarea{width:100%;padding:9px 11px;border:1.5px solid #ddd;border-radius:7px;font-size:13px;background:#fafafa;color:#222;outline:none;transition:border .2s}
+input:focus,select:focus{border-color:#1a5276;background:#fff}
+input[readonly]{background:#f0f2f5;color:#1a5276;font-weight:700}
+.btn{padding:10px 18px;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s}
+.btn:hover{opacity:.85}
+.btn-green{background:#1e8449;color:#fff;width:100%;margin-top:8px;padding:12px}
+.btn-blue{background:#1a5276;color:#fff}
+.btn-red{background:#e74c3c;color:#fff;font-size:12px;padding:6px 12px}
+.metric{background:#f8f9fa;border-radius:8px;padding:12px;text-align:center;border:1px solid #e9ecef}
+.metric .lbl{font-size:11px;color:#666;margin-bottom:4px}
+.metric .val{font-size:20px;font-weight:700;color:#1a5276}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
+.b-ok{background:#d5f5e3;color:#1e8449}
+.b-low{background:#fdebd0;color:#e67e22}
+.b-out{background:#fadbd8;color:#e74c3c}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#eaf0fb;color:#1a5276;font-weight:700;text-align:left;padding:9px 10px;border-bottom:2px solid #d0dcea;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+tr:hover td{background:#fafcff}
+.fac{background:#fff;border:1.5px solid #1e8449;border-radius:10px;padding:18px;max-width:420px;margin:0 auto}
+.fac-header{text-align:center;margin-bottom:14px}
+.fac-header h3{font-size:16px;color:#1a5276;font-weight:700}
+.fac-header p{font-size:12px;color:#666}
+.fac-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid #f0f0f0}
+.fac-row:last-child{border:none}
+.fac-total{display:flex;justify-content:space-between;padding:10px 0 0;font-size:17px;font-weight:700;color:#1e8449}
+.cuota-box{background:#f5eef8;border-radius:7px;padding:9px 13px;font-size:13px;color:#6c3483;margin-top:10px;font-weight:600}
+.alert{background:#fadbd8;color:#922b21;border-radius:7px;padding:8px 12px;font-size:12px;margin-top:6px;display:none;font-weight:600}
+.toast{position:fixed;bottom:24px;right:24px;background:#1e8449;color:#fff;padding:12px 20px;border-radius:9px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.sep{border:none;border-top:1px solid #eee;margin:10px 0}
+.stock-input{width:65px!important;text-align:center;font-size:13px;font-weight:700;padding:4px 6px}
+.venta-pago-ef{color:#0f6e56;font-weight:700}
+.venta-pago-cred{color:#6c3483;font-weight:700}
+.venta-pago-trans{color:#185fa5;font-weight:700}
+.empty{text-align:center;padding:30px;color:#aaa;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>&#127968; Tienda Muebles y Colchones</h1>
+    <span>Mocoa, Putumayo &mdash; Sistema de inventario</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span id="save-badge" style="background:#2ecc71;color:#fff;font-size:11px;padding:4px 12px;border-radius:99px;font-weight:700">&#10003; Guardado</span>
+    <button class="btn btn-red" onclick="confirmarReset()" style="font-size:11px;padding:5px 12px">&#128465; Reiniciar todo</button>
+  </div>
+</header>
+<div class="tabs">
+  <div class="tab active" onclick="mostrarTab('venta',this)">&#128722; Registrar venta</div>
+  <div class="tab" onclick="mostrarTab('inventario',this)">&#128230; Inventario</div>
+  <div class="tab" onclick="mostrarTab('historial',this)">&#128203; Historial</div>
+  <div class="tab" onclick="mostrarTab('resumen',this)">&#128200; Resumen</div>
+</div>
+<div id="tab-venta" class="section active">
+  <div class="grid2" style="align-items:start;gap:16px">
+    <div class="card">
+      <h2>&#9997; Nueva venta</h2>
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div><label>Artículo</label><select id="sel-art" onchange="cargarPrecio()"></select></div>
+        <div class="grid2">
+          <div><label>Cantidad</label><input type="number" id="inp-qty" min="1" value="1" oninput="calcTotal()"></div>
+          <div><label>Precio venta $</label><input type="number" id="inp-precio" oninput="calcTotal()"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Descuento %</label><input type="number" id="inp-desc" min="0" max="100" value="0" oninput="calcTotal()"></div>
+          <div><label>Total $</label><input type="text" id="inp-total" readonly></div>
+        </div>
+        <hr class="sep">
+        <div><label>Cliente</label><input type="text" id="inp-cliente" placeholder="Nombre del cliente"></div>
+        <div><label>Vendedor</label><input type="text" id="inp-vendedor" placeholder="Nombre del vendedor"></div>
+        <div>
+          <label>Medio de pago</label>
+          <select id="sel-pago" onchange="toggleCuotas()">
+            <option>Efectivo</option><option>Transferencia</option>
+            <option>Nequi</option><option>Daviplata</option><option>Crédito</option>
+          </select>
+        </div>
+        <div id="cuotas-wrap" style="display:none">
+          <label>Número de cuotas</label>
+          <input type="number" id="inp-cuotas" min="2" max="48" value="3">
+        </div>
+        <div class="alert" id="alerta-stock">&#9888; Stock insuficiente para esta cantidad</div>
+        <button class="btn btn-green" onclick="registrarVenta()">&#10003; Registrar venta</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>&#128221; Factura</h2>
+      <div id="fac-content" class="empty">&#128196; Registra una venta para generar la factura</div>
+    </div>
+  </div>
+</div>
+<div id="tab-inventario" class="section">
+  <div class="card">
+    <h2>&#128230; Stock de artículos <span style="font-size:12px;font-weight:400;color:#888">&mdash; Edita el stock directamente</span></h2>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>Código</th><th>Artículo</th><th style="text-align:center">Stock</th>
+          <th style="text-align:right">P. Costo</th><th style="text-align:right">P. Venta</th>
+          <th style="text-align:right">Margen</th><th>Estado</th>
+        </tr></thead>
+        <tbody id="inv-body"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h2>&#10133; Agregar nuevo artículo</h2>
+    <div class="grid3" style="margin-bottom:12px">
+      <div><label>Código</label><input type="text" id="new-cod" placeholder="MUE-011"></div>
+      <div style="grid-column:span 2"><label>Nombre</label><input type="text" id="new-art" placeholder="Ej: Cama king size"></div>
+      <div><label>Stock inicial</label><input type="number" id="new-stk" min="0" value="1"></div>
+      <div><label>Precio costo $</label><input type="number" id="new-costo" min="0"></div>
+      <div><label>Precio venta $</label><input type="number" id="new-venta" min="0"></div>
+    </div>
+    <button class="btn btn-blue" onclick="agregarArticulo()" style="padding:10px 24px">&#10133; Agregar artículo</button>
+  </div>
+</div>
+<div id="tab-historial" class="section">
+  <div class="card">
+    <h2>&#128203; Historial de ventas</h2>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Fecha</th><th>Artículo</th><th>Cant.</th>
+          <th style="text-align:right">Total $</th><th>Cliente</th>
+          <th>Vendedor</th><th>Pago</th><th>Cuotas</th><th></th>
+        </tr></thead>
+        <tbody id="hist-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div id="tab-resumen" class="section">
+  <div class="card">
+    <h2>&#128200; Resumen de ventas</h2>
+    <div class="grid4" style="margin-bottom:16px">
+      <div class="metric"><div class="lbl">Total ventas</div><div class="val" id="r-n">0</div></div>
+      <div class="metric"><div class="lbl">Total $</div><div class="val" id="r-total">$0</div></div>
+      <div class="metric"><div class="lbl">Efectivo</div><div class="val" id="r-ef">$0</div></div>
+      <div class="metric"><div class="lbl">Crédito</div><div class="val" id="r-cred">$0</div></div>
+    </div>
+    <div class="grid2">
+      <div class="metric"><div class="lbl">Transferencia / Nequi / Daviplata</div><div class="val" id="r-trans">$0</div></div>
+      <div class="metric"><div class="lbl">Artículo más vendido</div><div class="val" style="font-size:14px" id="r-top">—</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>&#127970; Resumen de inventario</h2>
+    <div class="grid4">
+      <div class="metric"><div class="lbl">Artículos distintos</div><div class="val" id="r-arts">0</div></div>
+      <div class="metric"><div class="lbl">Unidades en stock</div><div class="val" id="r-unid">0</div></div>
+      <div class="metric"><div class="lbl">Valor costo</div><div class="val" id="r-vcosto">$0</div></div>
+      <div class="metric"><div class="lbl">Valor venta</div><div class="val" id="r-vventa">$0</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>&#128101; Ventas por vendedor</h2>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Vendedor</th><th style="text-align:center">Ventas</th><th style="text-align:right">Total $</th></tr></thead>
+      <tbody id="r-vend-body"></tbody>
+    </table></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const INV_KEY='maxi_inv_v2',VEN_KEY='maxi_ven_v2';
+const defaultInv=[
+  {cod:"MUE-001",art:"Cama doble con cabecero",stk:10,costo:450000,venta:780000},
+  {cod:"MUE-002",art:"Colchón sencillo espuma",stk:8,costo:180000,venta:320000},
+  {cod:"MUE-003",art:"Sofá 3 puestos",stk:5,costo:620000,venta:990000},
+  {cod:"MUE-004",art:"Colchón doble ortopédico",stk:6,costo:390000,venta:650000},
+  {cod:"MUE-005",art:"Mesa de noche madera",stk:12,costo:95000,venta:165000},
+  {cod:"MUE-006",art:"Comedor 4 puestos",stk:4,costo:550000,venta:890000},
+  {cod:"MUE-007",art:"Silla apilable plástico",stk:20,costo:18000,venta:35000},
+  {cod:"MUE-008",art:"Base cama doble",stk:7,costo:210000,venta:360000},
+  {cod:"MUE-009",art:"Closet 3 puertas",stk:3,costo:750000,venta:1200000},
+  {cod:"MUE-010",art:"Colchón king size",stk:4,costo:580000,venta:950000},
+];
+let inv=[],ven=[];
+function cargar(){
+  try{inv=JSON.parse(localStorage.getItem(INV_KEY))||JSON.parse(JSON.stringify(defaultInv));}catch(e){inv=JSON.parse(JSON.stringify(defaultInv));}
+  try{ven=JSON.parse(localStorage.getItem(VEN_KEY))||[];}catch(e){ven=[];}
+}
+function guardar(){
+  localStorage.setItem(INV_KEY,JSON.stringify(inv));
+  localStorage.setItem(VEN_KEY,JSON.stringify(ven));
+  const b=document.getElementById('save-badge');
+  b.textContent='✓ Guardado';b.style.background='#2ecc71';
+}
+const fmt=n=>'$'+Math.round(n).toLocaleString('es-CO');
+function renderInv(){
+  document.getElementById('inv-body').innerHTML=inv.map((a,i)=>{
+    const mg=((a.venta-a.costo)/a.venta*100).toFixed(1);
+    const badge=a.stk<=0?'<span class="badge b-out">Sin stock</span>':a.stk<=2?'<span class="badge b-low">Stock bajo</span>':'<span class="badge b-ok">OK</span>';
+    const color=a.stk<=0?'#e74c3c':a.stk<=2?'#e67e22':'#1e8449';
+    return `<tr><td style="font-size:11px;color:#888">${a.cod}</td><td style="font-weight:700">${a.art}</td>
+    <td style="text-align:center"><input class="stock-input" type="number" min="0" value="${a.stk}" style="color:${color};border:1.5px solid #ddd;border-radius:6px" onchange="editarStock(${i},this.value)"></td>
+    <td style="text-align:right">${fmt(a.costo)}</td><td style="text-align:right;font-weight:700">${fmt(a.venta)}</td>
+    <td style="text-align:right;color:#1a5276;font-weight:700">${mg}%</td><td>${badge}</td></tr>`;
+  }).join('');
+}
+function renderSel(){
+  const s=document.getElementById('sel-art'),v=s.value;
+  s.innerHTML=inv.map((a,i)=>`<option value="${i}">${a.art} — stock: ${a.stk}</option>`).join('');
+  if(v)s.value=v;cargarPrecio();
+}
+function renderHistorial(){
+  const tb=document.getElementById('hist-body');
+  if(!ven.length){tb.innerHTML='<tr><td colspan="10" class="empty">Sin ventas registradas aún</td></tr>';return;}
+  const pc=p=>p==='Efectivo'?'venta-pago-ef':p==='Crédito'?'venta-pago-cred':'venta-pago-trans';
+  tb.innerHTML=ven.map((v,i)=>`<tr>
+    <td style="color:#aaa;font-size:11px">${ven.length-i}</td><td style="font-size:11px">${v.fecha}</td>
+    <td style="font-weight:600">${v.art}</td><td style="text-align:center">${v.qty}</td>
+    <td style="text-align:right;font-weight:700;color:#1e8449">${fmt(v.total)}</td>
+    <td>${v.cliente}</td><td>${v.vendedor}</td>
+    <td class="${pc(v.pago)}">${v.pago}</td>
+    <td style="text-align:center;color:#6c3483;font-weight:700">${v.cuotas>0?v.cuotas+' c':'—'}</td>
+    <td><button class="btn btn-red" onclick="eliminarVenta(${i},${v.idx},${v.qty})">✕</button></td>
+  </tr>`).join('');
+}
+function renderResumen(){
+  const total=ven.reduce((s,v)=>s+v.total,0);
+  const ef=ven.filter(v=>v.pago==='Efectivo').reduce((s,v)=>s+v.total,0);
+  const cred=ven.filter(v=>v.pago==='Crédito').reduce((s,v)=>s+v.total,0);
+  const trans=ven.filter(v=>!['Efectivo','Crédito'].includes(v.pago)).reduce((s,v)=>s+v.total,0);
+  document.getElementById('r-n').textContent=ven.length;
+  document.getElementById('r-total').textContent=fmt(total);
+  document.getElementById('r-ef').textContent=fmt(ef);
+  document.getElementById('r-cred').textContent=fmt(cred);
+  document.getElementById('r-trans').textContent=fmt(trans);
+  const conteo={};ven.forEach(v=>{conteo[v.art]=(conteo[v.art]||0)+v.qty;});
+  const top=Object.entries(conteo).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('r-top').textContent=top?top[0]:'—';
+  document.getElementById('r-arts').textContent=inv.length;
+  document.getElementById('r-unid').textContent=inv.reduce((s,a)=>s+a.stk,0);
+  document.getElementById('r-vcosto').textContent=fmt(inv.reduce((s,a)=>s+a.stk*a.costo,0));
+  document.getElementById('r-vventa').textContent=fmt(inv.reduce((s,a)=>s+a.stk*a.venta,0));
+  const vends={};ven.forEach(v=>{if(!vends[v.vendedor])vends[v.vendedor]={n:0,t:0};vends[v.vendedor].n++;vends[v.vendedor].t+=v.total;});
+  const vb=document.getElementById('r-vend-body');
+  const ve=Object.entries(vends).sort((a,b)=>b[1].t-a[1].t);
+  vb.innerHTML=ve.length?ve.map(([k,v])=>`<tr><td style="font-weight:700">${k}</td><td style="text-align:center">${v.n}</td><td style="text-align:right;font-weight:700;color:#1e8449">${fmt(v.t)}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">Sin datos</td></tr>';
+}
+function renderAll(){renderInv();renderSel();renderHistorial();renderResumen();}
+function cargarPrecio(){
+  const i=+document.getElementById('sel-art').value;
+  if(inv[i]){document.getElementById('inp-precio').value=inv[i].venta;calcTotal();}
+}
+function calcTotal(){
+  const qty=+document.getElementById('inp-qty').value||0;
+  const precio=+document.getElementById('inp-precio').value||0;
+  const desc=+document.getElementById('inp-desc').value||0;
+  document.getElementById('inp-total').value=fmt(qty*precio*(1-desc/100));
+  const i=+document.getElementById('sel-art').value;
+  document.getElementById('alerta-stock').style.display=(qty>inv[i].stk)?'block':'none';
+}
+function toggleCuotas(){
+  document.getElementById('cuotas-wrap').style.display=document.getElementById('sel-pago').value==='Crédito'?'block':'none';
+}
+function registrarVenta(){
+  const idx=+document.getElementById('sel-art').value;
+  const a=inv[idx];
+  const qty=+document.getElementById('inp-qty').value||1;
+  const precio=+document.getElementById('inp-precio').value||a.venta;
+  const desc=+document.getElementById('inp-desc').value||0;
+  const total=qty*precio*(1-desc/100);
+  const cliente=document.getElementById('inp-cliente').value.trim()||'Sin nombre';
+  const vendedor=document.getElementById('inp-vendedor').value.trim()||'Sin nombre';
+  const pago=document.getElementById('sel-pago').value;
+  const cuotas=pago==='Crédito'?(+document.getElementById('inp-cuotas').value||3):0;
+  if(qty>a.stk){toast('⚠ Stock insuficiente',true);return;}
+  if(qty<1){toast('⚠ Cantidad inválida',true);return;}
+  a.stk-=qty;
+  const fecha=new Date().toLocaleDateString('es-CO');
+  const v={idx,art:a.art,qty,precio,desc,total,cliente,vendedor,pago,cuotas,fecha};
+  ven.unshift(v);guardar();renderAll();mostrarFactura(v);
+  toast('✓ Venta registrada y guardada');
+  document.getElementById('inp-qty').value=1;
+  document.getElementById('inp-desc').value=0;calcTotal();
+}
+function mostrarFactura(v){
+  const cuotaVal=v.cuotas>0?Math.round(v.total/v.cuotas):0;
+  const pc=v.pago==='Efectivo'?'#0f6e56':v.pago==='Crédito'?'#6c3483':'#185fa5';
+  document.getElementById('fac-content').innerHTML=`<div class="fac">
+    <div class="fac-header"><h3>TIENDA MUEBLES Y COLCHONES</h3><p>Mocoa, Putumayo &mdash; No responsable de IVA</p><p style="margin-top:4px;font-weight:700;color:#1a5276">Documento soporte de venta</p></div>
+    <hr class="sep">
+    <div class="fac-row"><span style="color:#666">Fecha</span><span>${v.fecha}</span></div>
+    <div class="fac-row"><span style="color:#666">Cliente</span><span style="font-weight:700">${v.cliente}</span></div>
+    <div class="fac-row"><span style="color:#666">Vendedor</span><span>${v.vendedor}</span></div>
+    <div class="fac-row"><span style="color:#666">Pago</span><span style="font-weight:700;color:${pc}">${v.pago}</span></div>
+    <hr class="sep">
+    <div class="fac-row"><span style="flex:1">${v.art}</span></div>
+    <div class="fac-row"><span style="color:#666">${v.qty} × ${fmt(v.precio)}</span>${v.desc>0?`<span style="color:#e74c3c">-${v.desc}%</span>`:''}</div>
+    <div class="fac-total"><span>TOTAL A PAGAR</span><span>${fmt(v.total)}</span></div>
+    ${v.cuotas>0?`<div class="cuota-box">Crédito a ${v.cuotas} cuotas &mdash; Valor cuota: ${fmt(cuotaVal)}/mes</div>`:''}
+    <p style="text-align:center;font-size:11px;color:#aaa;margin-top:12px">Gracias por su compra</p>
+  </div>`;
+}
+function editarStock(idx,val){
+  const n=parseInt(val);if(isNaN(n)||n<0)return;
+  inv[idx].stk=n;guardar();renderSel();renderResumen();toast('✓ Stock actualizado');
+}
+function eliminarVenta(i,idx,qty){
+  if(!confirm('¿Eliminar esta venta? El stock se devolverá.'))return;
+  inv[idx].stk+=qty;ven.splice(i,1);guardar();renderAll();toast('Venta eliminada');
+}
+function agregarArticulo(){
+  const cod=document.getElementById('new-cod').value.trim();
+  const art=document.getElementById('new-art').value.trim();
+  const stk=+document.getElementById('new-stk').value||0;
+  const costo=+document.getElementById('new-costo').value||0;
+  const venta=+document.getElementById('new-venta').value||0;
+  if(!cod||!art){toast('⚠ Completa código y nombre',true);return;}
+  inv.push({cod,art,stk,costo,venta});guardar();renderAll();
+  document.getElementById('new-cod').value='';document.getElementById('new-art').value='';
+  document.getElementById('new-stk').value=1;document.getElementById('new-costo').value='';
+  document.getElementById('new-venta').value='';toast('✓ Artículo agregado');
+}
+function confirmarReset(){
+  if(confirm('¿Borrar TODO el historial y reiniciar el stock?')){
+    inv=JSON.parse(JSON.stringify(defaultInv));ven=[];guardar();renderAll();
+    document.getElementById('fac-content').innerHTML='<div class="empty">&#128196; Registra una venta para generar la factura</div>';
+    toast('Todo reiniciado');
+  }
+}
+function mostrarTab(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+  if(id==='resumen')renderResumen();
+}
+function toast(msg,err=false){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.style.background=err?'#e74c3c':'#1e8449';t.style.opacity='1';
+  clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',2500);
+}
+cargar();renderAll();
+</script>
+</body>
+</html>
