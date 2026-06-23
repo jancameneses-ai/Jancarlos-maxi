@@ -17,20 +17,22 @@ header span{font-size:12px;opacity:.8}
 .section{display:none;padding:16px;max-width:1100px;margin:0 auto}
 .section.active{display:block}
 .card{background:#fff;border-radius:10px;padding:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.card h2{font-size:15px;font-weight:700;margin-bottom:14px;color:#1a5276;display:flex;align-items:center;gap:8px}
+.card h2{font-size:15px;font-weight:700;margin-bottom:14px;color:#1a5276}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 @media(max-width:600px){.grid2,.grid3,.grid4{grid-template-columns:1fr 1fr}.grid4{grid-template-columns:1fr 1fr}}
 label{display:block;font-size:12px;color:#555;margin-bottom:4px;font-weight:600}
-input,select,textarea{width:100%;padding:9px 11px;border:1.5px solid #ddd;border-radius:7px;font-size:13px;background:#fafafa;color:#222;outline:none;transition:border .2s}
+input,select{width:100%;padding:9px 11px;border:1.5px solid #ddd;border-radius:7px;font-size:13px;background:#fafafa;color:#222;outline:none;transition:border .2s}
 input:focus,select:focus{border-color:#1a5276;background:#fff}
 input[readonly]{background:#f0f2f5;color:#1a5276;font-weight:700}
-.btn{padding:10px 18px;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s}
-.btn:hover{opacity:.85}
-.btn-green{background:#1e8449;color:#fff;width:100%;margin-top:8px;padding:12px}
+.btn{padding:8px 14px;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s}
+.btn:hover{opacity:.82}
+.btn-green{background:#1e8449;color:#fff;width:100%;margin-top:8px;padding:12px;font-size:14px}
 .btn-blue{background:#1a5276;color:#fff}
-.btn-red{background:#e74c3c;color:#fff;font-size:12px;padding:6px 12px}
+.btn-red{background:#e74c3c;color:#fff}
+.btn-orange{background:#e67e22;color:#fff}
+.btn-gray{background:#7f8c8d;color:#fff}
 .metric{background:#f8f9fa;border-radius:8px;padding:12px;text-align:center;border:1px solid #e9ecef}
 .metric .lbl{font-size:11px;color:#666;margin-bottom:4px}
 .metric .val{font-size:20px;font-weight:700;color:#1a5276}
@@ -40,7 +42,7 @@ input[readonly]{background:#f0f2f5;color:#1a5276;font-weight:700}
 .b-out{background:#fadbd8;color:#e74c3c}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{background:#eaf0fb;color:#1a5276;font-weight:700;text-align:left;padding:9px 10px;border-bottom:2px solid #d0dcea;white-space:nowrap}
-td{padding:8px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+td{padding:7px 8px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
 tr:hover td{background:#fafcff}
 .fac{background:#fff;border:1.5px solid #1e8449;border-radius:10px;padding:18px;max-width:420px;margin:0 auto}
 .fac-header{text-align:center;margin-bottom:14px}
@@ -53,14 +55,21 @@ tr:hover td{background:#fafcff}
 .alert{background:#fadbd8;color:#922b21;border-radius:7px;padding:8px 12px;font-size:12px;margin-top:6px;display:none;font-weight:600}
 .toast{position:fixed;bottom:24px;right:24px;background:#1e8449;color:#fff;padding:12px 20px;border-radius:9px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 .sep{border:none;border-top:1px solid #eee;margin:10px 0}
-.stock-input{width:65px!important;text-align:center;font-size:13px;font-weight:700;padding:4px 6px}
+.empty{text-align:center;padding:30px;color:#aaa;font-size:13px}
 .venta-pago-ef{color:#0f6e56;font-weight:700}
 .venta-pago-cred{color:#6c3483;font-weight:700}
 .venta-pago-trans{color:#185fa5;font-weight:700}
-.empty{text-align:center;padding:30px;color:#aaa;font-size:13px}
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;width:90%;max-width:440px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal h3{font-size:16px;font-weight:700;color:#1a5276;margin-bottom:16px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.stock-input{width:70px!important;text-align:center;font-size:13px;font-weight:700;padding:4px 6px;border:1.5px solid #ddd;border-radius:6px}
 </style>
 </head>
 <body>
+
 <header>
   <div>
     <h1>&#127968; Tienda Muebles y Colchones</h1>
@@ -71,12 +80,15 @@ tr:hover td{background:#fafcff}
     <button class="btn btn-red" onclick="confirmarReset()" style="font-size:11px;padding:5px 12px">&#128465; Reiniciar todo</button>
   </div>
 </header>
+
 <div class="tabs">
   <div class="tab active" onclick="mostrarTab('venta',this)">&#128722; Registrar venta</div>
   <div class="tab" onclick="mostrarTab('inventario',this)">&#128230; Inventario</div>
   <div class="tab" onclick="mostrarTab('historial',this)">&#128203; Historial</div>
   <div class="tab" onclick="mostrarTab('resumen',this)">&#128200; Resumen</div>
 </div>
+
+<!-- TAB VENTA -->
 <div id="tab-venta" class="section active">
   <div class="grid2" style="align-items:start;gap:16px">
     <div class="card">
@@ -115,15 +127,18 @@ tr:hover td{background:#fafcff}
     </div>
   </div>
 </div>
+
+<!-- TAB INVENTARIO -->
 <div id="tab-inventario" class="section">
   <div class="card">
-    <h2>&#128230; Stock de artículos <span style="font-size:12px;font-weight:400;color:#888">&mdash; Edita el stock directamente</span></h2>
+    <h2>&#128230; Stock de artículos</h2>
     <div style="overflow-x:auto">
       <table>
         <thead><tr>
           <th>Código</th><th>Artículo</th><th style="text-align:center">Stock</th>
           <th style="text-align:right">P. Costo</th><th style="text-align:right">P. Venta</th>
           <th style="text-align:right">Margen</th><th>Estado</th>
+          <th style="text-align:center">Acciones</th>
         </tr></thead>
         <tbody id="inv-body"></tbody>
       </table>
@@ -141,6 +156,8 @@ tr:hover td{background:#fafcff}
     <button class="btn btn-blue" onclick="agregarArticulo()" style="padding:10px 24px">&#10133; Agregar artículo</button>
   </div>
 </div>
+
+<!-- TAB HISTORIAL -->
 <div id="tab-historial" class="section">
   <div class="card">
     <h2>&#128203; Historial de ventas</h2>
@@ -156,6 +173,8 @@ tr:hover td{background:#fafcff}
     </div>
   </div>
 </div>
+
+<!-- TAB RESUMEN -->
 <div id="tab-resumen" class="section">
   <div class="card">
     <h2>&#128200; Resumen de ventas</h2>
@@ -187,9 +206,32 @@ tr:hover td{background:#fafcff}
     </table></div>
   </div>
 </div>
+
+<!-- MODAL EDITAR ARTICULO -->
+<div class="modal-bg" id="modal-edit">
+  <div class="modal">
+    <h3>&#9998; Editar artículo</h3>
+    <input type="hidden" id="edit-idx">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><label>Código</label><input type="text" id="edit-cod"></div>
+      <div><label>Nombre del artículo</label><input type="text" id="edit-art"></div>
+      <div class="grid3">
+        <div><label>Stock</label><input type="number" id="edit-stk" min="0"></div>
+        <div><label>Precio costo $</label><input type="number" id="edit-costo" min="0"></div>
+        <div><label>Precio venta $</label><input type="number" id="edit-venta" min="0"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-gray" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-blue" onclick="guardarEdicion()">&#10003; Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
+
 <script>
-const INV_KEY='maxi_inv_v2',VEN_KEY='maxi_ven_v2';
+const INV_KEY='maxi_inv_v3',VEN_KEY='maxi_ven_v3';
 const defaultInv=[
   {cod:"MUE-001",art:"Cama doble con cabecero",stk:10,costo:450000,venta:780000},
   {cod:"MUE-002",art:"Colchón sencillo espuma",stk:8,costo:180000,venta:320000},
@@ -203,6 +245,7 @@ const defaultInv=[
   {cod:"MUE-010",art:"Colchón king size",stk:4,costo:580000,venta:950000},
 ];
 let inv=[],ven=[];
+
 function cargar(){
   try{inv=JSON.parse(localStorage.getItem(INV_KEY))||JSON.parse(JSON.stringify(defaultInv));}catch(e){inv=JSON.parse(JSON.stringify(defaultInv));}
   try{ven=JSON.parse(localStorage.getItem(VEN_KEY))||[];}catch(e){ven=[];}
@@ -214,29 +257,46 @@ function guardar(){
   b.textContent='✓ Guardado';b.style.background='#2ecc71';
 }
 const fmt=n=>'$'+Math.round(n).toLocaleString('es-CO');
+
 function renderInv(){
   document.getElementById('inv-body').innerHTML=inv.map((a,i)=>{
     const mg=((a.venta-a.costo)/a.venta*100).toFixed(1);
     const badge=a.stk<=0?'<span class="badge b-out">Sin stock</span>':a.stk<=2?'<span class="badge b-low">Stock bajo</span>':'<span class="badge b-ok">OK</span>';
     const color=a.stk<=0?'#e74c3c':a.stk<=2?'#e67e22':'#1e8449';
-    return `<tr><td style="font-size:11px;color:#888">${a.cod}</td><td style="font-weight:700">${a.art}</td>
-    <td style="text-align:center"><input class="stock-input" type="number" min="0" value="${a.stk}" style="color:${color};border:1.5px solid #ddd;border-radius:6px" onchange="editarStock(${i},this.value)"></td>
-    <td style="text-align:right">${fmt(a.costo)}</td><td style="text-align:right;font-weight:700">${fmt(a.venta)}</td>
-    <td style="text-align:right;color:#1a5276;font-weight:700">${mg}%</td><td>${badge}</td></tr>`;
+    return `<tr>
+      <td style="font-size:11px;color:#888">${a.cod}</td>
+      <td style="font-weight:700">${a.art}</td>
+      <td style="text-align:center">
+        <input class="stock-input" type="number" min="0" value="${a.stk}"
+          style="color:${color}" onchange="editarStock(${i},this.value)">
+      </td>
+      <td style="text-align:right">${fmt(a.costo)}</td>
+      <td style="text-align:right;font-weight:700">${fmt(a.venta)}</td>
+      <td style="text-align:right;color:#1a5276;font-weight:700">${mg}%</td>
+      <td>${badge}</td>
+      <td style="text-align:center;white-space:nowrap">
+        <button class="btn btn-orange" onclick="abrirEdicion(${i})" style="margin-right:4px">&#9998; Editar</button>
+        <button class="btn btn-red" onclick="eliminarArticulo(${i})">&#128465; Eliminar</button>
+      </td>
+    </tr>`;
   }).join('');
 }
+
 function renderSel(){
   const s=document.getElementById('sel-art'),v=s.value;
   s.innerHTML=inv.map((a,i)=>`<option value="${i}">${a.art} — stock: ${a.stk}</option>`).join('');
   if(v)s.value=v;cargarPrecio();
 }
+
 function renderHistorial(){
   const tb=document.getElementById('hist-body');
   if(!ven.length){tb.innerHTML='<tr><td colspan="10" class="empty">Sin ventas registradas aún</td></tr>';return;}
   const pc=p=>p==='Efectivo'?'venta-pago-ef':p==='Crédito'?'venta-pago-cred':'venta-pago-trans';
   tb.innerHTML=ven.map((v,i)=>`<tr>
-    <td style="color:#aaa;font-size:11px">${ven.length-i}</td><td style="font-size:11px">${v.fecha}</td>
-    <td style="font-weight:600">${v.art}</td><td style="text-align:center">${v.qty}</td>
+    <td style="color:#aaa;font-size:11px">${ven.length-i}</td>
+    <td style="font-size:11px">${v.fecha}</td>
+    <td style="font-weight:600">${v.art}</td>
+    <td style="text-align:center">${v.qty}</td>
     <td style="text-align:right;font-weight:700;color:#1e8449">${fmt(v.total)}</td>
     <td>${v.cliente}</td><td>${v.vendedor}</td>
     <td class="${pc(v.pago)}">${v.pago}</td>
@@ -244,6 +304,7 @@ function renderHistorial(){
     <td><button class="btn btn-red" onclick="eliminarVenta(${i},${v.idx},${v.qty})">✕</button></td>
   </tr>`).join('');
 }
+
 function renderResumen(){
   const total=ven.reduce((s,v)=>s+v.total,0);
   const ef=ven.filter(v=>v.pago==='Efectivo').reduce((s,v)=>s+v.total,0);
@@ -262,11 +323,16 @@ function renderResumen(){
   document.getElementById('r-vcosto').textContent=fmt(inv.reduce((s,a)=>s+a.stk*a.costo,0));
   document.getElementById('r-vventa').textContent=fmt(inv.reduce((s,a)=>s+a.stk*a.venta,0));
   const vends={};ven.forEach(v=>{if(!vends[v.vendedor])vends[v.vendedor]={n:0,t:0};vends[v.vendedor].n++;vends[v.vendedor].t+=v.total;});
-  const vb=document.getElementById('r-vend-body');
   const ve=Object.entries(vends).sort((a,b)=>b[1].t-a[1].t);
-  vb.innerHTML=ve.length?ve.map(([k,v])=>`<tr><td style="font-weight:700">${k}</td><td style="text-align:center">${v.n}</td><td style="text-align:right;font-weight:700;color:#1e8449">${fmt(v.t)}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">Sin datos</td></tr>';
+  document.getElementById('r-vend-body').innerHTML=ve.length?ve.map(([k,v])=>`<tr>
+    <td style="font-weight:700">${k}</td>
+    <td style="text-align:center">${v.n}</td>
+    <td style="text-align:right;font-weight:700;color:#1e8449">${fmt(v.t)}</td>
+  </tr>`).join(''):'<tr><td colspan="3" class="empty">Sin datos</td></tr>';
 }
+
 function renderAll(){renderInv();renderSel();renderHistorial();renderResumen();}
+
 function cargarPrecio(){
   const i=+document.getElementById('sel-art').value;
   if(inv[i]){document.getElementById('inp-precio').value=inv[i].venta;calcTotal();}
@@ -329,6 +395,40 @@ function eliminarVenta(i,idx,qty){
   if(!confirm('¿Eliminar esta venta? El stock se devolverá.'))return;
   inv[idx].stk+=qty;ven.splice(i,1);guardar();renderAll();toast('Venta eliminada');
 }
+
+/* ── EDITAR ARTÍCULO ── */
+function abrirEdicion(i){
+  const a=inv[i];
+  document.getElementById('edit-idx').value=i;
+  document.getElementById('edit-cod').value=a.cod;
+  document.getElementById('edit-art').value=a.art;
+  document.getElementById('edit-stk').value=a.stk;
+  document.getElementById('edit-costo').value=a.costo;
+  document.getElementById('edit-venta').value=a.venta;
+  document.getElementById('modal-edit').classList.add('open');
+}
+function cerrarModal(){
+  document.getElementById('modal-edit').classList.remove('open');
+}
+function guardarEdicion(){
+  const i=+document.getElementById('edit-idx').value;
+  const cod=document.getElementById('edit-cod').value.trim();
+  const art=document.getElementById('edit-art').value.trim();
+  const stk=+document.getElementById('edit-stk').value||0;
+  const costo=+document.getElementById('edit-costo').value||0;
+  const venta=+document.getElementById('edit-venta').value||0;
+  if(!cod||!art){toast('⚠ Completa código y nombre',true);return;}
+  inv[i]={cod,art,stk,costo,venta};
+  guardar();cerrarModal();renderAll();toast('✓ Artículo actualizado');
+}
+
+/* ── ELIMINAR ARTÍCULO ── */
+function eliminarArticulo(i){
+  if(!confirm(`¿Eliminar "${inv[i].art}"? Esta acción no se puede deshacer.`))return;
+  inv.splice(i,1);
+  guardar();renderAll();toast('Artículo eliminado');
+}
+
 function agregarArticulo(){
   const cod=document.getElementById('new-cod').value.trim();
   const art=document.getElementById('new-art').value.trim();
@@ -360,6 +460,10 @@ function toast(msg,err=false){
   t.style.background=err?'#e74c3c':'#1e8449';t.style.opacity='1';
   clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',2500);
 }
+// Cerrar modal clickando fuera
+document.getElementById('modal-edit').addEventListener('click',function(e){
+  if(e.target===this)cerrarModal();
+});
 cargar();renderAll();
 </script>
 </body>
