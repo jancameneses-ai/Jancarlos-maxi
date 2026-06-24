@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Maximuebles Jo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;background:#f0f2f5;color:#222;font-size:14px}
@@ -77,6 +80,7 @@ input[readonly]{background:#f5f5f5;color:#1a3a1a;font-weight:700}
 .bgray{background:#95a5a6;color:#fff}
 .bgreen{background:#1e8449;color:#fff}
 .bpdf{background:#c0392b;color:#fff}
+.bwa{background:#25D366;color:#fff}
 .met{background:#fafafa;border-radius:8px;padding:12px;text-align:center;border:1px solid #eee}
 .met .ml{font-size:10px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px}
 .met .mv{font-size:18px;font-weight:700;color:#1a3a1a}
@@ -146,7 +150,7 @@ tr:hover td{background:#fdfaf0}
       <div class="field-group">
         <span class="field-label">Contraseña</span>
         <div class="pw-wrap">
-          <input type="password" id="ip" placeholder="Escribe tu contraseña" onkeydown="if(event.key==='Enter')doLogin()" style="text-transform:none!important">
+          <input type="password" autocomplete="off" spellcheck="false" id="ip" placeholder="Escribe tu contraseña" onkeydown="if(event.key==='Enter')doLogin()" style="text-transform:none!important">
           <button class="pw-eye" onclick="tpw('ip','e1')" id="e1" type="button">Ver</button>
         </div>
       </div>
@@ -156,6 +160,7 @@ tr:hover td{background:#fdfaf0}
       </div>
       <button class="bln" onclick="doLogin()">Ingresar</button>
       <div class="session-info">Si marcas la opción, no tendrás que ingresar cada vez</div>
+      <div id="debug-info" style="display:none;margin-top:10px;padding:8px;background:#fff3cd;border-radius:6px;font-size:10px;color:#856404;text-align:center"></div>
     </div>
     <div class="ls" id="ls-recuperar">
       <div class="field-group">
@@ -171,11 +176,11 @@ tr:hover td{background:#fdfaf0}
       <div id="rnw" style="display:none;flex-direction:column;gap:10px">
         <div class="field-group">
           <span class="field-label">Nueva contraseña</span>
-          <div class="pw-wrap"><input type="password" id="rn" placeholder="Nueva contraseña" style="text-transform:none!important"><button class="pw-eye" onclick="tpw('rn','e2')" id="e2" type="button">Ver</button></div>
+          <div class="pw-wrap"><input type="password" autocomplete="off" spellcheck="false" id="rn" placeholder="Nueva contraseña" style="text-transform:none!important"><button class="pw-eye" onclick="tpw('rn','e2')" id="e2" type="button">Ver</button></div>
         </div>
         <div class="field-group">
           <span class="field-label">Confirmar contraseña</span>
-          <div class="pw-wrap"><input type="password" id="rc" placeholder="Confirmar" style="text-transform:none!important"><button class="pw-eye" onclick="tpw('rc','e3')" id="e3" type="button">Ver</button></div>
+          <div class="pw-wrap"><input type="password" autocomplete="off" spellcheck="false" id="rc" placeholder="Confirmar" style="text-transform:none!important"><button class="pw-eye" onclick="tpw('rc','e3')" id="e3" type="button">Ver</button></div>
         </div>
       </div>
       <button class="bln" id="rbtn" onclick="pasoRec()">Buscar usuario</button>
@@ -314,7 +319,8 @@ tr:hover td{background:#fdfaf0}
       <h2>Factura</h2>
       <div id="fac"><div class="empty">Registra una venta para ver la factura</div></div>
       <div id="btnpdf" style="display:none;margin-top:10px">
-        <button class="btn bpdf" onclick="dlPDF()" style="width:100%;padding:10px;font-size:12px">Descargar factura PDF</button>
+        <button class="btn bpdf" onclick="dlPDF()" style="width:100%;padding:10px;font-size:12px;margin-bottom:6px">Descargar factura PDF</button>
+        <button class="btn bwa" onclick="enviarWA()" style="width:100%;padding:10px;font-size:12px;background:#25D366;color:#fff">Enviar por WhatsApp</button>
       </div>
     </div>
   </div>
@@ -403,7 +409,7 @@ tr:hover td{background:#fdfaf0}
       <div><label>Usuario</label><input type="text" id="nuu" style="text-transform:none" placeholder="usuario"></div>
       <div><label>Nombre completo</label><input type="text" id="nuf" placeholder="NOMBRE COMPLETO"></div>
       <div><label>Contrasena</label>
-        <div class="pw-wrap"><input type="password" id="nup" placeholder="contrasena" style="text-transform:none!important"><button class="pw-eye" onclick="tpw('nup','e4')" id="e4" type="button">Ver</button></div>
+        <div class="pw-wrap"><input type="password" autocomplete="off" spellcheck="false" id="nup" placeholder="contrasena" style="text-transform:none!important"><button class="pw-eye" onclick="tpw('nup','e4')" id="e4" type="button">Ver</button></div>
       </div>
       <div><label>Rol</label><select id="nur"><option value="vendedor">Vendedor</option><option value="admin">Administrador</option></select></div>
       <div><label>Pregunta seguridad</label>
@@ -440,7 +446,7 @@ tr:hover td{background:#fdfaf0}
     <div><label>Usuario</label><input type="text" id="euu" style="text-transform:none"></div>
     <div><label>Nombre completo</label><input type="text" id="euf"></div>
     <div><label>Nueva contrasena (vacio = no cambia)</label>
-      <div class="pw-wrap"><input type="password" id="eup" style="text-transform:none!important"><button class="pw-eye" onclick="tpw('eup','e5')" id="e5" type="button">Ver</button></div>
+      <div class="pw-wrap"><input type="password" autocomplete="off" spellcheck="false" id="eup" style="text-transform:none!important"><button class="pw-eye" onclick="tpw('eup','e5')" id="e5" type="button">Ver</button></div>
     </div>
     <div><label>Rol</label><select id="eur"><option value="vendedor">Vendedor</option><option value="admin">Administrador</option></select></div>
     <div><label>Pregunta seguridad</label>
@@ -481,31 +487,83 @@ const DI=[
 const DU=[{uname:'admin',fullname:'Administrador',pass:'admin123',role:'admin',pregunta:'Nombre de tu mascota',respuesta:'maxi'}];
 let inv=[],ven=[],users=[],cu=null,rp=1,ruf=null,sc=false,lv=null;
 
+// Storage compatible con Safari iOS
+function stor(action,key,val){
+  var stores=[localStorage,sessionStorage];
+  for(var i=0;i<stores.length;i++){
+    try{
+      if(action==='get'){
+        var r=stores[i].getItem(key);
+        if(r!==null)return r;
+      }else if(action==='set'){
+        stores[i].setItem(key,val);
+      }else if(action==='del'){
+        stores[i].removeItem(key);
+      }
+    }catch(e){}
+  }
+  return null;
+}
+// Memoria en RAM como ultimo respaldo (Safari privado)
+var RAM={};
+function storSafe(action,key,val){
+  try{
+    if(action==='get'){
+      var r=stor('get',key,null);
+      return r!==null?r:(RAM[key]||null);
+    }else if(action==='set'){
+      try{stor('set',key,val);}catch(e){}
+      RAM[key]=val;
+    }else if(action==='del'){
+      try{stor('del',key);}catch(e){}
+      delete RAM[key];
+    }
+  }catch(e){
+    if(action==='get')return RAM[key]||null;
+    if(action==='set')RAM[key]=val;
+    if(action==='del')delete RAM[key];
+  }
+  return null;
+}
 function load(){
-  try{inv=JSON.parse(localStorage.getItem(IK))||JSON.parse(JSON.stringify(DI));}catch(e){inv=JSON.parse(JSON.stringify(DI));}
-  try{ven=JSON.parse(localStorage.getItem(VK))||[];}catch(e){ven=[];}
-  try{users=JSON.parse(localStorage.getItem(UK))||JSON.parse(JSON.stringify(DU));}catch(e){users=JSON.parse(JSON.stringify(DU));}
+  try{
+    var si=storSafe('get',IK);
+    inv=si?JSON.parse(si):JSON.parse(JSON.stringify(DI));
+  }catch(e){inv=JSON.parse(JSON.stringify(DI));}
+  try{
+    var sv=storSafe('get',VK);
+    ven=sv?JSON.parse(sv):[];
+  }catch(e){ven=[];}
+  try{
+    var su=storSafe('get',UK);
+    users=su?JSON.parse(su):JSON.parse(JSON.stringify(DU));
+  }catch(e){users=JSON.parse(JSON.stringify(DU));}
 }
 function save(){
-  localStorage.setItem(IK,JSON.stringify(inv));
-  localStorage.setItem(VK,JSON.stringify(ven));
-  localStorage.setItem(UK,JSON.stringify(users));
-  var b=g('sbadge');b.textContent='Guardado';b.style.background='#2ecc71';
+  try{storSafe('set',IK,JSON.stringify(inv));}catch(e){}
+  try{storSafe('set',VK,JSON.stringify(ven));}catch(e){}
+  try{storSafe('set',UK,JSON.stringify(users));}catch(e){}
+  var b=g('sbadge');
+  b.textContent='Guardado';b.style.background='#2ecc71';
 }
 function saveSess(u){
-  var exp=Date.now()+(30*24*60*60*1000);
-  localStorage.setItem(SK,JSON.stringify({uname:u.uname,exp:exp}));
+  try{
+    var exp=Date.now()+(30*24*60*60*1000);
+    storSafe('set',SK,JSON.stringify({uname:u.uname,exp:exp}));
+  }catch(e){}
 }
 function checkSess(){
   try{
-    var s=JSON.parse(localStorage.getItem(SK));
-    if(!s||Date.now()>s.exp){localStorage.removeItem(SK);return false;}
+    var raw=storSafe('get',SK);
+    if(!raw)return false;
+    var s=JSON.parse(raw);
+    if(!s||Date.now()>s.exp){storSafe('del',SK);return false;}
     var u=users.find(function(x){return x.uname===s.uname;});
     if(!u)return false;
     cu=u;return true;
   }catch(e){return false;}
 }
-function clearSess(){localStorage.removeItem(SK);}
+function clearSess(){try{storSafe('del',SK);}catch(e){}}
 function fmt(n){return '$'+Math.round(n).toLocaleString('es-CO');}
 function isA(){return cu&&cu.role==='admin';}
 function isCr(){return ['SISTECREDITO','ADDI','CREDICONTADO'].indexOf(g('sp').value)>=0;}
@@ -546,8 +604,25 @@ function iniciarApp(user){
 function doLogin(){
   var u=g('iu').value.trim();
   var p=g('ip').value;
+  // Debug: mostrar lo que se esta intentando (solo si falla)
   var f=users.find(function(x){return x.uname.toLowerCase()===u.toLowerCase()&&x.pass===p;});
-  if(!f){g('lerr').textContent='Usuario o contrasena incorrectos';g('lerr').style.display='block';return;}
+  if(!f){
+    // Intentar tambien con trim en contrasena (Safari puede agregar espacios)
+    var pTrim=p.trim();
+    f=users.find(function(x){return x.uname.toLowerCase()===u.toLowerCase()&&x.pass===pTrim;});
+    if(!f){
+      // Mostrar info de debug
+      var dbg=g('debug-info');
+      if(dbg){
+        dbg.style.display='block';
+        dbg.textContent='Usuario ingresado: "'+u+'" | Usuarios disponibles: '+users.map(function(x){return x.uname;}).join(', ');
+      }
+      g('lerr').textContent='Usuario o contrasena incorrectos';
+      g('lerr').style.display='block';
+      return;
+    }
+  }
+  var dbg=g('debug-info');if(dbg)dbg.style.display='none';
   g('lerr').style.display='none';
   if(g('chkr').checked)saveSess(f);
   iniciarApp(f);
@@ -592,11 +667,17 @@ function renderSV(){
   if(cu)s.value=cu.fullname||cu.uname;
 }
 function onPago(){
+  var pago=g('sp').value;
   var cr=isCr(),cc=isCC();
+  var soloCC=pago==='CREDICONTADO';
+  // Caja especial Credicontado
   g('ccbox').style.display=cc?'block':'none';
+  // Cuotas simples: Sistecredito y Addi
   g('cred-wrap').style.display=(cr&&!cc)?'block':'none';
-  g('crefs').style.display=cr?'block':'none';
+  // Referencias: SOLO Credicontado
+  g('crefs').style.display=soloCC?'block':'none';
   var req='<span style="color:#e74c3c">*</span>';
+  // Datos comprador obligatorio si es cualquier credito
   g('lopc').textContent=cr?'(obligatorio)':'(opcional)';
   g('lopc').style.color=cr?'#e74c3c':'#aaa';
   ['rn1','ra1','rc1','rt1','rb1'].forEach(function(id){g(id).innerHTML=cr?req:'';});
@@ -630,12 +711,12 @@ function regVenta(){
   var nom=uv('inm'),ap=uv('iap'),ced=g('icc').value.trim(),tel=g('itel').value.trim(),bar=uv('ibar');
   var vend=g('sv').value;
   if(cr&&(!nom||!ap||!tel||!bar)){toast('Completa todos los datos del comprador',1);return;}
-  if(cr){
+  if(cc){
     if(!uv('r1n')||!g('r1t').value.trim()||!uv('r1b')){toast('Completa la referencia 1',1);return;}
     if(!uv('r2n')||!g('r2t').value.trim()||!uv('r2b')){toast('Completa la referencia 2',1);return;}
   }
   if(qty>a.stk){toast('Stock insuficiente',1);return;}
-  var refs=cr?[
+  var refs=cc?[
     {nom:uv('r1n'),tel:g('r1t').value.trim(),bar:uv('r1b')},
     {nom:uv('r2n'),tel:g('r2t').value.trim(),bar:uv('r2b')},
     {nom:uv('r3n'),tel:g('r3t').value.trim(),bar:uv('r3b')},
@@ -762,6 +843,42 @@ function dlPDF(){
   doc.save(fname);
   toast('PDF descargado');
 }
+function enviarWA(){
+  if(!lv){toast('No hay factura para enviar',1);return;}
+  var v=lv;
+  var c=v.comprador||{};
+  var cl=[c.nombre,c.apellido].filter(Boolean).join(' ')||'Sin nombre';
+  var tel=c.tel?c.tel.replace(/[^0-9]/g,''):'';
+  // Construir mensaje de texto
+  var msg='*MAXIMUEBLES JO*%0AMocoa, Putumayo%0A%0A';
+  msg+='*FACTURA DE VENTA*%0A';
+  msg+='------------------------%0A';
+  msg+='*Articulo:* '+v.art+'%0A';
+  msg+='*Cantidad:* '+v.qty+' x $'+Math.round(v.precio).toLocaleString('es-CO')+'%0A';
+  if(v.desc>0)msg+='*Descuento:* -'+v.desc+'%%0A';
+  msg+='*Total:* $'+Math.round(v.total).toLocaleString('es-CO')+'%0A';
+  msg+='*Pago:* '+v.pago+'%0A';
+  if(v.cuotas>0){
+    var cv=v.ci?Math.round(v.ci.cval):Math.round(v.total/v.cuotas);
+    msg+='*Cuotas:* '+v.cuotas+' de $'+cv.toLocaleString('es-CO')+'/mes%0A';
+    if(v.ci&&v.ci.inicial>0)msg+='*Inicial:* $'+Math.round(v.ci.inicial).toLocaleString('es-CO')+'%0A';
+    if(v.ci&&v.ci.fecha)msg+='*Primer pago:* '+v.ci.fecha+'%0A';
+  }
+  msg+='------------------------%0A';
+  msg+='*Cliente:* '+cl+'%0A';
+  if(c.cedula)msg+='*Cedula:* '+c.cedula+'%0A';
+  msg+='*Fecha:* '+v.fecha+'%0A';
+  msg+='*Vendedor:* '+v.vend+'%0A';
+  msg+='%0A_Gracias por su compra_';
+  // Primero descargar PDF
+  dlPDF();
+  // Luego abrir WhatsApp
+  setTimeout(function(){
+    var url=tel?'https://wa.me/57'+tel+'?text='+msg:'https://wa.me/?text='+msg;
+    window.open(url,'_blank');
+    toast('PDF descargado. Adjuntalo en WhatsApp');
+  },1200);
+}
 function renderInv(){
   var th=g('ith'),tb=g('itb');
   if(isA()){
@@ -813,6 +930,7 @@ function renderHist(){
       '<td style="white-space:nowrap">'+
       '<button class="btn bgold" onclick="showDet('+i+')" style="margin-right:3px">Ver</button>'+
       '<button class="btn bpdf" onclick="dlPDFi('+i+')" style="margin-right:3px">PDF</button>'+
+      '<button class="btn bwa" onclick="waIdx('+i+')" style="margin-right:3px">WA</button>'+
       (isA()?'<button class="btn bred" onclick="delVenta('+i+','+v.idx+','+v.qty+')">X</button>':'')+
       '</td></tr>';
   }).join('');
@@ -1001,6 +1119,7 @@ function showDet(i){
   g('mdet').classList.add('open');
 }
 function dlPDFi(i){lv=ven[i];showFac(ven[i]);dlPDF();}
+function waIdx(i){lv=ven[i];showFac(ven[i]);enviarWA();}
 function updStk(i,v){var n=parseInt(v);if(isNaN(n)||n<0)return;inv[i].stk=n;save();renderSel();renderRes();toast('Stock actualizado');}
 function delVenta(i,idx,qty){
   if(!confirm('Eliminar esta venta? El stock se devolvera.'))return;
