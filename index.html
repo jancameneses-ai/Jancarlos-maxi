@@ -7,11 +7,23 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;background:#f0f2f5;color:#222;font-size:14px}
-header{background:#1a5276;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-header h1{font-size:18px;font-weight:700}
-header span{font-size:12px;opacity:.8}
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#1a5276}
+.login-box{background:#fff;border-radius:14px;padding:36px 32px;width:90%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.login-box h1{font-size:20px;font-weight:700;color:#1a5276;text-align:center;margin-bottom:4px}
+.login-box p{font-size:12px;color:#888;text-align:center;margin-bottom:24px}
+.login-err{background:#fadbd8;color:#922b21;border-radius:7px;padding:8px 12px;font-size:12px;margin-bottom:12px;display:none;font-weight:600}
+/* APP */
+.app-wrap{display:none}
+header{background:#1a5276;color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header h1{font-size:17px;font-weight:700}
+.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.user-badge{background:rgba(255,255,255,.18);font-size:12px;padding:4px 12px;border-radius:99px;font-weight:700}
+.role-badge{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:700}
+.role-admin{background:#f39c12;color:#fff}
+.role-vend{background:#2ecc71;color:#fff}
 .tabs{display:flex;background:#fff;border-bottom:2px solid #e0e0e0;overflow-x:auto}
-.tab{padding:12px 20px;cursor:pointer;font-weight:600;font-size:13px;color:#666;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab{padding:12px 18px;cursor:pointer;font-weight:600;font-size:13px;color:#666;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px}
 .tab.active{color:#1a5276;border-bottom-color:#1a5276}
 .tab:hover{background:#f5f5f5}
 .section{display:none;padding:16px;max-width:1100px;margin:0 auto}
@@ -33,6 +45,8 @@ input[readonly]{background:#f0f2f5;color:#1a5276;font-weight:700}
 .btn-red{background:#e74c3c;color:#fff}
 .btn-orange{background:#e67e22;color:#fff}
 .btn-gray{background:#7f8c8d;color:#fff}
+.btn-login{background:#1a5276;color:#fff;width:100%;padding:12px;font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:8px}
+.btn-login:hover{background:#154360}
 .metric{background:#f8f9fa;border-radius:8px;padding:12px;text-align:center;border:1px solid #e9ecef}
 .metric .lbl{font-size:11px;color:#666;margin-bottom:4px}
 .metric .val{font-size:20px;font-weight:700;color:#1a5276}
@@ -59,33 +73,58 @@ tr:hover td{background:#fafcff}
 .venta-pago-ef{color:#0f6e56;font-weight:700}
 .venta-pago-cred{color:#6c3483;font-weight:700}
 .venta-pago-trans{color:#185fa5;font-weight:700}
-/* Modal */
+.stock-input{width:70px!important;text-align:center;font-size:13px;font-weight:700;padding:4px 6px;border:1.5px solid #ddd;border-radius:6px}
+/* MODAL */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center}
 .modal-bg.open{display:flex}
 .modal{background:#fff;border-radius:12px;padding:24px;width:90%;max-width:440px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
 .modal h3{font-size:16px;font-weight:700;color:#1a5276;margin-bottom:16px}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
-.stock-input{width:70px!important;text-align:center;font-size:13px;font-weight:700;padding:4px 6px;border:1.5px solid #ddd;border-radius:6px}
+/* USUARIOS */
+.user-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #f0f0f0;gap:8px}
+.user-row:last-child{border:none}
+.user-info{flex:1}
+.user-info .uname{font-weight:700;font-size:14px}
+.user-info .urole{font-size:11px;color:#888;margin-top:2px}
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-box">
+    <h1>&#127968; Tienda Muebles</h1>
+    <p>Mocoa, Putumayo — Ingresa tus credenciales</p>
+    <div class="login-err" id="login-err">Usuario o contraseña incorrectos</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><label>Usuario</label><input type="text" id="inp-user" placeholder="Tu usuario" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div><label>Contraseña</label><input type="password" id="inp-pass" placeholder="Tu contraseña" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    </div>
+    <button class="btn-login" onclick="doLogin()">Ingresar</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-wrap" id="app-wrap">
 <header>
   <div>
     <h1>&#127968; Tienda Muebles y Colchones</h1>
-    <span>Mocoa, Putumayo &mdash; Sistema de inventario</span>
+    <span style="font-size:11px;opacity:.7">Mocoa, Putumayo</span>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+  <div class="header-right">
     <span id="save-badge" style="background:#2ecc71;color:#fff;font-size:11px;padding:4px 12px;border-radius:99px;font-weight:700">&#10003; Guardado</span>
-    <button class="btn btn-red" onclick="confirmarReset()" style="font-size:11px;padding:5px 12px">&#128465; Reiniciar todo</button>
+    <span class="role-badge" id="role-badge"></span>
+    <span class="user-badge" id="user-badge"></span>
+    <button class="btn btn-gray" onclick="cerrarSesion()" style="font-size:11px;padding:5px 12px">&#128274; Salir</button>
   </div>
 </header>
 
-<div class="tabs">
+<div class="tabs" id="tabs-bar">
   <div class="tab active" onclick="mostrarTab('venta',this)">&#128722; Registrar venta</div>
   <div class="tab" onclick="mostrarTab('inventario',this)">&#128230; Inventario</div>
   <div class="tab" onclick="mostrarTab('historial',this)">&#128203; Historial</div>
-  <div class="tab" onclick="mostrarTab('resumen',this)">&#128200; Resumen</div>
+  <div class="tab tab-admin" onclick="mostrarTab('resumen',this)">&#128200; Resumen</div>
+  <div class="tab tab-admin" onclick="mostrarTab('usuarios',this)">&#128101; Usuarios</div>
 </div>
 
 <!-- TAB VENTA -->
@@ -105,7 +144,7 @@ tr:hover td{background:#fafcff}
         </div>
         <hr class="sep">
         <div><label>Cliente</label><input type="text" id="inp-cliente" placeholder="Nombre del cliente"></div>
-        <div><label>Vendedor</label><input type="text" id="inp-vendedor" placeholder="Nombre del vendedor"></div>
+        <div><label>Vendedor</label><input type="text" id="inp-vendedor" placeholder="Nombre del vendedor" id="inp-vendedor"></div>
         <div>
           <label>Medio de pago</label>
           <select id="sel-pago" onchange="toggleCuotas()">
@@ -133,18 +172,13 @@ tr:hover td{background:#fafcff}
   <div class="card">
     <h2>&#128230; Stock de artículos</h2>
     <div style="overflow-x:auto">
-      <table>
-        <thead><tr>
-          <th>Código</th><th>Artículo</th><th style="text-align:center">Stock</th>
-          <th style="text-align:right">P. Costo</th><th style="text-align:right">P. Venta</th>
-          <th style="text-align:right">Margen</th><th>Estado</th>
-          <th style="text-align:center">Acciones</th>
-        </tr></thead>
+      <table id="inv-table">
+        <thead id="inv-thead"></thead>
         <tbody id="inv-body"></tbody>
       </table>
     </div>
   </div>
-  <div class="card">
+  <div class="card" id="card-agregar">
     <h2>&#10133; Agregar nuevo artículo</h2>
     <div class="grid3" style="margin-bottom:12px">
       <div><label>Código</label><input type="text" id="new-cod" placeholder="MUE-011"></div>
@@ -174,7 +208,7 @@ tr:hover td{background:#fafcff}
   </div>
 </div>
 
-<!-- TAB RESUMEN -->
+<!-- TAB RESUMEN (solo admin) -->
 <div id="tab-resumen" class="section">
   <div class="card">
     <h2>&#128200; Resumen de ventas</h2>
@@ -191,11 +225,14 @@ tr:hover td{background:#fafcff}
   </div>
   <div class="card">
     <h2>&#127970; Resumen de inventario</h2>
-    <div class="grid4">
+    <div class="grid3">
       <div class="metric"><div class="lbl">Artículos distintos</div><div class="val" id="r-arts">0</div></div>
       <div class="metric"><div class="lbl">Unidades en stock</div><div class="val" id="r-unid">0</div></div>
-      <div class="metric"><div class="lbl">Valor costo</div><div class="val" id="r-vcosto">$0</div></div>
       <div class="metric"><div class="lbl">Valor venta</div><div class="val" id="r-vventa">$0</div></div>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <div class="metric"><div class="lbl">Valor inventario (costo)</div><div class="val" id="r-vcosto">$0</div></div>
+      <div class="metric"><div class="lbl">Ganancia potencial</div><div class="val" id="r-ganancia">$0</div></div>
     </div>
   </div>
   <div class="card">
@@ -205,9 +242,36 @@ tr:hover td{background:#fafcff}
       <tbody id="r-vend-body"></tbody>
     </table></div>
   </div>
+  <div style="margin-top:8px">
+    <button class="btn btn-red" onclick="confirmarReset()" style="padding:8px 20px">&#128465; Reiniciar todo</button>
+  </div>
 </div>
 
-<!-- MODAL EDITAR ARTICULO -->
+<!-- TAB USUARIOS (solo admin) -->
+<div id="tab-usuarios" class="section">
+  <div class="card">
+    <h2>&#128101; Gestión de usuarios</h2>
+    <div id="user-list"></div>
+  </div>
+  <div class="card">
+    <h2>&#10133; Crear nuevo usuario</h2>
+    <div class="grid3" style="margin-bottom:12px">
+      <div><label>Usuario</label><input type="text" id="new-uname" placeholder="Ej: maria"></div>
+      <div><label>Contraseña</label><input type="password" id="new-upass" placeholder="Contraseña"></div>
+      <div>
+        <label>Rol</label>
+        <select id="new-urole">
+          <option value="vendedor">Vendedor</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-blue" onclick="crearUsuario()" style="padding:10px 24px">&#10133; Crear usuario</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL EDITAR ARTÍCULO -->
 <div class="modal-bg" id="modal-edit">
   <div class="modal">
     <h3>&#9998; Editar artículo</h3>
@@ -222,8 +286,30 @@ tr:hover td{background:#fafcff}
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-gray" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-gray" onclick="cerrarModal('modal-edit')">Cancelar</button>
       <button class="btn btn-blue" onclick="guardarEdicion()">&#10003; Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR USUARIO -->
+<div class="modal-bg" id="modal-user">
+  <div class="modal">
+    <h3>&#9998; Editar usuario</h3>
+    <input type="hidden" id="edit-uidx">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><label>Usuario</label><input type="text" id="edit-uname"></div>
+      <div><label>Nueva contraseña <span style="font-weight:400;color:#aaa">(dejar vacío para no cambiar)</span></label><input type="password" id="edit-upass" placeholder="Nueva contraseña"></div>
+      <div><label>Rol</label>
+        <select id="edit-urole">
+          <option value="vendedor">Vendedor</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-gray" onclick="cerrarModal('modal-user')">Cancelar</button>
+      <button class="btn btn-blue" onclick="guardarUsuario()">&#10003; Guardar</button>
     </div>
   </div>
 </div>
@@ -231,7 +317,9 @@ tr:hover td{background:#fafcff}
 <div class="toast" id="toast"></div>
 
 <script>
-const INV_KEY='maxi_inv_v3',VEN_KEY='maxi_ven_v3';
+// ── CLAVES (mismas que antes, no se pierden datos) ──
+const INV_KEY='maxi_inv_v3', VEN_KEY='maxi_ven_v3', USR_KEY='maxi_users_v1';
+
 const defaultInv=[
   {cod:"MUE-001",art:"Cama doble con cabecero",stk:10,costo:450000,venta:780000},
   {cod:"MUE-002",art:"Colchón sencillo espuma",stk:8,costo:180000,venta:320000},
@@ -244,42 +332,111 @@ const defaultInv=[
   {cod:"MUE-009",art:"Closet 3 puertas",stk:3,costo:750000,venta:1200000},
   {cod:"MUE-010",art:"Colchón king size",stk:4,costo:580000,venta:950000},
 ];
-let inv=[],ven=[];
+const defaultUsers=[
+  {uname:'admin',pass:'admin123',role:'admin'}
+];
+
+let inv=[], ven=[], users=[], currentUser=null;
 
 function cargar(){
   try{inv=JSON.parse(localStorage.getItem(INV_KEY))||JSON.parse(JSON.stringify(defaultInv));}catch(e){inv=JSON.parse(JSON.stringify(defaultInv));}
   try{ven=JSON.parse(localStorage.getItem(VEN_KEY))||[];}catch(e){ven=[];}
+  try{users=JSON.parse(localStorage.getItem(USR_KEY))||JSON.parse(JSON.stringify(defaultUsers));}catch(e){users=JSON.parse(JSON.stringify(defaultUsers));}
 }
 function guardar(){
   localStorage.setItem(INV_KEY,JSON.stringify(inv));
   localStorage.setItem(VEN_KEY,JSON.stringify(ven));
+  localStorage.setItem(USR_KEY,JSON.stringify(users));
   const b=document.getElementById('save-badge');
   b.textContent='✓ Guardado';b.style.background='#2ecc71';
 }
 const fmt=n=>'$'+Math.round(n).toLocaleString('es-CO');
+const esAdmin=()=>currentUser&&currentUser.role==='admin';
 
+// ── LOGIN ──
+function doLogin(){
+  const u=document.getElementById('inp-user').value.trim().toLowerCase();
+  const p=document.getElementById('inp-pass').value;
+  const found=users.find(x=>x.uname.toLowerCase()===u&&x.pass===p);
+  if(!found){document.getElementById('login-err').style.display='block';return;}
+  currentUser=found;
+  document.getElementById('login-err').style.display='none';
+  document.getElementById('login-wrap').style.display='none';
+  document.getElementById('app-wrap').style.display='block';
+  document.getElementById('user-badge').textContent='👤 '+found.uname;
+  const rb=document.getElementById('role-badge');
+  rb.textContent=found.role==='admin'?'Administrador':'Vendedor';
+  rb.className='role-badge '+(found.role==='admin'?'role-admin':'role-vend');
+  // vendedor: poner su nombre en el campo vendedor
+  if(!esAdmin()) document.getElementById('inp-vendedor').value=found.uname;
+  aplicarRol();
+  renderAll();
+}
+function cerrarSesion(){
+  currentUser=null;
+  document.getElementById('app-wrap').style.display='none';
+  document.getElementById('login-wrap').style.display='flex';
+  document.getElementById('inp-user').value='';
+  document.getElementById('inp-pass').value='';
+}
+function aplicarRol(){
+  // Tabs admin
+  document.querySelectorAll('.tab-admin').forEach(t=>{
+    t.style.display=esAdmin()?'block':'none';
+  });
+  // Card agregar artículo
+  document.getElementById('card-agregar').style.display=esAdmin()?'block':'none';
+  // Vendedor: campo vendedor readonly
+  const fv=document.getElementById('inp-vendedor');
+  if(!esAdmin()){fv.readOnly=true;}else{fv.readOnly=false;}
+}
+
+// ── INVENTARIO ──
 function renderInv(){
-  document.getElementById('inv-body').innerHTML=inv.map((a,i)=>{
-    const mg=((a.venta-a.costo)/a.venta*100).toFixed(1);
-    const badge=a.stk<=0?'<span class="badge b-out">Sin stock</span>':a.stk<=2?'<span class="badge b-low">Stock bajo</span>':'<span class="badge b-ok">OK</span>';
-    const color=a.stk<=0?'#e74c3c':a.stk<=2?'#e67e22':'#1e8449';
-    return `<tr>
-      <td style="font-size:11px;color:#888">${a.cod}</td>
-      <td style="font-weight:700">${a.art}</td>
-      <td style="text-align:center">
-        <input class="stock-input" type="number" min="0" value="${a.stk}"
-          style="color:${color}" onchange="editarStock(${i},this.value)">
-      </td>
-      <td style="text-align:right">${fmt(a.costo)}</td>
-      <td style="text-align:right;font-weight:700">${fmt(a.venta)}</td>
-      <td style="text-align:right;color:#1a5276;font-weight:700">${mg}%</td>
-      <td>${badge}</td>
-      <td style="text-align:center;white-space:nowrap">
-        <button class="btn btn-orange" onclick="abrirEdicion(${i})" style="margin-right:4px">&#9998; Editar</button>
-        <button class="btn btn-red" onclick="eliminarArticulo(${i})">&#128465; Eliminar</button>
-      </td>
+  const thead=document.getElementById('inv-thead');
+  const tbody=document.getElementById('inv-body');
+  if(esAdmin()){
+    thead.innerHTML=`<tr>
+      <th>Código</th><th>Artículo</th><th style="text-align:center">Stock</th>
+      <th style="text-align:right">P. Costo</th><th style="text-align:right">P. Venta</th>
+      <th style="text-align:right">Margen</th><th>Estado</th><th style="text-align:center">Acciones</th>
     </tr>`;
-  }).join('');
+    tbody.innerHTML=inv.map((a,i)=>{
+      const mg=((a.venta-a.costo)/a.venta*100).toFixed(1);
+      const badge=a.stk<=0?'<span class="badge b-out">Sin stock</span>':a.stk<=2?'<span class="badge b-low">Stock bajo</span>':'<span class="badge b-ok">OK</span>';
+      const color=a.stk<=0?'#e74c3c':a.stk<=2?'#e67e22':'#1e8449';
+      return `<tr>
+        <td style="font-size:11px;color:#888">${a.cod}</td>
+        <td style="font-weight:700">${a.art}</td>
+        <td style="text-align:center"><input class="stock-input" type="number" min="0" value="${a.stk}" style="color:${color}" onchange="editarStock(${i},this.value)"></td>
+        <td style="text-align:right">${fmt(a.costo)}</td>
+        <td style="text-align:right;font-weight:700">${fmt(a.venta)}</td>
+        <td style="text-align:right;color:#1a5276;font-weight:700">${mg}%</td>
+        <td>${badge}</td>
+        <td style="text-align:center;white-space:nowrap">
+          <button class="btn btn-orange" onclick="abrirEdicion(${i})" style="margin-right:4px">&#9998; Editar</button>
+          <button class="btn btn-red" onclick="eliminarArticulo(${i})">&#128465;</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } else {
+    // Vista vendedor: sin costo, sin margen, sin acciones
+    thead.innerHTML=`<tr>
+      <th>Código</th><th>Artículo</th><th style="text-align:center">Stock</th>
+      <th style="text-align:right">Precio venta</th><th>Estado</th>
+    </tr>`;
+    tbody.innerHTML=inv.map(a=>{
+      const badge=a.stk<=0?'<span class="badge b-out">Sin stock</span>':a.stk<=2?'<span class="badge b-low">Stock bajo</span>':'<span class="badge b-ok">OK</span>';
+      const color=a.stk<=0?'#e74c3c':a.stk<=2?'#e67e22':'#1e8449';
+      return `<tr>
+        <td style="font-size:11px;color:#888">${a.cod}</td>
+        <td style="font-weight:700">${a.art}</td>
+        <td style="text-align:center;font-weight:700;color:${color}">${a.stk}</td>
+        <td style="text-align:right;font-weight:700">${fmt(a.venta)}</td>
+        <td>${badge}</td>
+      </tr>`;
+    }).join('');
+  }
 }
 
 function renderSel(){
@@ -301,11 +458,12 @@ function renderHistorial(){
     <td>${v.cliente}</td><td>${v.vendedor}</td>
     <td class="${pc(v.pago)}">${v.pago}</td>
     <td style="text-align:center;color:#6c3483;font-weight:700">${v.cuotas>0?v.cuotas+' c':'—'}</td>
-    <td><button class="btn btn-red" onclick="eliminarVenta(${i},${v.idx},${v.qty})">✕</button></td>
+    <td>${esAdmin()?`<button class="btn btn-red" onclick="eliminarVenta(${i},${v.idx},${v.qty})">✕</button>`:''}</td>
   </tr>`).join('');
 }
 
 function renderResumen(){
+  if(!esAdmin())return;
   const total=ven.reduce((s,v)=>s+v.total,0);
   const ef=ven.filter(v=>v.pago==='Efectivo').reduce((s,v)=>s+v.total,0);
   const cred=ven.filter(v=>v.pago==='Crédito').reduce((s,v)=>s+v.total,0);
@@ -320,18 +478,34 @@ function renderResumen(){
   document.getElementById('r-top').textContent=top?top[0]:'—';
   document.getElementById('r-arts').textContent=inv.length;
   document.getElementById('r-unid').textContent=inv.reduce((s,a)=>s+a.stk,0);
-  document.getElementById('r-vcosto').textContent=fmt(inv.reduce((s,a)=>s+a.stk*a.costo,0));
-  document.getElementById('r-vventa').textContent=fmt(inv.reduce((s,a)=>s+a.stk*a.venta,0));
+  const vcosto=inv.reduce((s,a)=>s+a.stk*a.costo,0);
+  const vventa=inv.reduce((s,a)=>s+a.stk*a.venta,0);
+  document.getElementById('r-vcosto').textContent=fmt(vcosto);
+  document.getElementById('r-vventa').textContent=fmt(vventa);
+  document.getElementById('r-ganancia').textContent=fmt(vventa-vcosto);
   const vends={};ven.forEach(v=>{if(!vends[v.vendedor])vends[v.vendedor]={n:0,t:0};vends[v.vendedor].n++;vends[v.vendedor].t+=v.total;});
   const ve=Object.entries(vends).sort((a,b)=>b[1].t-a[1].t);
   document.getElementById('r-vend-body').innerHTML=ve.length?ve.map(([k,v])=>`<tr>
-    <td style="font-weight:700">${k}</td>
-    <td style="text-align:center">${v.n}</td>
+    <td style="font-weight:700">${k}</td><td style="text-align:center">${v.n}</td>
     <td style="text-align:right;font-weight:700;color:#1e8449">${fmt(v.t)}</td>
   </tr>`).join(''):'<tr><td colspan="3" class="empty">Sin datos</td></tr>';
 }
 
-function renderAll(){renderInv();renderSel();renderHistorial();renderResumen();}
+function renderUsuarios(){
+  const ul=document.getElementById('user-list');
+  ul.innerHTML=users.map((u,i)=>`<div class="user-row">
+    <div class="user-info">
+      <div class="uname">&#128100; ${u.uname}</div>
+      <div class="urole">${u.role==='admin'?'&#11088; Administrador':'&#128722; Vendedor'}</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-orange" onclick="abrirEditarUsuario(${i})">&#9998; Editar</button>
+      ${i>0||users.length>1?`<button class="btn btn-red" onclick="eliminarUsuario(${i})">&#128465;</button>`:''}
+    </div>
+  </div>`).join('');
+}
+
+function renderAll(){renderInv();renderSel();renderHistorial();renderResumen();if(esAdmin())renderUsuarios();}
 
 function cargarPrecio(){
   const i=+document.getElementById('sel-art').value;
@@ -395,8 +569,6 @@ function eliminarVenta(i,idx,qty){
   if(!confirm('¿Eliminar esta venta? El stock se devolverá.'))return;
   inv[idx].stk+=qty;ven.splice(i,1);guardar();renderAll();toast('Venta eliminada');
 }
-
-/* ── EDITAR ARTÍCULO ── */
 function abrirEdicion(i){
   const a=inv[i];
   document.getElementById('edit-idx').value=i;
@@ -407,9 +579,6 @@ function abrirEdicion(i){
   document.getElementById('edit-venta').value=a.venta;
   document.getElementById('modal-edit').classList.add('open');
 }
-function cerrarModal(){
-  document.getElementById('modal-edit').classList.remove('open');
-}
 function guardarEdicion(){
   const i=+document.getElementById('edit-idx').value;
   const cod=document.getElementById('edit-cod').value.trim();
@@ -419,16 +588,12 @@ function guardarEdicion(){
   const venta=+document.getElementById('edit-venta').value||0;
   if(!cod||!art){toast('⚠ Completa código y nombre',true);return;}
   inv[i]={cod,art,stk,costo,venta};
-  guardar();cerrarModal();renderAll();toast('✓ Artículo actualizado');
+  guardar();cerrarModal('modal-edit');renderAll();toast('✓ Artículo actualizado');
 }
-
-/* ── ELIMINAR ARTÍCULO ── */
 function eliminarArticulo(i){
-  if(!confirm(`¿Eliminar "${inv[i].art}"? Esta acción no se puede deshacer.`))return;
-  inv.splice(i,1);
-  guardar();renderAll();toast('Artículo eliminado');
+  if(!confirm(`¿Eliminar "${inv[i].art}"? No se puede deshacer.`))return;
+  inv.splice(i,1);guardar();renderAll();toast('Artículo eliminado');
 }
-
 function agregarArticulo(){
   const cod=document.getElementById('new-cod').value.trim();
   const art=document.getElementById('new-art').value.trim();
@@ -441,7 +606,46 @@ function agregarArticulo(){
   document.getElementById('new-stk').value=1;document.getElementById('new-costo').value='';
   document.getElementById('new-venta').value='';toast('✓ Artículo agregado');
 }
+// ── USUARIOS ──
+function crearUsuario(){
+  const uname=document.getElementById('new-uname').value.trim().toLowerCase();
+  const pass=document.getElementById('new-upass').value;
+  const role=document.getElementById('new-urole').value;
+  if(!uname||!pass){toast('⚠ Completa usuario y contraseña',true);return;}
+  if(users.find(u=>u.uname===uname)){toast('⚠ Ese usuario ya existe',true);return;}
+  users.push({uname,pass,role});guardar();renderUsuarios();
+  document.getElementById('new-uname').value='';document.getElementById('new-upass').value='';
+  toast('✓ Usuario creado');
+}
+function abrirEditarUsuario(i){
+  const u=users[i];
+  document.getElementById('edit-uidx').value=i;
+  document.getElementById('edit-uname').value=u.uname;
+  document.getElementById('edit-upass').value='';
+  document.getElementById('edit-urole').value=u.role;
+  document.getElementById('modal-user').classList.add('open');
+}
+function guardarUsuario(){
+  const i=+document.getElementById('edit-uidx').value;
+  const uname=document.getElementById('edit-uname').value.trim().toLowerCase();
+  const pass=document.getElementById('edit-upass').value;
+  const role=document.getElementById('edit-urole').value;
+  if(!uname){toast('⚠ El usuario no puede estar vacío',true);return;}
+  users[i].uname=uname;
+  users[i].role=role;
+  if(pass) users[i].pass=pass;
+  guardar();cerrarModal('modal-user');renderUsuarios();toast('✓ Usuario actualizado');
+}
+function eliminarUsuario(i){
+  if(users.length<=1){toast('⚠ Debe haber al menos un usuario',true);return;}
+  if(!confirm(`¿Eliminar usuario "${users[i].uname}"?`))return;
+  users.splice(i,1);guardar();renderUsuarios();toast('Usuario eliminado');
+}
+function cerrarModal(id){document.getElementById(id).classList.remove('open');}
+document.getElementById('modal-edit').addEventListener('click',function(e){if(e.target===this)cerrarModal('modal-edit');});
+document.getElementById('modal-user').addEventListener('click',function(e){if(e.target===this)cerrarModal('modal-user');});
 function confirmarReset(){
+  if(!esAdmin())return;
   if(confirm('¿Borrar TODO el historial y reiniciar el stock?')){
     inv=JSON.parse(JSON.stringify(defaultInv));ven=[];guardar();renderAll();
     document.getElementById('fac-content').innerHTML='<div class="empty">&#128196; Registra una venta para generar la factura</div>';
@@ -454,17 +658,14 @@ function mostrarTab(id,el){
   document.getElementById('tab-'+id).classList.add('active');
   el.classList.add('active');
   if(id==='resumen')renderResumen();
+  if(id==='usuarios')renderUsuarios();
 }
 function toast(msg,err=false){
   const t=document.getElementById('toast');t.textContent=msg;
   t.style.background=err?'#e74c3c':'#1e8449';t.style.opacity='1';
   clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',2500);
 }
-// Cerrar modal clickando fuera
-document.getElementById('modal-edit').addEventListener('click',function(e){
-  if(e.target===this)cerrarModal();
-});
-cargar();renderAll();
+cargar();
 </script>
 </body>
 </html>
