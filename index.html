@@ -2,1464 +2,1618 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>Mis Finanzas</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0F2E4F">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-database.js";
-  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-
-  // ══════════════════════════════════════════════════════════════
-  // PEGA AQUI LA CONFIGURACION DE TU PROYECTO DE FIREBASE
-  // (Firebase Console → tu proyecto → Configuracion del proyecto → tus apps → SDK setup)
-  // ══════════════════════════════════════════════════════════════
-  const firebaseConfig = {
-    apiKey: "PEGA_AQUI_TU_API_KEY",
-    authDomain: "PEGA_AQUI.firebaseapp.com",
-    databaseURL: "https://PEGA_AQUI-default-rtdb.firebaseio.com",
-    projectId: "PEGA_AQUI",
-    storageBucket: "PEGA_AQUI.firebasestorage.app",
-    messagingSenderId: "PEGA_AQUI",
-    appId: "PEGA_AQUI"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
-
-  window.fbSet = function(data, callback){
-    set(ref(db, 'finanzas'), data)
-      .then(function(){ if(callback) callback(null); })
-      .catch(function(e){ if(callback) callback(e); });
-  };
-  window.fbListen = function(callback){
-    onValue(ref(db, 'finanzas'), function(snap){
-      callback(null, snap.val());
-    }, function(err){
-      callback(err, null);
-    });
-  };
-
-  signInAnonymously(auth).then(function(){
-    window.firebaseReady = true;
-    console.log('Firebase conectado OK');
-    window.dispatchEvent(new Event('firebaseReady'));
-  }).catch(function(err){
-    console.error('Error de autenticacion Firebase:', err);
-    window.firebaseReady = true;
-    window.dispatchEvent(new Event('firebaseReady'));
-  });
-</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diseñador de Muebles en Melamina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Poppins',sans-serif;background:#EEF1F5;color:#1A2B3C;-webkit-tap-highlight-color:transparent}
-.num{font-family:'Fraunces',serif}
-input,select,textarea,button{font-family:'Poppins',sans-serif}
-input[type=text],input[type=number],input[type=date],input[type=password],input[type=tel],select,textarea{
-  width:100%;padding:11px 13px;border:1.5px solid #DCE3EA;border-radius:10px;font-size:14px;background:#fff;color:#1A2B3C;transition:border-color .15s
-}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#0F2E4F}
-label{display:block;font-size:11px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;margin-top:10px}
-label:first-child{margin-top:0}
-.btn{border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.btn:active{transform:scale(.97)}
-.bp{background:#0F2E4F;color:#fff}
-.bp:hover{background:#0A1F38}
-.bg{background:#C9A227;color:#fff}
-.bg:hover{background:#b3901f}
-.br{background:#e74c3c;color:#fff}
-.br:hover{background:#c0392b}
-.bgray{background:#E2E8F0;color:#475569}
-.bgray:hover{background:#DCE3EA}
-.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(27,67,50,.06)}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-h2{font-size:14px;font-weight:700;color:#0F2E4F;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-h2::before{content:'';width:4px;height:16px;background:#C9A227;border-radius:2px;display:inline-block}
-::-webkit-scrollbar{width:8px;height:8px}
-::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px}
+  :root{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#f2f0eb;
+    --line:#dcd8d0;
+    --text:#242220;
+    --text-dim:#767167;
+    --wood:#a35a2e;
+    --wood-dim:#7a4322;
+    --canto:#2f6fb0;
+    --blue:#2f6fb0;
+    --danger:#b8493c;
+    --ok:#3f8a55;
+    --radius:6px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  #app{display:flex;flex-direction:column;height:100vh;}
 
-/* ── Login ── */
-.login-overlay{position:fixed;inset:0;background:linear-gradient(160deg,#0F2E4F,#0A1F38);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
-.login-box{background:#fff;border-radius:20px;padding:36px 30px;max-width:340px;width:100%;text-align:center}
-.login-icon{font-size:38px;margin-bottom:10px}
-.login-title{font-size:20px;font-weight:700;color:#0F2E4F;margin-bottom:4px;font-family:'Fraunces',serif}
-.login-sub{font-size:12px;color:#999;margin-bottom:22px}
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel);
+    flex-shrink:0;
+  }
+  header h1{font-size:15px;font-weight:600;margin:0;letter-spacing:.2px;}
+  header h1 span{color:var(--wood);}
+  header .sub{font-size:11px;color:var(--text-dim);margin-top:2px;}
+  .hdr-actions{display:flex;gap:8px;}
 
-/* ── App layout ── */
-.app-layout{display:none;min-height:100vh}
-.sidebar{width:210px;min-width:210px;background:#0F2E4F;display:flex;flex-direction:column;padding:16px 0}
-.slogo{padding:0 20px 18px;color:#fff;font-family:'Fraunces',serif;font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
-.sitem{display:flex;align-items:center;gap:11px;padding:11px 20px;cursor:pointer;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;transition:all .15s;border-left:3px solid transparent}
-.sitem:hover{background:rgba(255,255,255,.06);color:#fff}
-.sitem.active{background:rgba(201,162,39,.15);color:#f0d896;border-left-color:#C9A227}
-.sitem svg{width:17px;height:17px;flex-shrink:0}
-.main{flex:1;padding:22px 26px;max-width:900px}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.topbar-title{font-size:20px;font-weight:700;color:#0F2E4F;font-family:'Fraunces',serif}
-.sec{display:none}
-.sec.active{display:block}
+  button{
+    font-family:inherit;font-size:12.5px;border-radius:var(--radius);border:1px solid var(--line);
+    background:var(--panel-2);color:var(--text);padding:7px 12px;cursor:pointer;transition:.15s;
+  }
+  button:hover{border-color:var(--wood-dim);}
+  button.primary{background:var(--wood);border-color:var(--wood);color:#fff;font-weight:600;}
+  button.primary:hover{background:#b5652f;}
+  button.ghost{background:transparent;}
+  button.small{padding:4px 8px;font-size:11px;}
+  button.danger{color:var(--danger);}
+  button:disabled{opacity:.35;cursor:not-allowed;}
 
-/* ── Balance hero ── */
-.balance-hero{background:linear-gradient(135deg,#0F2E4F,#08192B);border-radius:20px;padding:26px 24px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden}
-.balance-hero::after{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:rgba(201,162,39,.12);border-radius:50%}
-.balance-label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:rgba(255,255,255,.6);font-weight:600}
-.balance-num{font-family:'Fraunces',serif;font-size:34px;font-weight:600;margin:4px 0 14px}
+  main{flex:1;display:flex;min-height:0;}
 
-.met{background:#fff;border-radius:12px;padding:14px 16px}
-.met-label{font-size:10px;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
-.met-val{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin-top:3px}
+  /* ---------- sidebar ---------- */
+  #sidebar{
+    width:300px;flex-shrink:0;border-right:1px solid var(--line);background:var(--panel);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .side-scroll{overflow-y:auto;flex:1;padding:14px;}
+  .side-scroll::-webkit-scrollbar{width:8px;}
+  .side-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
 
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:8px 10px;font-size:10px;color:#999;text-transform:uppercase;font-weight:700;border-bottom:1.5px solid #E4EAF0}
-td{padding:10px;border-bottom:1px solid #EEF1F5}
-tr:last-child td{border-bottom:none}
-.empty{text-align:center;color:#bbb;padding:26px;font-size:12px}
+  .piece-card{
+    border:1px solid var(--line);border-radius:var(--radius);padding:10px;margin-bottom:8px;
+    background:var(--panel-2);cursor:pointer;
+  }
+  .piece-card.active{border-color:var(--wood);}
+  .piece-card .pc-top{display:flex;justify-content:space-between;align-items:center;gap:6px;}
+  .piece-card .pc-name{font-weight:600;font-size:13px;}
+  .piece-card .pc-dims{font-size:11px;color:var(--text-dim);margin-top:3px;}
+  .swatch{width:12px;height:12px;border-radius:2px;display:inline-block;margin-right:6px;border:1px solid rgba(255,255,255,.2);}
 
-.chip{display:inline-block;padding:2px 9px;border-radius:9px;font-size:10px;font-weight:700}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0F2E4F;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:99999;display:none;box-shadow:0 6px 18px rgba(0,0,0,.2);max-width:90vw;text-align:center}
-.toast.err{background:#c0392b}
+  #addBtn{width:100%;margin-bottom:12px;}
 
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(20,30,20,.5);z-index:9998;align-items:center;justify-content:center;padding:16px}
-.modal{background:#fff;border-radius:18px;padding:24px;max-width:420px;width:100%;max-height:88vh;overflow-y:auto}
+  /* ---------- form ---------- */
+  .form-panel{border-top:1px solid var(--line);padding:14px;max-height:56%;overflow-y:auto;}
+  .form-panel::-webkit-scrollbar{width:8px;}
+  .form-panel::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+  .field{margin-bottom:10px;}
+  .field label{display:block;font-size:11px;color:var(--text-dim);margin-bottom:4px;}
+  .field input[type=text], .field input[type=number], .field select{
+    width:100%;padding:7px 8px;border-radius:var(--radius);border:1px solid var(--line);
+    background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12.5px;
+  }
+  .row2{display:flex;gap:8px;}
+  .row2 .field{flex:1;}
+  .canto-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .canto-chip{
+    display:flex;align-items:center;gap:6px;font-size:11.5px;padding:6px 8px;border:1px solid var(--line);
+    border-radius:var(--radius);cursor:pointer;user-select:none;background:var(--bg);
+  }
+  .canto-chip.on{border-color:var(--canto);background:rgba(47,111,176,.1);color:var(--canto);}
+  .canto-chip input{display:none;}
+  .colors{display:flex;gap:6px;flex-wrap:wrap;}
+  .color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+  .color-dot.sel{border-color:var(--text);}
+  .seg{display:flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .seg button{flex:1;border:none;border-radius:0;background:var(--bg);}
+  .seg button.on{background:var(--wood);color:#fff;font-weight:600;}
+  .hint{font-size:10.5px;color:var(--text-dim);margin-top:4px;line-height:1.4;}
+  .fitbox{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);padding:10px;margin-bottom:12px;}
 
-.reminder-item,.debt-item,.note-item{border:1px solid #E4EAF0;border-radius:12px;padding:14px 16px;margin-bottom:10px}
-.reminder-item.vencido{border-color:#f5c6c0;background:#fdf3f1}
-.reminder-item.hoy{border-color:#f5deb3;background:#fdf8ee}
+  /* ---------- center viewport ---------- */
+  #center{flex:1;display:flex;flex-direction:column;min-width:0;}
+  #viewToolbar{
+    display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel);
+    flex-shrink:0;align-items:center;
+  }
+  #viewToolbar .spacer{flex:1;}
+  #canvas3d-wrap{flex:1;position:relative;min-height:0;background:radial-gradient(circle at 50% 30%, #f4f2ee 0%, #e7e4dd 100%);}
+  #canvas3d-wrap canvas{display:block;width:100%;height:100%;}
+  .badge3d{position:absolute;top:10px;left:12px;font-size:11px;color:var(--text-dim);background:rgba(255,255,255,.75);padding:4px 8px;border-radius:4px;border:1px solid var(--line);}
+  #camControls{position:absolute;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:5;}
+  #camControls button{
+    width:44px;height:44px;border-radius:50%;font-size:17px;line-height:1;
+    background:var(--panel);border:1px solid var(--line);box-shadow:0 3px 10px rgba(0,0,0,.15);
+    display:flex;align-items:center;justify-content:center;user-select:none;
+  }
+  #camControls button:hover{background:var(--panel-2);border-color:var(--wood-dim);}
+  #camControls button:active{background:var(--wood);color:#fff;}
 
-@media(max-width:760px){
-  .app-layout{flex-direction:column}
-  .sidebar{width:100%;min-width:unset;flex-direction:row;flex-wrap:wrap;padding:10px 6px}
-  .slogo{display:none}
-  .sitem{flex:1;flex-direction:column;gap:4px;padding:8px 4px;font-size:9px;border-left:none;border-radius:8px;text-align:center}
-  .sitem.active{border-left:none;background:rgba(201,162,39,.2)}
-  .main{padding:14px}
-  .g2,.g3{grid-template-columns:1fr 1fr}
-  .balance-num{font-size:26px}
-}
+  /* ---------- 2D panel ---------- */
+  #panel2d{height:38%;border-top:1px solid var(--line);display:flex;flex-shrink:0;background:var(--panel);}
+  .view2d-box{flex:1;border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;}
+  .view2d-box:last-child{border-right:none;}
+  .view2d-head{padding:6px 10px;font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;}
+  .view2d-body{flex:1;overflow:hidden;position:relative;}
+  svg{width:100%;height:100%;display:block;}
+
+  /* ---------- bottom cutlist ---------- */
+  #bottomBar{border-top:1px solid var(--line);background:var(--panel);flex-shrink:0;}
+  #bottomHead{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;cursor:pointer;list-style:none;}
+  #bottomHead::-webkit-details-marker{display:none;}
+  #bottomHead::marker{display:none;content:"";}
+  #bottomHead .t{font-size:12.5px;font-weight:600;}
+  #bottomBody{max-height:260px;overflow-y:auto;padding:0 14px 14px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
+  th{color:var(--text-dim);font-weight:500;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;}
+  .cantos-tags span{display:inline-block;font-size:9.5px;background:rgba(47,111,176,.12);color:var(--canto);border:1px solid rgba(47,111,176,.35);border-radius:3px;padding:1px 5px;margin-right:3px;}
+  #nestWrap{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;}
+  .sheet{background:var(--bg);border:1px solid var(--line);border-radius:4px;position:relative;}
+  .sheet .cut{position:absolute;background:rgba(163,90,46,.22);border:1px solid var(--wood-dim);font-size:9px;color:var(--text);display:flex;align-items:center;justify-content:center;overflow:hidden;text-align:center;}
+  .sheet-label{font-size:10.5px;color:var(--text-dim);margin-bottom:4px;}
+
+  select#attachTarget{margin-bottom:6px;}
+
+  #modalOverlay{position:fixed;inset:0;background:rgba(30,26,20,.4);display:none;align-items:center;justify-content:center;z-index:50;}
+  #modalOverlay.open{display:flex;}
+  #modalCard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;width:340px;max-width:90vw;box-shadow:0 12px 40px rgba(0,0,0,.25);}
+  #modalCard h2{margin:0 0 14px;font-size:15px;font-weight:600;}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
+
+  ::selection{background:var(--wood);color:#fff;}
+
+  @media (max-width:900px){
+    #sidebar{width:240px;}
+    #panel2d{flex-direction:column;height:56%;}
+    .view2d-box{border-right:none;border-bottom:1px solid var(--line);}
+  }
 </style>
 </head>
 <body>
+<div id="app">
 
-<!-- ═══ LOGIN ═══ -->
-<div class="login-overlay" id="login-overlay">
-  <div class="login-box">
-    <div class="login-icon">🌿</div>
-    <div class="login-title">Mis Finanzas</div>
-    <div class="login-sub" id="login-sub">Crea un PIN para proteger tu informacion</div>
-    <div id="login-err" style="display:none;background:#fdecea;color:#c0392b;padding:9px 12px;border-radius:8px;font-size:12px;margin-bottom:14px;font-weight:600"></div>
-    <label>PIN (4 a 8 numeros)</label>
-    <input type="password" id="login-pin" inputmode="numeric" maxlength="8" placeholder="••••" style="text-align:center;font-size:20px;letter-spacing:6px" onkeydown="if(event.key==='Enter')intentarLogin()">
-    <div id="login-pin2-wrap" style="display:none">
-      <label>Confirma tu PIN</label>
-      <input type="password" id="login-pin2" inputmode="numeric" maxlength="8" placeholder="••••" style="text-align:center;font-size:20px;letter-spacing:6px" onkeydown="if(event.key==='Enter')intentarLogin()">
+  <header>
+    <div>
+      <h1>Diseñador de Muebles <span>· Melamina RH</span></h1>
+      <div class="sub">Piezas → ensamble 3D/2D → lista de corte y aprovechamiento de láminas</div>
     </div>
-    <button class="btn bp" onclick="intentarLogin()" style="width:100%;margin-top:16px;padding:13px">Entrar</button>
-  </div>
+    <div class="hdr-actions">
+      <button class="ghost small" id="btnLoad">Abrir proyecto</button>
+      <input type="file" id="fileInput" accept=".json" style="display:none">
+      <button class="ghost small" id="btnSave">Guardar proyecto</button>
+      <button class="primary small" id="btnExportCsv">Exportar lista (CSV)</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <div class="side-scroll">
+        <button id="addBtn" class="primary">+ Nueva pieza</button>
+        <button id="frameBtn" class="ghost" style="width:100%;margin-bottom:12px;">+ Marco (costados/tapas)</button>
+        <button id="fondoBtn" class="ghost" style="width:100%;margin-bottom:12px;">+ Fondo</button>
+        <button id="measureBtn" class="ghost" style="width:100%;margin-bottom:12px;">📏 Medir entre dos piezas</button>
+        <div id="pieceList"></div>
+      </div>
+      <div class="form-panel" id="formPanel" style="display:none;"></div>
+    </div>
+
+    <!-- CENTER -->
+    <div id="center">
+      <div id="viewToolbar">
+        <button class="small ghost" id="resetCam">Centrar cámara</button>
+        <div class="seg" style="width:auto;">
+          <button class="small" data-dragmode="horizontal" id="dm-h">Mover: horizontal</button>
+          <button class="small" data-dragmode="vertical" id="dm-v">Mover: vertical</button>
+        </div>
+        <div class="seg" style="width:auto;">
+          <button class="small ghost" id="viewUp" title="Subir la vista para ver la parte de arriba">▲ Ver arriba</button>
+          <button class="small ghost" id="viewDown" title="Bajar la vista">▼ Ver abajo</button>
+        </div>
+        <span class="spacer"></span>
+        <span class="hint" id="selInfo">Sin pieza seleccionada</span>
+      </div>
+      <div id="canvas3d-wrap">
+        <div class="badge3d">Clic y arrastra una pieza para moverla (se pega si queda cerca) · fondo: orbita · rueda: zoom · Ctrl+Z deshace</div>
+        <div id="camControls">
+          <button id="cc-up" title="Subir y acercar la vista (mantén presionado)">▲</button>
+          <button id="cc-down" title="Bajar y alejar la vista (mantén presionado)">▼</button>
+        </div>
+      </div>
+
+      <div id="panel2d">
+        <div class="view2d-box">
+          <div class="view2d-head"><span>Planta (vista superior)</span><span id="topDims" class="mono"></span></div>
+          <div class="view2d-body"><svg id="svgTop"></svg></div>
+        </div>
+        <div class="view2d-box">
+          <div class="view2d-head"><span>Alzado (vista frontal)</span><span id="frontDims" class="mono"></span></div>
+          <div class="view2d-body"><svg id="svgFront"></svg></div>
+        </div>
+        <div class="view2d-box">
+          <div class="view2d-head"><span>Ficha de pieza (con canto)</span><span id="pieceDims" class="mono"></span></div>
+          <div class="view2d-body"><svg id="svgPiece"></svg></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <details id="bottomBar">
+    <summary id="bottomHead">
+      <span class="t">Lista de corte y aprovechamiento de láminas</span>
+      <span id="toggleBottom" class="small ghost" style="display:inline-block;">Mostrar ▲</span>
+    </summary>
+    <div id="bottomBody">
+      <table>
+        <thead><tr><th>Pieza</th><th>Ancho</th><th>Alto</th><th>Esp.</th><th>Cant.</th><th>Canto (tapacanto)</th><th>Orientación</th></tr></thead>
+        <tbody id="cutlistBody"></tbody>
+      </table>
+      <div id="nestSummary" class="hint" style="margin-top:10px;"></div>
+      <div id="nestWrap"></div>
+    </div>
+  </details>
+
+  <div id="modalOverlay"></div>
+
 </div>
-
-<!-- ═══ APP ═══ -->
-<div class="app-layout" id="app-layout">
-  <div class="sidebar">
-    <div class="slogo">🌿 Mis Finanzas</div>
-    <div class="sitem active" onclick="goTab('resumen',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.1-2.8-2.8L7 14"/></svg>
-      <span>Resumen</span></div>
-    <div class="sitem" onclick="goTab('movimientos',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      <span>Movimientos</span></div>
-    <div class="sitem" onclick="goTab('reparto',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.7 1 6.3 2.7"/><path d="M21 3v6h-6"/></svg>
-      <span>Reparto de ingresos</span></div>
-    <div class="sitem" onclick="goTab('fijos',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
-      <span>Sueldo y pagos fijos</span></div>
-    <div class="sitem" onclick="goTab('ahorros',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5c-1.5-1.5-3-2-6-2S8.5 3.5 7 5c-3 0-5 2-5 5 0 4 3 5 3 8v2h14v-2c0-3 3-4 3-8 0-3-2-5-5-5z"/><circle cx="16" cy="8" r="1" fill="currentColor"/></svg>
-      <span>Ahorros</span></div>
-    <div class="sitem" onclick="goTab('inversiones',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-      <span>Inversiones</span></div>
-    <div class="sitem" onclick="goTab('deudas',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      <span>Deudas</span></div>
-    <div class="sitem" onclick="goTab('prestamos',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-      <span>Prestamos hechos</span></div>
-    <div class="sitem" onclick="goTab('notas',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      <span>Notas</span></div>
-    <div class="sitem" onclick="goTab('recordatorios',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span>Recordatorios</span></div>
-    <div class="sitem" onclick="goTab('ajustes',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span>Ajustes</span></div>
-  </div>
-
-  <div class="main">
-    <div class="topbar">
-      <div class="topbar-title" id="page-title">Resumen</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span id="sbadge" style="background:#27ae60;color:#fff;font-size:10px;padding:3px 10px;border-radius:20px;font-weight:600">Guardado</span>
-        <button class="btn bgray" onclick="cerrarSesion()" style="padding:7px 12px;font-size:11px">Salir</button>
-      </div>
-    </div>
-
-    <!-- ═══ RESUMEN ═══ -->
-    <div class="sec active" id="tab-resumen">
-      <div class="balance-hero">
-        <div class="balance-label">Balance actual</div>
-        <div class="balance-num" id="res-balance">$0</div>
-        <div class="g3" style="gap:10px">
-          <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px 12px">
-            <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;font-weight:700">Ingresos del mes</div>
-            <div style="font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:#8fd694;margin-top:2px" id="res-ing-mes">$0</div>
-          </div>
-          <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px 12px">
-            <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;font-weight:700">Gastos del mes</div>
-            <div style="font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:#f5a3a3;margin-top:2px" id="res-gas-mes">$0</div>
-          </div>
-          <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px 12px">
-            <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;font-weight:700">Ahorrado total</div>
-            <div style="font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:#f0d896;margin-top:2px" id="res-ahorro">$0</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Gastos del mes por categoria</h2>
-        <div id="res-cat-chart" style="display:flex;flex-direction:column;gap:10px"></div>
-      </div>
-
-      <div class="card">
-        <h2>Ultimos movimientos</h2>
-        <div style="overflow-x:auto"><table>
-          <thead><tr><th>Fecha</th><th>Categoria</th><th style="text-align:right">Monto</th></tr></thead>
-          <tbody id="res-ultimos-tb"></tbody>
-        </table></div>
-      </div>
-
-      <div class="card">
-        <h2>Sueldo, pagos, inversiones y prestamos</h2>
-        <div class="g2" style="gap:10px">
-          <div onclick="irA('fijos')" style="cursor:pointer;background:#F4F7FA;border-radius:10px;padding:12px 14px">
-            <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase">Pagos fijos este mes</div>
-            <div id="res-fijos-resumen" style="font-size:15px;font-weight:700;color:#1A2B3C;margin-top:2px">0 de 0 pagados</div>
-          </div>
-          <div onclick="irA('fijos')" style="cursor:pointer;background:#F4F7FA;border-radius:10px;padding:12px 14px">
-            <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase">Ingresos fijos este mes</div>
-            <div id="res-ing-fijos-resumen" style="font-size:15px;font-weight:700;color:#1A2B3C;margin-top:2px">0 de 0 recibidos</div>
-          </div>
-          <div onclick="irA('inversiones')" style="cursor:pointer;background:#F4F7FA;border-radius:10px;padding:12px 14px">
-            <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase">Total invertido</div>
-            <div id="res-inversiones-resumen" style="font-size:15px;font-weight:700;color:#1A2B3C;margin-top:2px">$0</div>
-          </div>
-          <div onclick="irA('prestamos')" style="cursor:pointer;background:#F4F7FA;border-radius:10px;padding:12px 14px">
-            <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase">Te deben (prestamos)</div>
-            <div id="res-prestamos-resumen" style="font-size:15px;font-weight:700;color:#1A2B3C;margin-top:2px">$0</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" id="res-recordatorios-card" style="display:none">
-        <h2>Recordatorios proximos</h2>
-        <div id="res-recordatorios-list"></div>
-      </div>
-    </div>
-
-    <!-- ═══ MOVIMIENTOS ═══ -->
-    <div class="sec" id="tab-movimientos">
-      <div class="card">
-        <h2>Registrar movimiento</h2>
-        <div class="g2">
-          <div>
-            <label>Tipo</label>
-            <select id="mv-tipo" onchange="actualizarCategoriasMovimiento()">
-              <option value="ingreso">Ingreso (entra dinero)</option>
-              <option value="gasto">Gasto (sale dinero)</option>
-            </select>
-          </div>
-          <div>
-            <label>Categoria</label>
-            <select id="mv-categoria"></select>
-          </div>
-        </div>
-        <div class="g2">
-          <div><label>Monto $</label><input type="number" id="mv-monto" min="0" placeholder="0"></div>
-          <div><label>Fecha</label><input type="date" id="mv-fecha"></div>
-        </div>
-        <label>Nota <span style="text-transform:none;font-weight:400">(opcional)</span></label>
-        <input type="text" id="mv-nota" placeholder="Ej: Mercado de la semana">
-        <div id="mv-reparto-check-wrap" style="display:none;margin-top:12px">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;font-weight:400;font-size:12px;color:#333">
-            <input type="checkbox" id="mv-repartir" style="width:16px;height:16px">
-            Repartir este ingreso segun mi regla (<span id="mv-reparto-desc"></span>)
-          </label>
-        </div>
-        <button class="btn bp" onclick="registrarMovimiento()" style="margin-top:16px;width:100%;padding:13px">+ Registrar movimiento</button>
-      </div>
-
-      <div class="card">
-        <h2>Historial</h2>
-        <div class="g2" style="margin-bottom:12px">
-          <select id="mv-filtro-tipo" onchange="renderMovimientos()">
-            <option value="todos">Todos</option>
-            <option value="ingreso">Solo ingresos</option>
-            <option value="gasto">Solo gastos</option>
-          </select>
-          <input type="text" id="mv-buscar" placeholder="Buscar por categoria o nota..." oninput="renderMovimientos()" style="text-transform:none">
-        </div>
-        <div style="overflow-x:auto"><table>
-          <thead><tr><th>Fecha</th><th>Categoria</th><th>Nota</th><th style="text-align:right">Monto</th><th></th></tr></thead>
-          <tbody id="mv-tb"></tbody>
-        </table></div>
-      </div>
-    </div>
-
-    <!-- ═══ REPARTO DE INGRESOS ═══ -->
-    <div class="sec" id="tab-reparto">
-      <div class="card" style="background:#EAF2FB;border:1px solid #cfe0f2">
-        <div style="font-size:12px;color:#375070">Cada vez que registras un ingreso marcando "Repartir", aparece aqui el desglose de cuanto le toca a cada categoria. Los vas marcando conforme saques o muevas esa plata de verdad.</div>
-      </div>
-      <div id="rp-lista"></div>
-    </div>
-
-    <!-- ═══ SUELDO Y PAGOS FIJOS ═══ -->
-    <div class="sec" id="tab-fijos">
-      <div class="card" style="background:#EAF2FB;border:1px solid #cfe0f2">
-        <div style="font-size:12px;color:#375070">Estas listas son fijas — las marcas cada mes cuando recibes o pagas cada cosa. El primer dia del mes se desmarcan solas para que empieces de nuevo.</div>
-      </div>
-
-      <div class="card">
-        <h2>Sueldo e ingresos fijos <span id="fj-ing-resumen" style="font-size:11px;color:#999;font-weight:400;text-transform:none;margin-left:6px"></span></h2>
-        <div id="fj-ing-lista" style="margin-bottom:14px"></div>
-        <div class="g2">
-          <div><label>Nombre</label><input type="text" id="fj-ing-nombre" placeholder="Ej: Sueldo, Arriendo que me pagan..."></div>
-          <div><label>Monto esperado $</label><input type="number" id="fj-ing-monto" min="0" placeholder="0"></div>
-        </div>
-        <label>Dia del mes en que llega <span style="text-transform:none;font-weight:400">(opcional)</span></label>
-        <input type="number" id="fj-ing-dia" min="1" max="31" placeholder="Ej: 30" style="max-width:120px">
-        <button class="btn bp" onclick="agregarIngresoFijo()" style="margin-top:14px;padding:10px 18px">+ Agregar ingreso fijo</button>
-      </div>
-
-      <div class="card">
-        <h2>Pagos fijos mensuales <span id="fj-pag-resumen" style="font-size:11px;color:#999;font-weight:400;text-transform:none;margin-left:6px"></span></h2>
-        <div id="fj-pag-lista" style="margin-bottom:14px"></div>
-        <div class="g2">
-          <div><label>Nombre</label><input type="text" id="fj-pag-nombre" placeholder="Ej: Arriendo, Internet, Netflix..."></div>
-          <div><label>Monto $</label><input type="number" id="fj-pag-monto" min="0" placeholder="0"></div>
-        </div>
-        <label>Dia del mes en que vence <span style="text-transform:none;font-weight:400">(opcional)</span></label>
-        <input type="number" id="fj-pag-dia" min="1" max="31" placeholder="Ej: 5" style="max-width:120px">
-        <button class="btn bp" onclick="agregarPagoFijo()" style="margin-top:14px;padding:10px 18px">+ Agregar pago fijo</button>
-      </div>
-    </div>
-
-    <!-- ═══ AHORROS ═══ -->
-    <div class="sec" id="tab-ahorros">
-      <div class="balance-hero">
-        <div class="balance-label">Total ahorrado</div>
-        <div class="balance-num" id="ah-total">$0</div>
-      </div>
-
-      <div class="card">
-        <h2>Meta de ahorro <span style="font-size:10px;color:#bbb;font-weight:400;text-transform:none">(opcional)</span></h2>
-        <div class="g2">
-          <div><label>Meta $</label><input type="number" id="ah-meta" min="0" placeholder="0" onchange="guardarMetaAhorro()"></div>
-          <div style="display:flex;flex-direction:column;justify-content:flex-end">
-            <div id="ah-meta-progreso" style="font-size:12px;color:#666;margin-bottom:6px"></div>
-            <div style="background:#E4EAF0;border-radius:20px;height:12px;overflow:hidden"><div id="ah-meta-barra" style="width:0%;height:100%;background:#C9A227"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Agregar movimiento de ahorro</h2>
-        <div class="g2">
-          <div>
-            <label>Tipo</label>
-            <select id="ah-tipo">
-              <option value="deposito">Deposito (guardo dinero)</option>
-              <option value="retiro">Retiro (uso lo ahorrado)</option>
-            </select>
-          </div>
-          <div><label>Monto $</label><input type="number" id="ah-monto" min="0" placeholder="0"></div>
-        </div>
-        <div class="g2">
-          <div><label>Fecha</label><input type="date" id="ah-fecha"></div>
-          <div><label>Nota <span style="text-transform:none;font-weight:400">(opcional)</span></label><input type="text" id="ah-nota" placeholder="Ej: Fondo de emergencia"></div>
-        </div>
-        <button class="btn bp" onclick="registrarAhorro()" style="margin-top:16px;width:100%;padding:13px">+ Registrar</button>
-      </div>
-
-      <div class="card">
-        <h2>Historial de ahorros</h2>
-        <div style="overflow-x:auto"><table>
-          <thead><tr><th>Fecha</th><th>Tipo</th><th>Nota</th><th style="text-align:right">Monto</th><th></th></tr></thead>
-          <tbody id="ah-tb"></tbody>
-        </table></div>
-      </div>
-    </div>
-
-    <!-- ═══ INVERSIONES ═══ -->
-    <div class="sec" id="tab-inversiones">
-      <div class="balance-hero" style="background:linear-gradient(135deg,#0F2E4F,#08192B)">
-        <div class="balance-label">Total invertido</div>
-        <div class="balance-num" id="in-total">$0</div>
-      </div>
-
-      <div class="card">
-        <h2>Agregar movimiento de inversion</h2>
-        <div class="g2">
-          <div>
-            <label>Tipo</label>
-            <select id="in-tipo">
-              <option value="deposito">Invierto (meto dinero)</option>
-              <option value="retiro">Retiro (saco lo invertido)</option>
-            </select>
-          </div>
-          <div><label>Monto $</label><input type="number" id="in-monto" min="0" placeholder="0"></div>
-        </div>
-        <div class="g2">
-          <div><label>Fecha</label><input type="date" id="in-fecha"></div>
-          <div><label>En que <span style="text-transform:none;font-weight:400">(opcional)</span></label><input type="text" id="in-nota" placeholder="Ej: Acciones, CDT, negocio..."></div>
-        </div>
-        <button class="btn bp" onclick="registrarInversion()" style="margin-top:16px;width:100%;padding:13px">+ Registrar</button>
-      </div>
-
-      <div class="card">
-        <h2>Historial de inversiones</h2>
-        <div style="overflow-x:auto"><table>
-          <thead><tr><th>Fecha</th><th>Tipo</th><th>En que</th><th style="text-align:right">Monto</th><th></th></tr></thead>
-          <tbody id="in-tb"></tbody>
-        </table></div>
-      </div>
-    </div>
-
-    <!-- ═══ DEUDAS ═══ -->
-    <div class="sec" id="tab-deudas">
-      <div class="balance-hero" style="background:linear-gradient(135deg,#8B2E2E,#5c1c1c)">
-        <div class="balance-label">Total que debes</div>
-        <div class="balance-num" id="de-total">$0</div>
-      </div>
-
-      <div class="card">
-        <h2>Agregar deuda</h2>
-        <div class="g2">
-          <div><label>A quien le debes</label><input type="text" id="de-nombre" placeholder="Ej: Banco, Juan, Tarjeta..."></div>
-          <div><label>Monto total $</label><input type="number" id="de-monto" min="0" placeholder="0"></div>
-        </div>
-        <div class="g2">
-          <div><label>Fecha limite <span style="text-transform:none;font-weight:400">(opcional)</span></label><input type="date" id="de-fecha"></div>
-          <div><label>Nota <span style="text-transform:none;font-weight:400">(opcional)</span></label><input type="text" id="de-nota" placeholder="Detalle"></div>
-        </div>
-        <button class="btn bp" onclick="agregarDeuda()" style="margin-top:16px;width:100%;padding:13px">+ Agregar deuda</button>
-      </div>
-
-      <div class="card">
-        <h2>Mis deudas</h2>
-        <div id="de-lista"></div>
-      </div>
-    </div>
-
-    <!-- ═══ PRESTAMOS HECHOS (plata que otros me deben) ═══ -->
-    <div class="sec" id="tab-prestamos">
-      <div class="balance-hero" style="background:linear-gradient(135deg,#0F5F3F,#083A26)">
-        <div class="balance-label">Total que te deben</div>
-        <div class="balance-num" id="pr-total">$0</div>
-      </div>
-
-      <div class="card">
-        <h2>Agregar prestamo que hiciste</h2>
-        <div class="g2">
-          <div><label>A quien le prestaste</label><input type="text" id="pr-nombre" placeholder="Nombre de la persona"></div>
-          <div><label>Monto prestado $</label><input type="number" id="pr-monto" min="0" placeholder="0"></div>
-        </div>
-        <div class="g2">
-          <div><label>Fecha en que deberia devolvertelo <span style="text-transform:none;font-weight:400">(opcional)</span></label><input type="date" id="pr-fecha"></div>
-          <div><label>Nota <span style="text-transform:none;font-weight:400">(opcional)</span></label><input type="text" id="pr-nota" placeholder="Detalle"></div>
-        </div>
-        <button class="btn bp" onclick="agregarPrestamo()" style="margin-top:16px;width:100%;padding:13px">+ Agregar prestamo</button>
-      </div>
-
-      <div class="card">
-        <h2>Prestamos que has hecho</h2>
-        <div id="pr-lista"></div>
-      </div>
-    </div>
-
-    <!-- ═══ NOTAS ═══ -->
-    <div class="sec" id="tab-notas">
-      <div class="card">
-        <h2>Nueva nota</h2>
-        <textarea id="no-texto" rows="3" placeholder="Escribe tu nota..." style="resize:vertical"></textarea>
-        <button class="btn bp" onclick="agregarNota()" style="margin-top:12px;padding:11px 20px">+ Guardar nota</button>
-      </div>
-      <div id="no-lista"></div>
-    </div>
-
-    <!-- ═══ RECORDATORIOS ═══ -->
-    <div class="sec" id="tab-recordatorios">
-      <div class="card">
-        <h2>Nuevo recordatorio</h2>
-        <label>Que quieres recordar</label>
-        <input type="text" id="re-texto" placeholder="Ej: Pagar el arriendo">
-        <label>Fecha</label>
-        <input type="date" id="re-fecha">
-        <button class="btn bp" onclick="agregarRecordatorio()" style="margin-top:14px;padding:11px 20px">+ Agregar recordatorio</button>
-      </div>
-      <div id="re-lista"></div>
-    </div>
-
-    <!-- ═══ AJUSTES ═══ -->
-    <div class="sec" id="tab-ajustes">
-      <div class="card">
-        <h2>Cambiar PIN</h2>
-        <label>PIN actual</label>
-        <input type="password" id="aj-pin-actual" inputmode="numeric" maxlength="8">
-        <label>PIN nuevo</label>
-        <input type="password" id="aj-pin-nuevo" inputmode="numeric" maxlength="8">
-        <button class="btn bp" onclick="cambiarPin()" style="margin-top:14px;padding:10px 18px">Guardar PIN nuevo</button>
-      </div>
-
-      <div class="card">
-        <h2>Categorias de gasto</h2>
-        <div style="font-size:11px;color:#999;margin-bottom:10px">Agrega o quita las categorias que usas para tus gastos.</div>
-        <div id="aj-categorias" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
-        <div style="display:flex;gap:8px">
-          <input type="text" id="aj-cat-nueva" placeholder="Nueva categoria" style="text-transform:none">
-          <button class="btn bg" onclick="agregarCategoria()" style="white-space:nowrap">+ Agregar</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Tu regla de reparto de ingresos</h2>
-        <div style="font-size:11px;color:#888;margin-bottom:12px">Cuando registres un ingreso (como tu quincena) y marques "repartir", la app calcula automaticamente cuanto le toca a cada categoria. Debe sumar 100%.</div>
-        <div id="aj-reparto-filas" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
-        <div style="display:flex;gap:8px;margin-bottom:10px">
-          <input type="text" id="aj-reparto-nombre" placeholder="Nombre de la categoria" style="text-transform:none">
-          <input type="number" id="aj-reparto-pct" placeholder="%" min="1" max="100" style="max-width:80px">
-          <button class="btn bg" onclick="agregarCategoriaReparto()" style="white-space:nowrap">+ Agregar</button>
-        </div>
-        <div id="aj-reparto-suma" style="font-size:12px;font-weight:700;margin-bottom:10px"></div>
-        <button class="btn bp" onclick="guardarReglaReparto()" style="padding:10px 18px">Guardar regla de reparto</button>
-      </div>
-
-      <div class="card">
-        <h2>Color de fondo</h2>
-        <div id="aj-fondos" style="display:flex;gap:10px;flex-wrap:wrap"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════ DATOS ══════════════════
-let movimientos=[], ahorros=[], deudas=[], notas=[], recordatorios=[];
-let ingresosFijos=[], pagosFijos=[], inversiones=[], prestamos=[], repartos=[];
-let reglaReparto=[
-  {nombre:'Gastos personales',pct:40},
-  {nombre:'Deudas',pct:40},
-  {nombre:'Ahorros',pct:10},
-  {nombre:'Diezmos',pct:10}
-];
-let categorias=['Diezmo','Comida','Transporte','Servicios','Salud','Entretenimiento','Deudas','Otros'];
-let metaAhorro=0;
-let pinHash=null;
-let fondoColor='#EEF1F5';
+/* ============================================================
+   ESTADO
+============================================================ */
+const MATERIAL_COLORS = ['#d8cdbb','#efe9e0','#8a6a4a','#3d3128','#c7c9cb','#4a4d52','#7a5a41','#e3d3c0'];
+const SHEET = { w:183, h:244 }; // cm — lámina estándar 1.83 x 2.44 m
+const DRAG_SNAP_THRESHOLD = 3; // cm — distancia bajo la cual una pieza arrastrada se pega sola
 
-const LK='fin_local_v1';
-function g(id){return document.getElementById(id);}
-function sv(id,val){var el=g(id);if(el)el.value=val;}
-function fmt(n){return '$'+Math.round(n||0).toLocaleString('es-CO');}
-function fechaHoyISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function fmtFechaDDMMYYYY(iso){
-  if(!iso)return '';
-  var p=iso.split('-');
-  return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso;
-}
-function toast(msg,esError){
-  var t=g('toast');
-  t.textContent=msg;
-  t.className='toast'+(esError?' err':'');
-  t.style.display='block';
-  clearTimeout(window._toastTimer);
-  window._toastTimer=setTimeout(function(){t.style.display='none';},3200);
-}
-function uid(){return Date.now().toString(36)+Math.random().toString(36).substring(2,7);}
+let pieces = [];       // lista de piezas
+let selectedId = null;
+let nextId = 1;
 
-async function hashPin(pin){
-  var enc=new TextEncoder().encode('finpersonal_'+pin);
-  var buf=await crypto.subtle.digest('SHA-256',enc);
-  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+/* ---------- Deshacer (Ctrl+Z) ---------- */
+let undoStack = [];
+function snapshot(){
+  undoStack.push(JSON.stringify({ pieces, nextId, selectedId }));
+  if(undoStack.length > 60) undoStack.shift();
+}
+function undo(){
+  if(!undoStack.length) return;
+  const state = JSON.parse(undoStack.pop());
+  pieces = state.pieces;
+  nextId = state.nextId;
+  selectedId = state.selectedId;
+  refreshAll();
+}
+window.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){
+    e.preventDefault();
+    undo();
+  }
+});
+
+function uid(){ return nextId++; }
+
+function newPiece(){
+  return {
+    id: uid(),
+    name: 'Pieza ' + (pieces.length+1),
+    w: 60, h: 40, t: 1.5, qty: 1,
+    orientation: 'vertical-front', // vertical-front | vertical-side | horizontal
+    canto: { top:false, bottom:false, left:false, right:false },
+    color: MATERIAL_COLORS[pieces.length % MATERIAL_COLORS.length],
+    posMode: 'free',
+    x:0, y:0, z:0,
+    attachTo: null, attachFace: 'top', offsetA:0, offsetB:0,
+    locked: false
+  };
 }
 
-// ══════════════════ LOGIN ══════════════════
-async function intentarLogin(){
-  var pin=g('login-pin').value.trim();
-  if(pin.length<4){toast('El PIN debe tener al menos 4 numeros',1);return;}
-  var errEl=g('login-err');errEl.style.display='none';
-  if(!pinHash){
-    // Primera vez: crear PIN
-    var pin2=g('login-pin2').value.trim();
-    if(g('login-pin2-wrap').style.display==='none'){
-      g('login-pin2-wrap').style.display='block';
-      g('login-sub').textContent='Confirma tu PIN para continuar';
-      return;
+/* ============================================================
+   GEOMETRÍA: cada pieza -> tamaño de caja (cm) + posición mínima
+============================================================ */
+function boxSize(p){
+  if(p.orientation === 'vertical-front') return { sx:p.w, sy:p.h, sz:p.t };
+  if(p.orientation === 'vertical-side')  return { sx:p.t, sy:p.h, sz:p.w };
+  return { sx:p.w, sy:p.t, sz:p.h }; // horizontal (h = profundidad)
+}
+
+function piecePosition(p){
+  if(p.posMode === 'free' || !p.attachTo){
+    return { x:p.x, y:p.y, z:p.z };
+  }
+  const target = pieces.find(q => q.id === p.attachTo);
+  if(!target) return { x:p.x, y:p.y, z:p.z };
+  const tPos = piecePosition(target);
+  const tSize = boxSize(target);
+  const mySize = boxSize(p);
+  let x=0,y=0,z=0;
+  switch(p.attachFace){
+    case 'top':    y = tPos.y + tSize.sy;         x = tPos.x + p.offsetA; z = tPos.z + p.offsetB; break;
+    case 'bottom': y = tPos.y - mySize.sy;        x = tPos.x + p.offsetA; z = tPos.z + p.offsetB; break;
+    case 'right':  x = tPos.x + tSize.sx;         y = tPos.y + p.offsetA; z = tPos.z + p.offsetB; break;
+    case 'left':   x = tPos.x - mySize.sx;        y = tPos.y + p.offsetA; z = tPos.z + p.offsetB; break;
+    case 'front':  z = tPos.z + tSize.sz;         x = tPos.x + p.offsetA; y = tPos.y + p.offsetB; break;
+    case 'back':   z = tPos.z - mySize.sz;        x = tPos.x + p.offsetA; y = tPos.y + p.offsetB; break;
+  }
+  return {x,y,z};
+}
+
+// Para una pieza horizontal (entrepaño, techo, piso), busca los dos costados
+// (verticales) que quedan justo a su izquierda y derecha a esa misma altura,
+// y calcula el hueco libre real entre ellos — así se sabe qué medida exacta
+// debe tener la tabla para calzar por dentro, sin adivinar.
+function computeFitInfo(p){
+  if(p.orientation !== 'horizontal') return null;
+  const pos = piecePosition(p), size = boxSize(p);
+  const centerY = pos.y + size.sy/2;
+  const tol = 0.6;
+  let left=null, right=null;
+  pieces.forEach(o=>{
+    if(o.id===p.id || o.orientation==='horizontal') return;
+    const oPos=piecePosition(o), oSize=boxSize(o);
+    if(centerY < oPos.y - tol || centerY > oPos.y+oSize.sy + tol) return; // no cubre esta altura
+    if(oPos.x + oSize.sx <= pos.x + tol){
+      if(!left || (oPos.x+oSize.sx) > (left.pos.x+left.size.sx)) left = {piece:o,pos:oPos,size:oSize};
     }
-    if(pin!==pin2){errEl.textContent='Los PIN no coinciden';errEl.style.display='block';sv('login-pin2','');return;}
-    pinHash=await hashPin(pin);
-    save();
-    entrarApp();
-  }else{
-    var intento=await hashPin(pin);
-    if(intento!==pinHash){errEl.textContent='PIN incorrecto';errEl.style.display='block';sv('login-pin','');return;}
-    entrarApp();
+    if(oPos.x >= pos.x + size.sx - tol){
+      if(!right || oPos.x < right.pos.x) right = {piece:o,pos:oPos,size:oSize};
+    }
+  });
+  if(!left || !right) return null;
+  const clearWidth = round1(right.pos.x - (left.pos.x+left.size.sx));
+  const expectedX = round1(left.pos.x+left.size.sx);
+  const xDiffLeft = round1(pos.x - expectedX);
+  const widthDiff = round1(size.sx - clearWidth);
+  const fitTol = 0.05; // prácticamente exacto — solo tolera el redondeo interno, no huecos reales
+  return {
+    leftName:left.piece.name, rightName:right.piece.name, clearWidth,
+    currentWidth: round1(size.sx), xDiffLeft, widthDiff,
+    ok: Math.abs(xDiffLeft) <= fitTol && Math.abs(widthDiff) <= fitTol,
+    expectedX
+  };
+}
+
+// nombres de otras piezas con las que esta pieza realmente se encima/choca en
+// el espacio (no solo tocarse en un borde, que es normal en un ensamble)
+function findOverlaps(p){
+  const pa = piecePosition(p), sa = boxSize(p);
+  const eps = 0.3;
+  const names = [];
+  pieces.forEach(o=>{
+    if(o.id===p.id) return;
+    const pb = piecePosition(o), sb = boxSize(o);
+    const ox = Math.min(pa.x+sa.sx, pb.x+sb.sx) - Math.max(pa.x, pb.x);
+    const oy = Math.min(pa.y+sa.sy, pb.y+sb.sy) - Math.max(pa.y, pb.y);
+    const oz = Math.min(pa.z+sa.sz, pb.z+sb.sz) - Math.max(pa.z, pb.z);
+    if(ox > eps && oy > eps && oz > eps) names.push(o.name);
+  });
+  return names;
+}
+
+// Para un Fondo: compara su medida/posición actual contra lo que debería ser
+// según el marco con el que se creó. Solo avisa si de verdad se salió del
+// marco (se corrió o le cambiaron la medida) — no por tocar los bordes normales.
+function computeFondoInfo(p){
+  if(!p.isFondo) return null;
+  const exact = (p.material === 'TRIPLE' || p.material === 'MDF');
+  const expectedW = exact ? p.frameAncho : round1(p.frameAncho - 2*p.frameEsp);
+  const expectedH = exact ? p.frameAlto : round1(p.frameAlto - 2*p.frameEsp);
+  const size = boxSize(p);
+  const tol = 0.05;
+  return {
+    expectedW, expectedH, currentW: round1(size.sx), currentH: round1(size.sy),
+    ok: Math.abs(size.sx-expectedW) <= tol && Math.abs(size.sy-expectedH) <= tol
+  };
+}
+
+// ids de piezas con algún problema: no calzan en su hueco, se salieron del
+// marco (fondo), o se están encimando con otra
+function getWarningIds(){
+  const s = new Set();
+  pieces.forEach(p=>{
+    const info = computeFitInfo(p);
+    if(info && !info.ok) s.add(p.id);
+    const fondoInfo = computeFondoInfo(p);
+    if(fondoInfo && !fondoInfo.ok) s.add(p.id);
+    if(findOverlaps(p).length) s.add(p.id);
+  });
+  return s;
+}
+
+// mete la pieza exactamente en el hueco libre calculado (medida + posición)
+function fitPieceToGap(id){
+  const p = pieces.find(x=>x.id===id);
+  if(!p) return;
+  const info = computeFitInfo(p);
+  if(!info) return;
+  snapshot();
+  p.w = info.clearWidth;
+  p.posMode = 'free';
+  p.attachTo = null;
+  p.x = info.expectedX;
+  refreshAll();
+}
+
+// deja el fondo exactamente en la medida y posición que le corresponde según
+// el marco con el que se creó (según si es exacto o va por dentro)
+function fixFondoToFrame(id){
+  const p = pieces.find(x=>x.id===id);
+  if(!p || !p.isFondo) return;
+  const info = computeFondoInfo(p);
+  if(!info) return;
+  snapshot();
+  const exact = (p.material === 'TRIPLE' || p.material === 'MDF');
+  p.w = info.expectedW;
+  p.h = info.expectedH;
+  p.x = exact ? 0 : p.frameEsp;
+  p.y = exact ? 0 : p.frameEsp;
+  p.posMode = 'free';
+  p.attachTo = null;
+  refreshAll();
+}
+
+// devuelve los 4 segmentos de canto (en el plano local ancho/alto de la pieza) mapeados a coords 3D mundo, para dibujarlos
+function cantoWorldSegments(p){
+  const pos = piecePosition(p);
+  const size = boxSize(p);
+  // ejes locales -> ejes mundo según orientación
+  let axW, axH, axT; // 'x'|'y'|'z' para ancho, alto, espesor
+  if(p.orientation === 'vertical-front'){ axW='x'; axH='y'; axT='z'; }
+  else if(p.orientation === 'vertical-side'){ axW='z'; axH='y'; axT='x'; }
+  else { axW='x'; axH='z'; axT='y'; }
+
+  const wLen = p.w, hLen = p.h;
+  const min = {x:pos.x, y:pos.y, z:pos.z};
+  const max = {x:pos.x+size.sx, y:pos.y+size.sy, z:pos.z+size.sz};
+  // cara "visible" (la más externa en el eje de espesor) para dibujar el canto encima
+  const faceT = max[axT];
+
+  function pt(wVal, hVal){
+    const c = {x:0,y:0,z:0};
+    c[axW] = min[axW] + wVal;
+    c[axH] = min[axH] + hVal;
+    c[axT] = faceT;
+    return c;
+  }
+  const segs = [];
+  if(p.canto.top)    segs.push([pt(0,hLen), pt(wLen,hLen)]);
+  if(p.canto.bottom) segs.push([pt(0,0), pt(wLen,0)]);
+  if(p.canto.left)   segs.push([pt(0,0), pt(0,hLen)]);
+  if(p.canto.right)  segs.push([pt(wLen,0), pt(wLen,hLen)]);
+  return segs;
+}
+
+/* ============================================================
+   THREE.JS
+============================================================ */
+let scene, camera, renderer, controls, wrapEl;
+let meshGroup;
+
+function initThree(){
+  wrapEl = document.getElementById('canvas3d-wrap');
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(45, 1, 0.5, 6000);
+  camera.position.set(220, 160, 260);
+
+  renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  resizeRenderer();
+  wrapEl.appendChild(renderer.domElement);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.set(60,40,30);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 30;
+  controls.maxDistance = 4000;
+  controls.screenSpacePanning = true;
+
+  const amb = new THREE.AmbientLight(0xffffff, 0.75);
+  scene.add(amb);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+  dir.position.set(150, 250, 180);
+  scene.add(dir);
+  const dir2 = new THREE.DirectionalLight(0xffffff, 0.35);
+  dir2.position.set(-120,80,-100);
+  scene.add(dir2);
+
+  const grid = new THREE.GridHelper(400, 40, 0xc9c4b8, 0xe3dfd6);
+  scene.add(grid);
+
+  meshGroup = new THREE.Group();
+  scene.add(meshGroup);
+
+  window.addEventListener('resize', resizeRenderer);
+  animate();
+}
+
+function resizeRenderer(){
+  const w = wrapEl.clientWidth, h = wrapEl.clientHeight;
+  renderer.setSize(w,h);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+function rebuild3D(){
+  while(meshGroup.children.length) meshGroup.remove(meshGroup.children[0]);
+  const warnIds = getWarningIds();
+
+  pieces.forEach(p => {
+    const size = boxSize(p);
+    const pos = piecePosition(p);
+    const warn = warnIds.has(p.id);
+    const geo = new THREE.BoxGeometry(size.sx, size.sy, size.sz);
+    const mat = new THREE.MeshStandardMaterial({
+      color: warn ? '#d0473a' : p.color, roughness:0.75, metalness:0.05,
+      emissive: p.id===selectedId ? 0x3a2210 : 0x000000
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(pos.x + size.sx/2, pos.y + size.sy/2, pos.z + size.sz/2);
+    mesh.userData.pieceId = p.id;
+    meshGroup.add(mesh);
+
+    const edges = new THREE.EdgesGeometry(geo);
+    const lineMat = new THREE.LineBasicMaterial({ color: warn ? 0x7a1c12 : (p.id===selectedId ? 0xa35a2e : 0x35322c) });
+    const line = new THREE.LineSegments(edges, lineMat);
+    line.position.copy(mesh.position);
+    meshGroup.add(line);
+
+    // canto highlight
+    const cantoMat = new THREE.LineBasicMaterial({ color:0x2f6fb0, linewidth:2 });
+    cantoWorldSegments(p).forEach(seg=>{
+      const g = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(seg[0].x, seg[0].y, seg[0].z),
+        new THREE.Vector3(seg[1].x, seg[1].y, seg[1].z)
+      ]);
+      meshGroup.add(new THREE.Line(g, cantoMat));
+    });
+  });
+}
+
+/* click para seleccionar + arrastrar piezas en 3D, con imán al acercarse a otra pieza */
+let dragMode = 'horizontal'; // 'horizontal' (X/Z) | 'vertical' (Y)
+let dragState = null;
+
+function snapAxis(pieceId, axis, rawMin, size){
+  let best = rawMin, bestDist = DRAG_SNAP_THRESHOLD, snappedToPiece = false;
+  pieces.forEach(o=>{
+    if(o.id===pieceId) return;
+    const oPos = piecePosition(o), oSize = boxSize(o);
+    const key = 's'+axis;
+    const oMin = oPos[axis], oMax = oPos[axis] + oSize[key];
+    [oMin - size, oMax, oMin, oMax - size].forEach(cand=>{
+      const d = Math.abs(cand - rawMin);
+      if(d < bestDist){ bestDist = d; best = cand; snappedToPiece = true; }
+    });
+  });
+  // si no quedó cerca de ninguna pieza, al menos que caiga en un número
+  // limpio (medio centímetro) en vez del valor "sucio" que da el mouse.
+  if(!snappedToPiece) best = Math.round(rawMin*2)/2;
+  return best;
+}
+
+function setup3DPicking(){
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const groundPlane = new THREE.Plane();
+
+  function toMouse(e){
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX-rect.left)/rect.width)*2-1;
+    mouse.y = -((e.clientY-rect.top)/rect.height)*2+1;
+  }
+
+  function planeIntersect(planeY){
+    groundPlane.set(new THREE.Vector3(0,1,0), -planeY);
+    raycaster.setFromCamera(mouse, camera);
+    // si el rayo queda casi paralelo al plano, la intersección se dispara a
+    // coordenadas absurdas — en ese caso lo ignoramos en vez de mover la pieza
+    if(Math.abs(raycaster.ray.direction.dot(groundPlane.normal)) < 0.15) return null;
+    const pt = new THREE.Vector3();
+    return raycaster.ray.intersectPlane(groundPlane, pt) ? pt : null;
+  }
+
+  renderer.domElement.addEventListener('pointerdown', (e)=>{
+    toMouse(e);
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(meshGroup.children.filter(o=>o.type==='Mesh'));
+    if(!hits.length) return;
+    const id = hits[0].object.userData.pieceId;
+    selectPiece(id);
+    const p = pieces.find(x=>x.id===id);
+    if(p.locked) return; // seleccionada pero no se arrastra
+    const pos = piecePosition(p);
+
+    if(dragMode === 'horizontal'){
+      const start = planeIntersect(pos.y);
+      if(!start) return; // ángulo de cámara demasiado rasante para arrastrar ahora
+      snapshot();
+      controls.enabled = false;
+      dragState = { id, mode:'horizontal', startX: start.x, startZ: start.z, pieceStartX: pos.x, pieceStartZ: pos.z, pieceY: pos.y, lastX: pos.x, lastZ: pos.z };
+    } else {
+      snapshot();
+      controls.enabled = false;
+      dragState = { id, mode:'vertical', startClientY: e.clientY, pieceStartY: pos.y };
+    }
+    renderer.domElement.setPointerCapture(e.pointerId);
+  });
+
+  renderer.domElement.addEventListener('pointermove', (e)=>{
+    if(!dragState) return;
+    const p = pieces.find(x=>x.id===dragState.id);
+    if(!p) return;
+    toMouse(e);
+    const MAX_JUMP = 150; // cm — protección: ignora saltos irreales en un solo movimiento
+
+    if(dragState.mode === 'horizontal'){
+      const pt = planeIntersect(dragState.pieceY);
+      if(!pt) return;
+      const rawX = dragState.pieceStartX + (pt.x - dragState.startX);
+      const rawZ = dragState.pieceStartZ + (pt.z - dragState.startZ);
+      if(Math.abs(rawX-dragState.lastX) > MAX_JUMP || Math.abs(rawZ-dragState.lastZ) > MAX_JUMP) return;
+      dragState.lastX = rawX; dragState.lastZ = rawZ;
+      p.posMode = 'free'; p.attachTo = null;
+      // sin imán mientras se mueve — se mueve suave, parejo con el mouse.
+      // El imán se aplica una sola vez, al soltar (ver endDrag), para que no tiemble.
+      p.x = rawX;
+      p.z = rawZ;
+      p.y = dragState.pieceY;
+    } else {
+      const deltaPx = e.clientY - dragState.startClientY;
+      const rawY = dragState.pieceStartY - deltaPx * 0.5; // 0.5 cm por pixel
+      p.posMode = 'free'; p.attachTo = null;
+      p.y = rawY;
+    }
+    rebuild3D();
+    render2D();
+  });
+
+  function endDrag(){
+    if(!dragState) return;
+    const p = pieces.find(x=>x.id===dragState.id);
+    if(p){
+      const size = boxSize(p);
+      // acá sí se aplica el imán, una sola vez, con la posición final ya soltada
+      if(dragState.mode === 'horizontal'){
+        p.x = snapAxis(p.id, 'x', p.x, size.sx);
+        p.z = snapAxis(p.id, 'z', p.z, size.sz);
+      } else {
+        p.y = snapAxis(p.id, 'y', p.y, size.sy);
+      }
+    }
+    dragState = null;
+    controls.enabled = true;
+    refreshAll();
+  }
+  renderer.domElement.addEventListener('pointerup', endDrag);
+  renderer.domElement.addEventListener('pointerleave', endDrag);
+}
+
+/* ============================================================
+   RENDER 2D (SVG) — planta, alzado, ficha de pieza
+============================================================ */
+function overallBounds(){
+  if(!pieces.length) return {minX:0,maxX:1000,minY:0,maxY:1000,minZ:0,maxZ:1000};
+  let minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9,minZ=1e9,maxZ=-1e9;
+  pieces.forEach(p=>{
+    const s=boxSize(p), pos=piecePosition(p);
+    minX=Math.min(minX,pos.x); maxX=Math.max(maxX,pos.x+s.sx);
+    minY=Math.min(minY,pos.y); maxY=Math.max(maxY,pos.y+s.sy);
+    minZ=Math.min(minZ,pos.z); maxZ=Math.max(maxZ,pos.z+s.sz);
+  });
+  return {minX,maxX,minY,maxY,minZ,maxZ};
+}
+
+function round1(n){ return Math.round(n*10)/10; }
+
+// Encuadra la cámara según el tamaño real de todas las piezas, calculado con el
+// campo de visión real (no una distancia fija) para que el alto SIEMPRE quepa
+// completo, sin importar qué tan alto sea el mueble.
+function autoFitCamera(){
+  const b = overallBounds();
+  const cx = (b.minX+b.maxX)/2, cy = (b.minY+b.maxY)/2, cz = (b.minZ+b.maxZ)/2;
+  const sizeX = Math.max(b.maxX-b.minX, 20), sizeY = Math.max(b.maxY-b.minY, 20), sizeZ = Math.max(b.maxZ-b.minZ, 20);
+  const fov = camera.fov * Math.PI/180;
+  const aspect = camera.aspect || (wrapEl.clientWidth/wrapEl.clientHeight) || 1.6;
+  const distForHeight = (sizeY/2) / Math.tan(fov/2);
+  const diag = Math.sqrt(sizeX*sizeX + sizeZ*sizeZ);
+  const distForWidth = (diag/2) / Math.tan((fov*aspect)/2);
+  const dist = Math.max(distForHeight, distForWidth) * 1.5 + 40; // margen extra para que no quede al filo
+
+  controls.target.set(cx, cy, cz);
+  const dir = new THREE.Vector3(0.62,0.55,0.78).normalize();
+  camera.position.set(cx+dir.x*dist, cy+dir.y*dist, cz+dir.z*dist);
+  camera.updateProjectionMatrix();
+}
+
+function svgEl(tag, attrs){
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for(const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+function renderTopView(){
+  const svg = document.getElementById('svgTop');
+  svg.innerHTML='';
+  const b = overallBounds();
+  const w = svg.parentElement.clientWidth, h = svg.parentElement.clientHeight;
+  const pad = 30;
+  const spanX = Math.max(b.maxX-b.minX, 100), spanZ = Math.max(b.maxZ-b.minZ, 100);
+  const scale = Math.min((w-2*pad)/spanX, (h-2*pad)/spanZ);
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  const warnIds = getWarningIds();
+
+  pieces.forEach(p=>{
+    const s = boxSize(p), pos = piecePosition(p);
+    const x = pad + (pos.x-b.minX)*scale;
+    const y = pad + (spanZ - (pos.z-b.minZ+s.sz))*scale;
+    const rw = s.sx*scale, rh = s.sz*scale;
+    const fill = warnIds.has(p.id) ? '#d0473a' : p.color;
+    const rect = svgEl('rect',{x,y,width:Math.max(rw,1),height:Math.max(rh,1),fill,stroke:p.id===selectedId?'#a35a2e':'#33302a','stroke-width':p.id===selectedId?2:1,'fill-opacity':0.9});
+    rect.style.cursor='pointer';
+    rect.addEventListener('click', ()=>selectPiece(p.id));
+    svg.appendChild(rect);
+  });
+  document.getElementById('topDims').textContent = `${round1(b.maxX-b.minX)} × ${round1(b.maxZ-b.minZ)} cm`;
+}
+
+function renderFrontView(){
+  const svg = document.getElementById('svgFront');
+  svg.innerHTML='';
+  const b = overallBounds();
+  const w = svg.parentElement.clientWidth, h = svg.parentElement.clientHeight;
+  const pad = 30;
+  const spanX = Math.max(b.maxX-b.minX, 100), spanY = Math.max(b.maxY-b.minY, 100);
+  const scale = Math.min((w-2*pad)/spanX, (h-2*pad)/spanY);
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  const warnIds = getWarningIds();
+
+  pieces.forEach(p=>{
+    const s = boxSize(p), pos = piecePosition(p);
+    const x = pad + (pos.x-b.minX)*scale;
+    const y = pad + (spanY - (pos.y-b.minY+s.sy))*scale;
+    const rw = s.sx*scale, rh = s.sy*scale;
+    const fill = warnIds.has(p.id) ? '#d0473a' : p.color;
+    const rect = svgEl('rect',{x,y,width:Math.max(rw,1),height:Math.max(rh,1),fill,stroke:p.id===selectedId?'#a35a2e':'#33302a','stroke-width':p.id===selectedId?2:1,'fill-opacity':0.9});
+    rect.style.cursor='pointer';
+    rect.addEventListener('click', ()=>selectPiece(p.id));
+    svg.appendChild(rect);
+  });
+  document.getElementById('frontDims').textContent = `${round1(b.maxX-b.minX)} × ${round1(b.maxY-b.minY)} cm`;
+}
+
+function renderPieceFicha(){
+  const svg = document.getElementById('svgPiece');
+  svg.innerHTML='';
+  const p = pieces.find(x=>x.id===selectedId);
+  document.getElementById('pieceDims').textContent = p ? `${p.w} × ${p.h} cm` : '';
+  if(!p) return;
+  const w = svg.parentElement.clientWidth, h = svg.parentElement.clientHeight;
+  const pad = 36;
+  const scale = Math.min((w-2*pad)/p.w, (h-2*pad)/p.h);
+  const rw = p.w*scale, rh = p.h*scale;
+  const x0 = (w-rw)/2, y0 = (h-rh)/2;
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+  svg.appendChild(svgEl('rect',{x:x0,y:y0,width:rw,height:rh,fill:p.color,stroke:'#33302a','stroke-width':1.5}));
+
+  const CANTO_W = 5;
+  const bands = [
+    {on:p.canto.top,    x:x0-CANTO_W/2, y:y0-CANTO_W/2, width:rw+CANTO_W, height:CANTO_W},
+    {on:p.canto.bottom, x:x0-CANTO_W/2, y:y0+rh-CANTO_W/2, width:rw+CANTO_W, height:CANTO_W},
+    {on:p.canto.left,   x:x0-CANTO_W/2, y:y0-CANTO_W/2, width:CANTO_W, height:rh+CANTO_W},
+    {on:p.canto.right,  x:x0+rw-CANTO_W/2, y:y0-CANTO_W/2, width:CANTO_W, height:rh+CANTO_W},
+  ];
+  bands.forEach(b=>{ if(b.on) svg.appendChild(svgEl('rect',{x:b.x,y:b.y,width:b.width,height:b.height,fill:'#2f6fb0'})); });
+
+  // etiquetas de medida
+  const lbl = (x,y,text,anchor)=>{
+    const t = svgEl('text',{x,y,fill:'#9a9fa6','font-size':11,'font-family':'IBM Plex Mono, monospace','text-anchor':anchor||'middle'});
+    t.textContent = text; svg.appendChild(t);
+  };
+  lbl(x0+rw/2, y0-14, p.w+' cm');
+  const tv = svgEl('text',{x:x0-14,y:y0+rh/2,fill:'#9a9fa6','font-size':11,'font-family':'IBM Plex Mono, monospace','text-anchor':'middle'});
+  tv.setAttribute('transform', `rotate(-90 ${x0-14} ${y0+rh/2})`);
+  tv.textContent = p.h+' cm';
+  svg.appendChild(tv);
+}
+
+function render2D(){ renderTopView(); renderFrontView(); renderPieceFicha(); }
+
+/* ============================================================
+   UI: LISTA DE PIEZAS
+============================================================ */
+function renderPieceList(){
+  const list = document.getElementById('pieceList');
+  list.innerHTML = '';
+  const warnIds = getWarningIds();
+  pieces.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'piece-card' + (p.id===selectedId ? ' active':'');
+    if(warnIds.has(p.id)) card.style.borderColor = 'var(--danger)';
+    card.innerHTML = `
+      <div class="pc-top">
+        <div><span class="swatch" style="background:${p.color}"></span><span class="pc-name">${p.name}</span>${p.locked ? ' 🔒' : ''}${warnIds.has(p.id) ? ' <span style="color:var(--danger);font-weight:600;">⚠ no calza</span>' : ''}</div>
+        <div style="display:flex;gap:2px;">
+          <button class="small ghost" data-lock="${p.id}" title="${p.locked?'Desbloquear':'Bloquear (evita moverla sin querer)'}">${p.locked?'🔒':'🔓'}</button>
+          <button class="small ghost" data-dup="${p.id}" title="Duplicar pieza">⧉</button>
+          <button class="small ghost danger" data-del="${p.id}">✕</button>
+        </div>
+      </div>
+      <div class="pc-dims mono">${p.w}×${p.h}×${p.t} cm · x${p.qty} · ${orientationLabel(p.orientation)}</div>
+    `;
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-del],[data-lock],[data-dup]')) return;
+      selectPiece(p.id);
+    });
+    card.querySelector('[data-del]').addEventListener('click', ()=>deletePiece(p.id));
+    card.querySelector('[data-lock]').addEventListener('click', ()=>togglePieceLock(p.id));
+    card.querySelector('[data-dup]').addEventListener('click', ()=>duplicatePiece(p.id));
+    list.appendChild(card);
+  });
+}
+
+function togglePieceLock(id){
+  const p = pieces.find(x=>x.id===id);
+  if(!p) return;
+  snapshot();
+  p.locked = !p.locked;
+  refreshAll();
+}
+
+function duplicatePiece(id){
+  const src = pieces.find(x=>x.id===id);
+  if(!src) return;
+  snapshot();
+  const pos = piecePosition(src);
+  const copy = JSON.parse(JSON.stringify(src));
+  copy.id = uid();
+  copy.name = src.name + ' (copia)';
+  copy.posMode = 'free';
+  copy.attachTo = null;
+  copy.locked = false;
+  copy.x = pos.x + 20;
+  copy.y = pos.y;
+  copy.z = pos.z + 20;
+  pieces.push(copy);
+  selectedId = copy.id;
+  refreshAll();
+}
+
+function orientationLabel(o){
+  return o==='vertical-front' ? 'panel frontal' : o==='vertical-side' ? 'panel lateral' : 'horizontal';
+}
+
+function deletePiece(id){
+  snapshot();
+  pieces = pieces.filter(p=>p.id!==id);
+  pieces.forEach(p=>{ if(p.attachTo===id){ p.attachTo=null; p.posMode='free'; } });
+  if(selectedId===id) selectedId=null;
+  refreshAll();
+}
+
+function selectPiece(id){
+  selectedId = id;
+  refreshAll();
+}
+
+/* ============================================================
+   UI: FORMULARIO DE PIEZA
+============================================================ */
+function renderForm(){
+  const panel = document.getElementById('formPanel');
+  const p = pieces.find(x=>x.id===selectedId);
+  if(!p){ panel.style.display='none'; document.getElementById('selInfo').textContent='Sin pieza seleccionada'; return; }
+  panel.style.display='block';
+  document.getElementById('selInfo').textContent = `Editando: ${p.name}`;
+
+  const otherPieces = pieces.filter(x=>x.id!==p.id);
+  const pos = piecePosition(p);
+  const size = boxSize(p);
+  const fitInfo = computeFitInfo(p);
+  const fondoInfo = computeFondoInfo(p);
+
+  let infoHtml = `<div class="fitbox"><div class="ts">Esta pieza queda de <b class="mono">${round1(pos.y)}</b> a <b class="mono">${round1(pos.y+size.sy)}</b> cm de altura desde el piso.</div>`;
+  const overlaps = findOverlaps(p);
+  if(overlaps.length){
+    infoHtml += `<div class="ts" style="margin-top:4px;color:var(--danger);font-weight:600;">⚠ Se está encimando con: ${overlaps.join(', ')}. Muévela o ajusta su medida.</div>`;
+  }
+  if(fondoInfo){
+    if(fondoInfo.ok){
+      infoHtml += `<div class="ts" style="margin-top:4px;color:var(--ok);">✓ Este fondo (${p.material}) está exacto al marco: ${fondoInfo.currentW}×${fondoInfo.currentH} cm.</div>`;
+    } else {
+      infoHtml += `<div class="ts" style="margin-top:4px;color:var(--danger);font-weight:600;">⚠ Este fondo se salió del marco: debería medir ${fondoInfo.expectedW}×${fondoInfo.expectedH} cm y mide ${fondoInfo.currentW}×${fondoInfo.currentH} cm.</div>
+        <button class="small primary" id="f-fixfondo" style="margin-top:6px;">Ajustar automáticamente a ${fondoInfo.expectedW}×${fondoInfo.expectedH} cm</button>`;
+    }
+  }
+  if(fitInfo){
+    if(fitInfo.ok){
+      infoHtml += `<div class="ts" style="margin-top:4px;color:var(--ok);">✓ Encaja bien entre "${fitInfo.leftName}" y "${fitInfo.rightName}" (hueco libre: <b class="mono">${fitInfo.clearWidth}</b> cm).</div>`;
+    } else {
+      infoHtml += `<div class="ts" style="margin-top:4px;color:var(--danger);font-weight:600;">⚠ No calza bien entre "${fitInfo.leftName}" y "${fitInfo.rightName}": el hueco libre es de <b class="mono">${fitInfo.clearWidth}</b> cm y esta pieza mide <b class="mono">${fitInfo.currentWidth}</b> cm.</div>
+        <button class="small primary" id="f-fit" style="margin-top:6px;">Ajustar automáticamente a ${fitInfo.clearWidth} cm</button>`;
+    }
+  }
+  infoHtml += `</div>`;
+
+  panel.innerHTML = `
+    ${infoHtml}
+    <div class="field" style="display:flex;gap:8px;">
+      <button class="small ghost" id="f-dup" style="flex:1;">⧉ Duplicar pieza</button>
+      <button class="small ghost" id="f-lock" style="flex:1;">${p.locked ? '🔒 Bloqueada' : '🔓 Bloquear'}</button>
+    </div>
+    <div class="field">
+      <label>Nombre de la pieza</label>
+      <input type="text" id="f-name" value="${p.name}">
+    </div>
+    <div class="row2">
+      <div class="field"><label>Ancho (cm)</label><input type="number" step="0.1" id="f-w" value="${p.w}"></div>
+      <div class="field"><label>Alto (cm)</label><input type="number" step="0.1" id="f-h" value="${p.h}"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Espesor (cm)</label><input type="number" step="0.1" id="f-t" value="${p.t}"></div>
+      <div class="field"><label>Cantidad (para la lista de corte)</label><input type="number" id="f-qty" value="${p.qty}" min="1"></div>
+    </div>
+    <div class="hint" style="margin-top:-6px;margin-bottom:10px;">"Cantidad" solo suma piezas iguales en la lista de corte y el aprovechamiento de láminas — no crea copias en el 3D. Para eso usa "Duplicar pieza" arriba.</div>
+
+    <div class="field">
+      <label>Orientación en el mueble</label>
+      <div class="seg">
+        <button data-or="vertical-front" class="${p.orientation==='vertical-front'?'on':''}">Frontal</button>
+        <button data-or="vertical-side" class="${p.orientation==='vertical-side'?'on':''}">Lateral</button>
+        <button data-or="horizontal" class="${p.orientation==='horizontal'?'on':''}">Horizontal</button>
+      </div>
+      <div class="hint">Frontal = puertas/costados vistos de frente · Lateral = costados vistos de lado · Horizontal = entrepaños, techo, piso</div>
+    </div>
+
+    <div class="field">
+      <label>Color / material</label>
+      <div class="colors">
+        ${MATERIAL_COLORS.map(c=>`<div class="color-dot ${p.color===c?'sel':''}" style="background:${c}" data-color="${c}"></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Cantos (tapacanto)</label>
+      <div class="canto-grid">
+        <label class="canto-chip ${p.canto.top?'on':''}"><input type="checkbox" data-canto="top" ${p.canto.top?'checked':''}> Superior</label>
+        <label class="canto-chip ${p.canto.bottom?'on':''}"><input type="checkbox" data-canto="bottom" ${p.canto.bottom?'checked':''}> Inferior</label>
+        <label class="canto-chip ${p.canto.left?'on':''}"><input type="checkbox" data-canto="left" ${p.canto.left?'checked':''}> Izquierdo</label>
+        <label class="canto-chip ${p.canto.right?'on':''}"><input type="checkbox" data-canto="right" ${p.canto.right?'checked':''}> Derecho</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Posición en el ensamble</label>
+      <div class="seg">
+        <button data-pm="free" class="${p.posMode==='free'?'on':''}">Libre (X,Y,Z)</button>
+        <button data-pm="attach" class="${p.posMode==='attach'?'on':''}">Pegar a otra pieza</button>
+      </div>
+    </div>
+
+    ${p.posMode==='free' ? `
+      <div class="row2">
+        <div class="field"><label>X (cm)</label><input type="number" step="0.1" id="f-x" value="${p.x}"></div>
+        <div class="field"><label>Y (cm)</label><input type="number" step="0.1" id="f-y" value="${p.y}"></div>
+        <div class="field"><label>Z (cm)</label><input type="number" step="0.1" id="f-z" value="${p.z}"></div>
+      </div>
+    ` : `
+      <div class="field">
+        <label>Pegar a</label>
+        <select id="attachTarget">
+          <option value="">— elegir pieza —</option>
+          ${otherPieces.map(o=>`<option value="${o.id}" ${p.attachTo===o.id?'selected':''}>${o.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Lado de contacto</label>
+        <select id="attachFace">
+          <option value="top" ${p.attachFace==='top'?'selected':''}>Encima</option>
+          <option value="bottom" ${p.attachFace==='bottom'?'selected':''}>Debajo</option>
+          <option value="left" ${p.attachFace==='left'?'selected':''}>Izquierda</option>
+          <option value="right" ${p.attachFace==='right'?'selected':''}>Derecha</option>
+          <option value="front" ${p.attachFace==='front'?'selected':''}>Adelante</option>
+          <option value="back" ${p.attachFace==='back'?'selected':''}>Atrás</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Ajuste fino eje A (cm)</label><input type="number" step="0.1" id="f-offA" value="${p.offsetA}"></div>
+        <div class="field"><label>Ajuste fino eje B (cm)</label><input type="number" step="0.1" id="f-offB" value="${p.offsetB}"></div>
+      </div>
+      <div class="hint">La pieza queda apoyada contra la cara elegida de la pieza destino; usa el ajuste fino para correrla en las otras dos direcciones.</div>
+    `}
+  `;
+
+  // listeners
+  const fitBtn = panel.querySelector('#f-fit');
+  if(fitBtn) fitBtn.addEventListener('click', ()=>fitPieceToGap(p.id));
+  const fixFondoBtn = panel.querySelector('#f-fixfondo');
+  if(fixFondoBtn) fixFondoBtn.addEventListener('click', ()=>fixFondoToFrame(p.id));
+  panel.querySelector('#f-dup').addEventListener('click', ()=>duplicatePiece(p.id));
+  panel.querySelector('#f-lock').addEventListener('click', ()=>togglePieceLock(p.id));
+  // Los campos numéricos usan refreshLight (no redibuja el formulario) para no perder
+  // el foco / cursor mientras se escriben varios dígitos seguidos. El snapshot() para
+  // deshacer se toma una sola vez, al entrar al campo (focus), no en cada tecla.
+  panel.querySelector('#f-name').addEventListener('input', e=>{ p.name=e.target.value; renderPieceList(); document.getElementById('selInfo').textContent=`Editando: ${p.name}`; });
+  panel.querySelector('#f-w').addEventListener('focus', snapshot);
+  panel.querySelector('#f-w').addEventListener('input', e=>{ p.w=parseFloat(e.target.value); if(isNaN(p.w)) p.w=0; refreshLight(); });
+  panel.querySelector('#f-h').addEventListener('focus', snapshot);
+  panel.querySelector('#f-h').addEventListener('input', e=>{ p.h=parseFloat(e.target.value); if(isNaN(p.h)) p.h=0; refreshLight(); });
+  panel.querySelector('#f-t').addEventListener('focus', snapshot);
+  panel.querySelector('#f-t').addEventListener('input', e=>{ p.t=parseFloat(e.target.value); if(isNaN(p.t)) p.t=0; refreshLight(); });
+  panel.querySelector('#f-qty').addEventListener('focus', snapshot);
+  panel.querySelector('#f-qty').addEventListener('input', e=>{ p.qty=Math.max(1,parseInt(e.target.value)||1); refreshLight(); });
+
+  panel.querySelectorAll('[data-or]').forEach(b=>b.addEventListener('click', ()=>{ snapshot(); p.orientation=b.dataset.or; refreshAll(); }));
+  panel.querySelectorAll('[data-color]').forEach(d=>d.addEventListener('click', ()=>{ snapshot(); p.color=d.dataset.color; refreshAll(); }));
+  panel.querySelectorAll('[data-canto]').forEach(chk=>chk.addEventListener('change', e=>{ snapshot(); p.canto[e.target.dataset.canto]=e.target.checked; refreshAll(); }));
+  panel.querySelectorAll('[data-pm]').forEach(b=>b.addEventListener('click', ()=>{
+    snapshot();
+    p.posMode=b.dataset.pm;
+    if(p.posMode==='attach' && !p.attachTo && otherPieces.length) p.attachTo = otherPieces[0].id;
+    refreshAll();
+  }));
+
+  if(p.posMode==='free'){
+    panel.querySelector('#f-x').addEventListener('focus', snapshot);
+    panel.querySelector('#f-x').addEventListener('input', e=>{ p.x=parseFloat(e.target.value); if(isNaN(p.x)) p.x=0; refreshLight(); });
+    panel.querySelector('#f-y').addEventListener('focus', snapshot);
+    panel.querySelector('#f-y').addEventListener('input', e=>{ p.y=parseFloat(e.target.value); if(isNaN(p.y)) p.y=0; refreshLight(); });
+    panel.querySelector('#f-z').addEventListener('focus', snapshot);
+    panel.querySelector('#f-z').addEventListener('input', e=>{ p.z=parseFloat(e.target.value); if(isNaN(p.z)) p.z=0; refreshLight(); });
+  } else {
+    const targetSel = panel.querySelector('#attachTarget');
+    if(targetSel) targetSel.addEventListener('change', e=>{ snapshot(); p.attachTo = e.target.value ? Number(e.target.value) : null; refreshAll(); });
+    const faceSel = panel.querySelector('#attachFace');
+    if(faceSel) faceSel.addEventListener('change', e=>{ snapshot(); p.attachFace = e.target.value; refreshAll(); });
+    const offA = panel.querySelector('#f-offA');
+    if(offA){ offA.addEventListener('focus', snapshot); offA.addEventListener('input', e=>{ p.offsetA=parseFloat(e.target.value); if(isNaN(p.offsetA)) p.offsetA=0; refreshLight(); }); }
+    const offB = panel.querySelector('#f-offB');
+    if(offB){ offB.addEventListener('focus', snapshot); offB.addEventListener('input', e=>{ p.offsetB=parseFloat(e.target.value); if(isNaN(p.offsetB)) p.offsetB=0; refreshLight(); }); }
   }
 }
-function entrarApp(){
-  g('login-overlay').style.display='none';
-  g('app-layout').style.display='flex';
-  aplicarFondo();
-  sv('mv-fecha',fechaHoyISO());
-  sv('ah-fecha',fechaHoyISO());
-  sv('in-fecha',fechaHoyISO());
-  actualizarCategoriasMovimiento();
-  renderAll();
-}
-function cerrarSesion(){
-  g('app-layout').style.display='none';
-  g('login-overlay').style.display='flex';
-  sv('login-pin','');sv('login-pin2','');
-  g('login-pin2-wrap').style.display='none';
-  g('login-sub').textContent='Escribe tu PIN para entrar';
-}
-async function cambiarPin(){
-  var actual=g('aj-pin-actual').value.trim();
-  var nuevo=g('aj-pin-nuevo').value.trim();
-  if(!actual||!nuevo){toast('Completa los dos campos',1);return;}
-  if(nuevo.length<4){toast('El PIN nuevo debe tener al menos 4 numeros',1);return;}
-  var hashActual=await hashPin(actual);
-  if(hashActual!==pinHash){toast('El PIN actual no es correcto',1);return;}
-  pinHash=await hashPin(nuevo);
-  save();
-  sv('aj-pin-actual','');sv('aj-pin-nuevo','');
-  toast('PIN actualizado');
+
+/* ============================================================
+   LISTA DE CORTE + APROVECHAMIENTO DE LÁMINA (guillotina simple)
+============================================================ */
+function renderCutlist(){
+  const body = document.getElementById('cutlistBody');
+  body.innerHTML = '';
+  pieces.forEach(p=>{
+    const tags = ['top','bottom','left','right'].filter(k=>p.canto[k]);
+    const labelMap = {top:'Sup',bottom:'Inf',left:'Izq',right:'Der'};
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td class="mono">${p.w}</td>
+      <td class="mono">${p.h}</td>
+      <td class="mono">${p.t}</td>
+      <td class="mono">${p.qty}</td>
+      <td class="cantos-tags">${tags.length ? tags.map(t=>`<span>${labelMap[t]}</span>`).join('') : '<span style="opacity:.4;background:transparent;border-color:var(--line);color:var(--text-dim)">sin canto</span>'}</td>
+      <td>${orientationLabel(p.orientation)}</td>
+    `;
+    body.appendChild(tr);
+  });
+
+  nestSheets();
 }
 
-// ══════════════════ GUARDAR / CARGAR ══════════════════
-function save(){
-  var b=g('sbadge');if(!b)return;
-  var payload={movimientos:movimientos,ahorros:ahorros,deudas:deudas,notas:notas,recordatorios:recordatorios,categorias:categorias,metaAhorro:metaAhorro,pinHash:pinHash,fondoColor:fondoColor,ingresosFijos:ingresosFijos,pagosFijos:pagosFijos,inversiones:inversiones,prestamos:prestamos,reglaReparto:reglaReparto,repartos:repartos};
-  try{localStorage.setItem(LK,JSON.stringify(payload));}catch(e){}
-  if(typeof window.fbSet==='function'){
-    b.textContent='Guardando...';b.style.background='#f39c12';
-    window.fbSet(payload,function(err){
-      if(err){
-        console.error('Firebase save error:',err);
-        b.textContent='Solo local';b.style.background='#e67e22';
-      }else{
-        b.textContent='Guardado';b.style.background='#27ae60';
+// bin packing tipo guillotina muy simple, por lámina de espesor uniforme más común
+function nestSheets(){
+  const wrap = document.getElementById('nestWrap');
+  wrap.innerHTML = '';
+  document.getElementById('nestSummary').textContent = '';
+  if(!pieces.length) return;
+
+  // agrupar por espesor (cada espesor = un set de láminas distinto)
+  const byThickness = {};
+  pieces.forEach(p=>{
+    for(let i=0;i<p.qty;i++){
+      (byThickness[p.t] = byThickness[p.t]||[]).push({ w:p.w, h:p.h, name:p.name, color:p.color });
+    }
+  });
+
+  let totalSheets = 0;
+  const maxDrawW = 260;
+
+  Object.keys(byThickness).forEach(t=>{
+    let rects = byThickness[t].slice().sort((a,b)=> (b.w*b.h)-(a.w*a.h));
+    const sheets = [];
+    rects.forEach(r=>{
+      let placed = false;
+      for(const sh of sheets){
+        if(tryPlace(sh, r)){ placed = true; break; }
+      }
+      if(!placed){
+        const sh = { free:[{x:0,y:0,w:SHEET.w,h:SHEET.h}], placed:[] };
+        tryPlace(sh, r);
+        sheets.push(sh);
       }
     });
-  }else{
-    b.textContent='Guardado local';b.style.background='#e67e22';
-  }
-}
-function procesarDatos(data){
-  if(!data)return;
-  if(data.movimientos)movimientos=data.movimientos;
-  if(data.ahorros)ahorros=data.ahorros;
-  if(data.deudas)deudas=data.deudas;
-  if(data.notas)notas=data.notas;
-  if(data.recordatorios)recordatorios=data.recordatorios;
-  if(data.categorias)categorias=data.categorias;
-  if(data.metaAhorro!=null)metaAhorro=data.metaAhorro;
-  if(data.pinHash)pinHash=data.pinHash;
-  if(data.fondoColor)fondoColor=data.fondoColor;
-  if(data.ingresosFijos)ingresosFijos=data.ingresosFijos;
-  if(data.pagosFijos)pagosFijos=data.pagosFijos;
-  if(data.inversiones)inversiones=data.inversiones;
-  if(data.prestamos)prestamos=data.prestamos;
-  if(data.reglaReparto)reglaReparto=data.reglaReparto;
-  if(data.repartos)repartos=data.repartos;
-  if(g('app-layout').style.display==='flex')renderAll();
-}
+    totalSheets += sheets.length;
 
-// ══════════════════ NAVEGACION ══════════════════
-// ══════════════════ REPARTO DE INGRESOS ══════════════════
-function toggleRepartoItem(repartoId,idx){
-  var r=repartos.find(function(x){return x.id===repartoId;});
-  if(!r||!r.items[idx])return;
-  r.items[idx].hecho=!r.items[idx].hecho;
-  save();renderAll();
-}
-function eliminarReparto(id){
-  if(!confirm('Vas a eliminar este desglose (no elimina el ingreso ya registrado). Continuar?'))return;
-  repartos=repartos.filter(function(r){return r.id!==id;});
-  save();renderAll();
-  toast('Desglose eliminado');
-}
-function renderRepartos(){
-  var lista=g('rp-lista');
-  if(!lista)return;
-  if(!repartos.length){
-    lista.innerHTML='<div class="card"><div class="empty">Aun no has repartido ningun ingreso. Ve a Movimientos, registra un ingreso, y marca "Repartir".</div></div>';
-    return;
-  }
-  var ordenados=repartos.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  lista.innerHTML=ordenados.map(function(r){
-    var hechos=r.items.filter(function(it){return it.hecho;}).length;
-    var completo=hechos===r.items.length;
-    return '<div class="card">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'+
-        '<div>'+
-          '<div style="font-weight:700;font-size:14px">'+fmt(r.montoTotal)+' — '+fmtFechaDDMMYYYY(r.fecha)+(completo?' <span class="chip" style="background:#eafaf1;color:#1e8449">Repartido</span>':'')+'</div>'+
-          (r.nota?'<div style="font-size:11px;color:#999">'+r.nota+'</div>':'')+
-          '<div style="font-size:11px;color:#999;margin-top:2px">'+hechos+' de '+r.items.length+' categorias ya repartidas</div>'+
-        '</div>'+
-        '<button onclick="eliminarReparto(\''+r.id+'\')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;font-weight:600">Eliminar</button>'+
-      '</div>'+
-      r.items.map(function(it,idx){
-        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #F1F3F6">'+
-          '<div style="display:flex;align-items:center;gap:10px">'+
-            '<input type="checkbox" '+(it.hecho?'checked':'')+' onchange="toggleRepartoItem(\''+r.id+'\','+idx+')" style="width:18px;height:18px;cursor:pointer;accent-color:#0F2E4F">'+
-            '<span style="font-size:13px;font-weight:600;'+(it.hecho?'text-decoration:line-through;color:#bbb':'')+'">'+it.nombre+' ('+it.pct+'%)</span>'+
-          '</div>'+
-          '<span style="font-weight:700;font-size:13px;'+(it.hecho?'color:#bbb':'')+'">'+fmt(it.monto)+'</span>'+
-        '</div>';
-      }).join('')+
-    '</div>';
-  }).join('');
-}
-
-// ══════════════════ REGLA DE REPARTO (AJUSTES) ══════════════════
-function agregarCategoriaReparto(){
-  var nombre=(g('aj-reparto-nombre').value||'').trim();
-  var pct=+g('aj-reparto-pct').value||0;
-  if(!nombre){toast('Escribe el nombre de la categoria',1);return;}
-  if(!pct||pct<=0){toast('Escribe un porcentaje valido',1);return;}
-  reglaReparto.push({nombre:nombre,pct:pct});
-  sv('aj-reparto-nombre','');sv('aj-reparto-pct','');
-  renderReglaReparto();
-}
-function quitarCategoriaReparto(idx){
-  reglaReparto.splice(idx,1);
-  renderReglaReparto();
-}
-function actualizarPctReparto(idx,valor){
-  reglaReparto[idx].pct=+valor||0;
-  renderReglaReparto();
-}
-function renderReglaReparto(){
-  var cont=g('aj-reparto-filas');
-  if(!cont)return;
-  cont.innerHTML=reglaReparto.map(function(r,idx){
-    return '<div style="display:flex;align-items:center;gap:8px;background:#F4F7FA;padding:8px 10px;border-radius:8px">'+
-      '<span style="flex:1;font-size:13px;font-weight:600">'+r.nombre+'</span>'+
-      '<input type="number" value="'+r.pct+'" min="0" max="100" oninput="actualizarPctReparto('+idx+',this.value)" style="width:60px;padding:5px 8px;text-align:center">'+
-      '<span style="font-size:12px;color:#999">%</span>'+
-      '<span onclick="quitarCategoriaReparto('+idx+')" style="cursor:pointer;color:#c0392b;font-weight:800;padding:0 4px">×</span>'+
-    '</div>';
-  }).join('');
-  var suma=reglaReparto.reduce(function(s,r){return s+(r.pct||0);},0);
-  var sumaEl=g('aj-reparto-suma');
-  if(sumaEl){
-    sumaEl.textContent='Suma total: '+suma+'%'+(suma===100?' ✓':' (debe sumar 100%)');
-    sumaEl.style.color=suma===100?'#1e8449':'#c0392b';
-  }
-}
-function guardarReglaReparto(){
-  var suma=reglaReparto.reduce(function(s,r){return s+(r.pct||0);},0);
-  if(suma!==100){toast('La suma debe dar exactamente 100% (ahora mismo suma '+suma+'%)',1);return;}
-  save();
-  actualizarCategoriasMovimiento();
-  toast('Regla de reparto guardada');
-}
-
-function irA(id){
-  var el=document.querySelector('.sitem[onclick*="\''+id+'\'"]');
-  goTab(id,el);
-}
-function goTab(id,el){
-  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
-  document.querySelectorAll('.sitem').forEach(function(t){t.classList.remove('active');});
-  var tab=g('tab-'+id);if(tab)tab.classList.add('active');
-  if(el)el.classList.add('active');
-  var titulos={resumen:'Resumen',movimientos:'Movimientos',reparto:'Reparto de ingresos',fijos:'Sueldo y pagos fijos',ahorros:'Ahorros',inversiones:'Inversiones',deudas:'Deudas',prestamos:'Prestamos hechos',notas:'Notas',recordatorios:'Recordatorios',ajustes:'Ajustes'};
-  g('page-title').textContent=titulos[id]||id;
-  renderAll();
-}
-
-// ══════════════════ RENDER GENERAL ══════════════════
-function renderAll(){
-  renderResumen();
-  renderMovimientos();
-  renderRepartos();
-  renderFijos();
-  renderAhorros();
-  renderInversiones();
-  renderDeudas();
-  renderPrestamos();
-  renderNotas();
-  renderRecordatorios();
-  renderCategoriasAjustes();
-  renderReglaReparto();
-  renderFondosAjustes();
-  actualizarCategoriasMovimiento();
-}
-
-function totalIngresos(){return movimientos.filter(function(m){return m.tipo==='ingreso';}).reduce(function(s,m){return s+m.monto;},0);}
-function totalGastos(){return movimientos.filter(function(m){return m.tipo==='gasto';}).reduce(function(s,m){return s+m.monto;},0);}
-function totalAhorrado(){
-  return ahorros.reduce(function(s,a){return s+(a.tipo==='deposito'?a.monto:-a.monto);},0);
-}
-function totalDeudas(){
-  return deudas.reduce(function(s,d){return s+Math.max(0,d.montoTotal-(d.pagos||[]).reduce(function(s2,p){return s2+p.monto;},0));},0);
-}
-function enMesActual(fechaISO){
-  if(!fechaISO)return false;
-  var hoy=new Date();
-  var p=fechaISO.split('-');
-  return p.length===3&&+p[0]===hoy.getFullYear()&&+p[1]===(hoy.getMonth()+1);
-}
-
-// ══════════════════ RESUMEN ══════════════════
-function renderResumen(){
-  var balance=totalIngresos()-totalGastos()-totalAhorrado()+totalAhorrado(); // ingresos-gastos es flujo; el ahorro es aparte
-  balance=totalIngresos()-totalGastos();
-  var bEl=g('res-balance');
-  if(bEl){bEl.textContent=fmt(balance);bEl.style.color=balance<0?'#f5a3a3':'#fff';}
-
-  var ingMes=movimientos.filter(function(m){return m.tipo==='ingreso'&&enMesActual(m.fecha);}).reduce(function(s,m){return s+m.monto;},0);
-  var gasMes=movimientos.filter(function(m){return m.tipo==='gasto'&&enMesActual(m.fecha);}).reduce(function(s,m){return s+m.monto;},0);
-  if(g('res-ing-mes'))g('res-ing-mes').textContent=fmt(ingMes);
-  if(g('res-gas-mes'))g('res-gas-mes').textContent=fmt(gasMes);
-  if(g('res-ahorro'))g('res-ahorro').textContent=fmt(totalAhorrado());
-
-  var mesAct=mesActualKey();
-  var pagHechos=pagosFijos.filter(function(x){return x.marcadoMes===mesAct;}).length;
-  var ingRecibidos=ingresosFijos.filter(function(x){return x.marcadoMes===mesAct;}).length;
-  if(g('res-fijos-resumen'))g('res-fijos-resumen').textContent=pagHechos+' de '+pagosFijos.length+' pagados';
-  if(g('res-ing-fijos-resumen'))g('res-ing-fijos-resumen').textContent=ingRecibidos+' de '+ingresosFijos.length+' recibidos';
-  if(g('res-inversiones-resumen'))g('res-inversiones-resumen').textContent=fmt(totalInvertido());
-  if(g('res-prestamos-resumen'))g('res-prestamos-resumen').textContent=fmt(totalPrestamosPendientes());
-
-  // Gastos del mes por categoria
-  var gastosMes=movimientos.filter(function(m){return m.tipo==='gasto'&&enMesActual(m.fecha);});
-  var porCat={};
-  gastosMes.forEach(function(m){porCat[m.categoria]=(porCat[m.categoria]||0)+m.monto;});
-  var maxCat=Math.max(1,Math.max.apply(null,Object.values(porCat).concat([0])));
-  var catChart=g('res-cat-chart');
-  if(catChart){
-    var entradas=Object.keys(porCat).sort(function(a,b){return porCat[b]-porCat[a];});
-    if(!entradas.length){
-      catChart.innerHTML='<div class="empty">Sin gastos registrados este mes</div>';
-    }else{
-      catChart.innerHTML=entradas.map(function(cat){
-        var val=porCat[cat];
-        var pct=Math.round(val/maxCat*100);
-        return '<div>'+
-          '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:600">'+cat+'</span><span style="font-weight:700">'+fmt(val)+'</span></div>'+
-          '<div style="background:#E4EAF0;border-radius:20px;height:9px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:#C9A227"></div></div>'+
-        '</div>';
-      }).join('');
-    }
-  }
-
-  // Ultimos movimientos
-  var tb=g('res-ultimos-tb');
-  if(tb){
-    var ultimos=movimientos.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,6);
-    if(!ultimos.length){
-      tb.innerHTML='<tr><td colspan="3" class="empty">Aun no has registrado movimientos</td></tr>';
-    }else{
-      tb.innerHTML=ultimos.map(function(m){
-        var color=m.tipo==='ingreso'?'#2D8659':'#C0392B';
-        var signo=m.tipo==='ingreso'?'+':'-';
-        return '<tr><td style="font-size:11px;color:#999">'+fmtFechaDDMMYYYY(m.fecha)+'</td>'+
-          '<td>'+m.categoria+'</td>'+
-          '<td style="text-align:right;font-weight:700;color:'+color+'">'+signo+fmt(m.monto)+'</td></tr>';
-      }).join('');
-    }
-  }
-
-  // Recordatorios proximos (7 dias)
-  var hoy=new Date();hoy.setHours(0,0,0,0);
-  var proximos=recordatorios.filter(function(r){
-    if(r.completado)return false;
-    var f=new Date(r.fecha+'T00:00:00');
-    var dias=Math.round((f-hoy)/86400000);
-    return dias<=7;
-  }).sort(function(a,b){return a.fecha.localeCompare(b.fecha);});
-  var card=g('res-recordatorios-card');
-  if(card){
-    card.style.display=proximos.length?'block':'none';
-    if(proximos.length){
-      g('res-recordatorios-list').innerHTML=proximos.map(function(r){
-        return renderReminderRow(r,hoy);
-      }).join('');
-    }
-  }
-}
-
-// ══════════════════ MOVIMIENTOS ══════════════════
-function actualizarCategoriasMovimiento(){
-  var sel=g('mv-categoria');
-  if(!sel)return;
-  var actual=sel.value;
-  sel.innerHTML=categorias.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
-  if(categorias.indexOf(actual)>=0)sel.value=actual;
-  var tipo=(g('mv-tipo')||{value:'gasto'}).value;
-  var wrap=g('mv-reparto-check-wrap');
-  if(wrap)wrap.style.display=(tipo==='ingreso'&&reglaReparto.length)?'block':'none';
-  var desc=g('mv-reparto-desc');
-  if(desc)desc.textContent=reglaReparto.map(function(r){return r.pct+'% '+r.nombre;}).join(', ');
-}
-function registrarMovimiento(){
-  var tipo=g('mv-tipo').value;
-  var categoria=g('mv-categoria').value;
-  var monto=+g('mv-monto').value||0;
-  var rawFecha=g('mv-fecha').value;
-  var nota=(g('mv-nota').value||'').trim();
-  var repartir=tipo==='ingreso'&&g('mv-repartir')&&g('mv-repartir').checked;
-  if(!monto||monto<=0){toast('Escribe un monto valido',1);return;}
-  if(!rawFecha){toast('Falta la fecha',1);return;}
-  var movId=uid();
-  movimientos.unshift({id:movId,tipo:tipo,categoria:categoria,monto:monto,fecha:rawFecha,nota:nota,ts:Date.now()});
-  if(repartir&&reglaReparto.length){
-    repartos.unshift({
-      id:uid(),movimientoId:movId,montoTotal:monto,fecha:rawFecha,nota:nota,ts:Date.now(),
-      items:reglaReparto.map(function(r){return {nombre:r.nombre,pct:r.pct,monto:Math.round(monto*r.pct/100),hecho:false};})
-    });
-  }
-  sv('mv-monto','');sv('mv-nota','');
-  if(g('mv-repartir'))g('mv-repartir').checked=false;
-  save();renderAll();
-  toast((tipo==='ingreso'?'Ingreso':'Gasto')+' registrado: '+fmt(monto)+(repartir?'. Se genero el desglose en Reparto de ingresos.':''));
-}
-function eliminarMovimiento(id){
-  movimientos=movimientos.filter(function(m){return m.id!==id;});
-  save();renderAll();
-  toast('Movimiento eliminado');
-}
-function renderMovimientos(){
-  var tb=g('mv-tb');
-  if(!tb)return;
-  var filtroTipo=(g('mv-filtro-tipo')||{value:'todos'}).value;
-  var q=((g('mv-buscar')||{value:''}).value||'').toLowerCase().trim();
-  var filtrados=movimientos.filter(function(m){
-    if(filtroTipo!=='todos'&&m.tipo!==filtroTipo)return false;
-    if(q&&m.categoria.toLowerCase().indexOf(q)<0&&(m.nota||'').toLowerCase().indexOf(q)<0)return false;
-    return true;
-  }).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  if(!filtrados.length){
-    tb.innerHTML='<tr><td colspan="5" class="empty">Sin movimientos</td></tr>';
-    return;
-  }
-  tb.innerHTML=filtrados.map(function(m){
-    var color=m.tipo==='ingreso'?'#2D8659':'#C0392B';
-    var signo=m.tipo==='ingreso'?'+':'-';
-    return '<tr><td style="font-size:11px;color:#999">'+fmtFechaDDMMYYYY(m.fecha)+'</td>'+
-      '<td style="font-weight:600">'+m.categoria+'</td>'+
-      '<td style="font-size:12px;color:#888">'+(m.nota||'-')+'</td>'+
-      '<td style="text-align:right;font-weight:700;color:'+color+'">'+signo+fmt(m.monto)+'</td>'+
-      '<td><button onclick="eliminarMovimiento(\''+m.id+'\')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;font-weight:600">Eliminar</button></td></tr>';
-  }).join('');
-}
-
-// ══════════════════ AHORROS ══════════════════
-function guardarMetaAhorro(){
-  metaAhorro=+g('ah-meta').value||0;
-  save();
-  renderAhorros();
-}
-function registrarAhorro(){
-  var tipo=g('ah-tipo').value;
-  var monto=+g('ah-monto').value||0;
-  var rawFecha=g('ah-fecha').value;
-  var nota=(g('ah-nota').value||'').trim();
-  if(!monto||monto<=0){toast('Escribe un monto valido',1);return;}
-  if(!rawFecha){toast('Falta la fecha',1);return;}
-  if(tipo==='retiro'&&monto>totalAhorrado()){
-    if(!confirm('Vas a retirar mas de lo que tienes ahorrado. Continuar de todas formas?'))return;
-  }
-  ahorros.unshift({id:uid(),tipo:tipo,monto:monto,fecha:rawFecha,nota:nota,ts:Date.now()});
-  sv('ah-monto','');sv('ah-nota','');
-  save();renderAll();
-  toast((tipo==='deposito'?'Deposito':'Retiro')+' registrado: '+fmt(monto));
-}
-function eliminarAhorro(id){
-  ahorros=ahorros.filter(function(a){return a.id!==id;});
-  save();renderAll();
-  toast('Movimiento eliminado');
-}
-function renderAhorros(){
-  var totalEl=g('ah-total');
-  if(totalEl)totalEl.textContent=fmt(totalAhorrado());
-  sv('ah-meta',metaAhorro||'');
-  var progEl=g('ah-meta-progreso'),barraEl=g('ah-meta-barra');
-  if(progEl&&barraEl){
-    if(metaAhorro>0){
-      var pct=Math.min(100,Math.round(totalAhorrado()/metaAhorro*100));
-      progEl.textContent=fmt(totalAhorrado())+' de '+fmt(metaAhorro)+' ('+pct+'%)';
-      barraEl.style.width=pct+'%';
-    }else{
-      progEl.textContent='Define una meta para ver tu progreso';
-      barraEl.style.width='0%';
-    }
-  }
-  var tb=g('ah-tb');
-  if(!tb)return;
-  var ordenados=ahorros.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  if(!ordenados.length){
-    tb.innerHTML='<tr><td colspan="5" class="empty">Aun no has registrado ahorros</td></tr>';
-    return;
-  }
-  tb.innerHTML=ordenados.map(function(a){
-    var color=a.tipo==='deposito'?'#2D8659':'#C0392B';
-    var signo=a.tipo==='deposito'?'+':'-';
-    return '<tr><td style="font-size:11px;color:#999">'+fmtFechaDDMMYYYY(a.fecha)+'</td>'+
-      '<td style="font-weight:600;text-transform:capitalize">'+a.tipo+'</td>'+
-      '<td style="font-size:12px;color:#888">'+(a.nota||'-')+'</td>'+
-      '<td style="text-align:right;font-weight:700;color:'+color+'">'+signo+fmt(a.monto)+'</td>'+
-      '<td><button onclick="eliminarAhorro(\''+a.id+'\')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;font-weight:600">Eliminar</button></td></tr>';
-  }).join('');
-}
-
-// ══════════════════ SUELDO Y PAGOS FIJOS ══════════════════
-function mesActualKey(){
-  var d=new Date();
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-}
-function agregarIngresoFijo(){
-  var nombre=(g('fj-ing-nombre').value||'').trim();
-  var monto=+g('fj-ing-monto').value||0;
-  var dia=+g('fj-ing-dia').value||null;
-  if(!nombre){toast('Escribe el nombre del ingreso',1);return;}
-  if(!monto||monto<=0){toast('Escribe un monto valido',1);return;}
-  ingresosFijos.push({id:uid(),nombre:nombre,monto:monto,dia:dia,marcadoMes:null});
-  sv('fj-ing-nombre','');sv('fj-ing-monto','');sv('fj-ing-dia','');
-  save();renderAll();
-  toast('Ingreso fijo agregado: '+nombre);
-}
-function agregarPagoFijo(){
-  var nombre=(g('fj-pag-nombre').value||'').trim();
-  var monto=+g('fj-pag-monto').value||0;
-  var dia=+g('fj-pag-dia').value||null;
-  if(!nombre){toast('Escribe el nombre del pago',1);return;}
-  if(!monto||monto<=0){toast('Escribe un monto valido',1);return;}
-  pagosFijos.push({id:uid(),nombre:nombre,monto:monto,dia:dia,marcadoMes:null});
-  sv('fj-pag-nombre','');sv('fj-pag-monto','');sv('fj-pag-dia','');
-  save();renderAll();
-  toast('Pago fijo agregado: '+nombre);
-}
-function toggleFijoIngreso(id){
-  var it=ingresosFijos.find(function(x){return x.id===id;});
-  if(!it)return;
-  var mesAct=mesActualKey();
-  it.marcadoMes=(it.marcadoMes===mesAct)?null:mesAct;
-  save();renderAll();
-}
-function toggleFijoPago(id){
-  var it=pagosFijos.find(function(x){return x.id===id;});
-  if(!it)return;
-  var mesAct=mesActualKey();
-  it.marcadoMes=(it.marcadoMes===mesAct)?null:mesAct;
-  save();renderAll();
-}
-function eliminarIngresoFijo(id){
-  ingresosFijos=ingresosFijos.filter(function(x){return x.id!==id;});
-  save();renderAll();
-  toast('Ingreso fijo eliminado');
-}
-function eliminarPagoFijo(id){
-  pagosFijos=pagosFijos.filter(function(x){return x.id!==id;});
-  save();renderAll();
-  toast('Pago fijo eliminado');
-}
-function renderListaFijos(lista,contId,mesAct,toggleFn,delFn,colorHecho){
-  var cont=g(contId);
-  if(!cont)return;
-  if(!lista.length){
-    cont.innerHTML='<div class="empty">Nada agregado todavia</div>';
-    return;
-  }
-  cont.innerHTML=lista.map(function(it){
-    var hecho=it.marcadoMes===mesAct;
-    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #F1F3F6">'+
-      '<div style="display:flex;align-items:center;gap:10px">'+
-        '<input type="checkbox" '+(hecho?'checked':'')+' onchange="'+toggleFn+'(\''+it.id+'\')" style="width:19px;height:19px;cursor:pointer;accent-color:'+colorHecho+'">'+
-        '<div>'+
-          '<div style="font-weight:600;font-size:13px;'+(hecho?'text-decoration:line-through;color:#bbb':'')+'">'+it.nombre.replace(/</g,'&lt;')+'</div>'+
-          (it.dia?'<div style="font-size:10px;color:#999">Dia '+it.dia+' de cada mes</div>':'')+
-        '</div>'+
-      '</div>'+
-      '<div style="display:flex;align-items:center;gap:10px">'+
-        '<span style="font-weight:700;font-size:13px;'+(hecho?'color:#bbb':'')+'">'+fmt(it.monto)+'</span>'+
-        '<button onclick="'+delFn+'(\''+it.id+'\')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;font-weight:600">Eliminar</button>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-}
-function renderFijos(){
-  var mesAct=mesActualKey();
-  renderListaFijos(ingresosFijos,'fj-ing-lista',mesAct,'toggleFijoIngreso','eliminarIngresoFijo','#2D8659');
-  renderListaFijos(pagosFijos,'fj-pag-lista',mesAct,'toggleFijoPago','eliminarPagoFijo','#0F2E4F');
-  var ingRecibidos=ingresosFijos.filter(function(x){return x.marcadoMes===mesAct;}).length;
-  var pagHechos=pagosFijos.filter(function(x){return x.marcadoMes===mesAct;}).length;
-  var re1=g('fj-ing-resumen');if(re1)re1.textContent=ingresosFijos.length?'('+ingRecibidos+' de '+ingresosFijos.length+' recibidos este mes)':'';
-  var re2=g('fj-pag-resumen');if(re2)re2.textContent=pagosFijos.length?'('+pagHechos+' de '+pagosFijos.length+' pagados este mes)':'';
-}
-
-// ══════════════════ INVERSIONES ══════════════════
-function totalInvertido(){
-  return inversiones.reduce(function(s,i){return s+(i.tipo==='deposito'?i.monto:-i.monto);},0);
-}
-function registrarInversion(){
-  var tipo=g('in-tipo').value;
-  var monto=+g('in-monto').value||0;
-  var rawFecha=g('in-fecha').value;
-  var nota=(g('in-nota').value||'').trim();
-  if(!monto||monto<=0){toast('Escribe un monto valido',1);return;}
-  if(!rawFecha){toast('Falta la fecha',1);return;}
-  inversiones.unshift({id:uid(),tipo:tipo,monto:monto,fecha:rawFecha,nota:nota,ts:Date.now()});
-  sv('in-monto','');sv('in-nota','');
-  save();renderAll();
-  toast((tipo==='deposito'?'Inversion':'Retiro')+' registrado: '+fmt(monto));
-}
-function eliminarInversion(id){
-  inversiones=inversiones.filter(function(i){return i.id!==id;});
-  save();renderAll();
-  toast('Movimiento eliminado');
-}
-function renderInversiones(){
-  var totalEl=g('in-total');
-  if(totalEl)totalEl.textContent=fmt(totalInvertido());
-  var tb=g('in-tb');
-  if(!tb)return;
-  var ordenados=inversiones.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  if(!ordenados.length){
-    tb.innerHTML='<tr><td colspan="5" class="empty">Aun no has registrado inversiones</td></tr>';
-    return;
-  }
-  tb.innerHTML=ordenados.map(function(i){
-    var color=i.tipo==='deposito'?'#2D8659':'#C0392B';
-    var signo=i.tipo==='deposito'?'+':'-';
-    return '<tr><td style="font-size:11px;color:#999">'+fmtFechaDDMMYYYY(i.fecha)+'</td>'+
-      '<td style="font-weight:600;text-transform:capitalize">'+(i.tipo==='deposito'?'Invertido':'Retiro')+'</td>'+
-      '<td style="font-size:12px;color:#888">'+(i.nota||'-')+'</td>'+
-      '<td style="text-align:right;font-weight:700;color:'+color+'">'+signo+fmt(i.monto)+'</td>'+
-      '<td><button onclick="eliminarInversion(\''+i.id+'\')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;font-weight:600">Eliminar</button></td></tr>';
-  }).join('');
-}
-
-// ══════════════════ DEUDAS ══════════════════
-function agregarDeuda(){
-  var nombre=(g('de-nombre').value||'').trim();
-  var monto=+g('de-monto').value||0;
-  var fecha=g('de-fecha').value;
-  var nota=(g('de-nota').value||'').trim();
-  if(!nombre){toast('Escribe a quien le debes',1);return;}
-  if(!monto||monto<=0){toast('Escribe un monto valido',1);return;}
-  deudas.unshift({id:uid(),nombre:nombre,montoTotal:monto,fecha:fecha,nota:nota,pagos:[],ts:Date.now()});
-  sv('de-nombre','');sv('de-monto','');sv('de-fecha','');sv('de-nota','');
-  save();renderAll();
-  toast('Deuda agregada: '+nombre);
-}
-function eliminarDeuda(id){
-  if(!confirm('Vas a eliminar esta deuda por completo. Continuar?'))return;
-  deudas=deudas.filter(function(d){return d.id!==id;});
-  save();renderAll();
-  toast('Deuda eliminada');
-}
-function abonarDeuda(id){
-  var d=deudas.find(function(x){return x.id===id;});
-  if(!d)return;
-  var pendiente=d.montoTotal-(d.pagos||[]).reduce(function(s,p){return s+p.monto;},0);
-  var monto=prompt('Cuanto vas a abonar a "'+d.nombre+'"? (pendiente: '+fmt(pendiente)+')');
-  if(monto===null)return;
-  monto=+monto;
-  if(!monto||monto<=0){toast('Monto invalido',1);return;}
-  d.pagos=d.pagos||[];
-  d.pagos.push({monto:monto,fecha:fechaHoyISO(),ts:Date.now()});
-  save();renderAll();
-  toast('Abono registrado: '+fmt(monto));
-}
-function renderDeudas(){
-  var totalEl=g('de-total');
-  if(totalEl)totalEl.textContent=fmt(totalDeudas());
-  var lista=g('de-lista');
-  if(!lista)return;
-  if(!deudas.length){
-    lista.innerHTML='<div class="empty">No tienes deudas registradas</div>';
-    return;
-  }
-  var ordenadas=deudas.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  lista.innerHTML=ordenadas.map(function(d){
-    var pagado=(d.pagos||[]).reduce(function(s,p){return s+p.monto;},0);
-    var pendiente=Math.max(0,d.montoTotal-pagado);
-    var pct=d.montoTotal>0?Math.min(100,Math.round(pagado/d.montoTotal*100)):0;
-    var saldada=pendiente<=0;
-    return '<div class="debt-item">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
-        '<div>'+
-          '<div style="font-weight:700;font-size:14px">'+d.nombre+(saldada?' <span class="chip" style="background:#eafaf1;color:#1e8449">Saldada</span>':'')+'</div>'+
-          (d.fecha?'<div style="font-size:11px;color:#999">Fecha limite: '+fmtFechaDDMMYYYY(d.fecha)+'</div>':'')+
-          (d.nota?'<div style="font-size:11px;color:#999">'+d.nota+'</div>':'')+
-        '</div>'+
-        '<button onclick="eliminarDeuda(\''+d.id+'\')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;font-weight:600">Eliminar</button>'+
-      '</div>'+
-      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">'+
-        '<span>Pagado: <b style="color:#2D8659">'+fmt(pagado)+'</b></span>'+
-        '<span>Pendiente: <b style="color:#C0392B">'+fmt(pendiente)+'</b></span>'+
-      '</div>'+
-      '<div style="background:#E4EAF0;border-radius:20px;height:10px;overflow:hidden;margin-bottom:10px"><div style="width:'+pct+'%;height:100%;background:#8B2E2E"></div></div>'+
-      (saldada?'':'<button class="btn bg" onclick="abonarDeuda(\''+d.id+'\')" style="font-size:11px;padding:7px 14px">+ Abonar</button>')+
-    '</div>';
-  }).join('');
-}
-
-// ══════════════════ PRESTAMOS HECHOS (plata que otros me deben) ══════════════════
-function totalPrestamosPendientes(){
-  return prestamos.reduce(function(s,p){return s+Math.max(0,p.montoTotal-(p.pagos||[]).reduce(function(s2,x){return s2+x.monto;},0));},0);
-}
-function agregarPrestamo(){
-  var nombre=(g('pr-nombre').value||'').trim();
-  var monto=+g('pr-monto').value||0;
-  var fecha=g('pr-fecha').value;
-  var nota=(g('pr-nota').value||'').trim();
-  if(!nombre){toast('Escribe a quien le prestaste',1);return;}
-  if(!monto||monto<=0){toast('Escribe un monto valido',1);return;}
-  prestamos.unshift({id:uid(),nombre:nombre,montoTotal:monto,fecha:fecha,nota:nota,pagos:[],ts:Date.now()});
-  sv('pr-nombre','');sv('pr-monto','');sv('pr-fecha','');sv('pr-nota','');
-  save();renderAll();
-  toast('Prestamo agregado: '+nombre);
-}
-function eliminarPrestamo(id){
-  if(!confirm('Vas a eliminar este prestamo por completo. Continuar?'))return;
-  prestamos=prestamos.filter(function(p){return p.id!==id;});
-  save();renderAll();
-  toast('Prestamo eliminado');
-}
-function cobrarPrestamo(id){
-  var p=prestamos.find(function(x){return x.id===id;});
-  if(!p)return;
-  var pendiente=p.montoTotal-(p.pagos||[]).reduce(function(s,x){return s+x.monto;},0);
-  var monto=prompt('Cuanto te devolvio "'+p.nombre+'"? (pendiente: '+fmt(pendiente)+')');
-  if(monto===null)return;
-  monto=+monto;
-  if(!monto||monto<=0){toast('Monto invalido',1);return;}
-  p.pagos=p.pagos||[];
-  p.pagos.push({monto:monto,fecha:fechaHoyISO(),ts:Date.now()});
-  save();renderAll();
-  toast('Devolucion registrada: '+fmt(monto));
-}
-function renderPrestamos(){
-  var totalEl=g('pr-total');
-  if(totalEl)totalEl.textContent=fmt(totalPrestamosPendientes());
-  var lista=g('pr-lista');
-  if(!lista)return;
-  if(!prestamos.length){
-    lista.innerHTML='<div class="empty">No has registrado prestamos todavia</div>';
-    return;
-  }
-  var ordenados=prestamos.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  lista.innerHTML=ordenados.map(function(p){
-    var pagado=(p.pagos||[]).reduce(function(s,x){return s+x.monto;},0);
-    var pendiente=Math.max(0,p.montoTotal-pagado);
-    var pct=p.montoTotal>0?Math.min(100,Math.round(pagado/p.montoTotal*100)):0;
-    var saldado=pendiente<=0;
-    return '<div class="debt-item">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
-        '<div>'+
-          '<div style="font-weight:700;font-size:14px">'+p.nombre+(saldado?' <span class="chip" style="background:#eafaf1;color:#1e8449">Devuelto</span>':'')+'</div>'+
-          (p.fecha?'<div style="font-size:11px;color:#999">Deberia devolvertelo: '+fmtFechaDDMMYYYY(p.fecha)+'</div>':'')+
-          (p.nota?'<div style="font-size:11px;color:#999">'+p.nota+'</div>':'')+
-        '</div>'+
-        '<button onclick="eliminarPrestamo(\''+p.id+'\')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;font-weight:600">Eliminar</button>'+
-      '</div>'+
-      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">'+
-        '<span>Te ha devuelto: <b style="color:#2D8659">'+fmt(pagado)+'</b></span>'+
-        '<span>Te falta cobrar: <b style="color:#C0392B">'+fmt(pendiente)+'</b></span>'+
-      '</div>'+
-      '<div style="background:#E4EAF0;border-radius:20px;height:10px;overflow:hidden;margin-bottom:10px"><div style="width:'+pct+'%;height:100%;background:#0F5F3F"></div></div>'+
-      (saldado?'':'<button class="btn bg" onclick="cobrarPrestamo(\''+p.id+'\')" style="font-size:11px;padding:7px 14px">+ Registrar devolucion</button>')+
-    '</div>';
-  }).join('');
-}
-
-// ══════════════════ NOTAS ══════════════════
-function agregarNota(){
-  var texto=(g('no-texto').value||'').trim();
-  if(!texto){toast('Escribe algo en la nota',1);return;}
-  notas.unshift({id:uid(),texto:texto,fecha:fechaHoyISO(),ts:Date.now()});
-  sv('no-texto','');
-  save();renderAll();
-  toast('Nota guardada');
-}
-function eliminarNota(id){
-  notas=notas.filter(function(n){return n.id!==id;});
-  save();renderAll();
-  toast('Nota eliminada');
-}
-function renderNotas(){
-  var lista=g('no-lista');
-  if(!lista)return;
-  if(!notas.length){
-    lista.innerHTML='<div class="card"><div class="empty">Aun no tienes notas</div></div>';
-    return;
-  }
-  var ordenadas=notas.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-  lista.innerHTML=ordenadas.map(function(n){
-    return '<div class="note-item" style="background:#fff">'+
-      '<div style="display:flex;justify-content:space-between;gap:10px">'+
-        '<div style="font-size:13px;white-space:pre-wrap;flex:1">'+n.texto.replace(/</g,'&lt;')+'</div>'+
-        '<button onclick="eliminarNota(\''+n.id+'\')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;font-weight:600;flex-shrink:0">Eliminar</button>'+
-      '</div>'+
-      '<div style="font-size:10px;color:#bbb;margin-top:8px">'+fmtFechaDDMMYYYY(n.fecha)+'</div>'+
-    '</div>';
-  }).join('');
-}
-
-// ══════════════════ RECORDATORIOS ══════════════════
-function agregarRecordatorio(){
-  var texto=(g('re-texto').value||'').trim();
-  var fecha=g('re-fecha').value;
-  if(!texto){toast('Escribe que quieres recordar',1);return;}
-  if(!fecha){toast('Falta la fecha',1);return;}
-  recordatorios.unshift({id:uid(),texto:texto,fecha:fecha,completado:false,ts:Date.now()});
-  sv('re-texto','');sv('re-fecha','');
-  save();renderAll();
-  toast('Recordatorio agregado');
-}
-function toggleRecordatorio(id){
-  var r=recordatorios.find(function(x){return x.id===id;});
-  if(r)r.completado=!r.completado;
-  save();renderAll();
-}
-function eliminarRecordatorio(id){
-  recordatorios=recordatorios.filter(function(r){return r.id!==id;});
-  save();renderAll();
-  toast('Recordatorio eliminado');
-}
-function renderReminderRow(r,hoy){
-  var f=new Date(r.fecha+'T00:00:00');
-  var dias=Math.round((f-hoy)/86400000);
-  var estado='',claseExtra='';
-  if(r.completado){estado='<span class="chip" style="background:#eafaf1;color:#1e8449">Hecho</span>';}
-  else if(dias<0){estado='<span class="chip" style="background:#fadbd8;color:#c0392b">Vencido</span>';claseExtra=' vencido';}
-  else if(dias===0){estado='<span class="chip" style="background:#fdf3d9;color:#9a7d0a">Hoy</span>';claseExtra=' hoy';}
-  else{estado='<span class="chip" style="background:#eaf2fb;color:#2a78d6">En '+dias+' dia'+(dias===1?'':'s')+'</span>';}
-  return '<div class="reminder-item'+claseExtra+'" style="display:flex;justify-content:space-between;align-items:center;gap:10px">'+
-    '<div style="display:flex;align-items:center;gap:10px">'+
-      '<input type="checkbox" '+(r.completado?'checked':'')+' onchange="toggleRecordatorio(\''+r.id+'\')" style="width:18px;height:18px;cursor:pointer">'+
-      '<div>'+
-        '<div style="font-weight:600;font-size:13px;'+(r.completado?'text-decoration:line-through;color:#bbb':'')+'">'+r.texto.replace(/</g,'&lt;')+'</div>'+
-        '<div style="font-size:11px;color:#999">'+fmtFechaDDMMYYYY(r.fecha)+'</div>'+
-      '</div>'+
-    '</div>'+
-    '<div style="display:flex;align-items:center;gap:8px">'+estado+
-      '<button onclick="eliminarRecordatorio(\''+r.id+'\')" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:11px;font-weight:600">Eliminar</button>'+
-    '</div>'+
-  '</div>';
-}
-function renderRecordatorios(){
-  var lista=g('re-lista');
-  if(!lista)return;
-  if(!recordatorios.length){
-    lista.innerHTML='<div class="card"><div class="empty">Aun no tienes recordatorios</div></div>';
-    return;
-  }
-  var hoy=new Date();hoy.setHours(0,0,0,0);
-  var ordenados=recordatorios.slice().sort(function(a,b){
-    if(a.completado!==b.completado)return a.completado?1:-1;
-    return a.fecha.localeCompare(b.fecha);
-  });
-  lista.innerHTML='<div class="card">'+ordenados.map(function(r){return renderReminderRow(r,hoy);}).join('')+'</div>';
-}
-
-// ══════════════════ AJUSTES ══════════════════
-function agregarCategoria(){
-  var nueva=(g('aj-cat-nueva').value||'').trim();
-  if(!nueva){toast('Escribe el nombre de la categoria',1);return;}
-  if(categorias.indexOf(nueva)>=0){toast('Esa categoria ya existe',1);return;}
-  categorias.push(nueva);
-  sv('aj-cat-nueva','');
-  save();renderAll();
-  toast('Categoria agregada: '+nueva);
-}
-function quitarCategoria(cat){
-  categorias=categorias.filter(function(c){return c!==cat;});
-  save();renderAll();
-}
-function renderCategoriasAjustes(){
-  var cont=g('aj-categorias');
-  if(!cont)return;
-  cont.innerHTML=categorias.map(function(c){
-    return '<span style="display:inline-flex;align-items:center;gap:6px;background:#E4EAF0;padding:5px 10px 5px 13px;border-radius:20px;font-size:12px;font-weight:600">'+
-      c+'<span onclick="quitarCategoria(\''+c.replace(/'/g,"\\'")+'\')" style="cursor:pointer;color:#c0392b;font-weight:800;padding:0 3px">×</span></span>';
-  }).join('');
-}
-
-var FONDOS_PRESET=[
-  {nombre:'Crema calido',color:'#EEF1F5'},
-  {nombre:'Verde suave',color:'#eafaf1'},
-  {nombre:'Azul suave',color:'#eaf2fb'},
-  {nombre:'Beige',color:'#faf3e9'},
-  {nombre:'Lavanda',color:'#f3f0fb'},
-  {nombre:'Oscuro',color:'#232a24'}
-];
-function renderFondosAjustes(){
-  var wrap=g('aj-fondos');
-  if(!wrap)return;
-  wrap.innerHTML=FONDOS_PRESET.map(function(f){
-    var activo=f.color===fondoColor;
-    return '<div onclick="seleccionarFondo(\''+f.color+'\')" style="cursor:pointer;text-align:center">'+
-      '<div style="width:44px;height:44px;border-radius:10px;background:'+f.color+';border:3px solid '+(activo?'#0F2E4F':'#e0e0e0')+'"></div>'+
-      '<div style="font-size:9px;color:#999;margin-top:4px">'+f.nombre+'</div>'+
-    '</div>';
-  }).join('');
-}
-function seleccionarFondo(color){
-  fondoColor=color;
-  aplicarFondo();
-  save();
-  renderFondosAjustes();
-}
-function aplicarFondo(){
-  document.body.style.background=fondoColor;
-}
-
-// ══════════════════ ARRANQUE ══════════════════
-window.addEventListener('load',function(){
-  try{var local=localStorage.getItem(LK);if(local)procesarDatos(JSON.parse(local));}catch(e){}
-
-  if(pinHash){
-    g('login-sub').textContent='Escribe tu PIN para entrar';
-  }
-
-  function cargar(callback){
-    if(typeof window.fbListen==='function'){
-      window.fbListen(function(err,data){
-        if(!err&&data){procesarDatos(data);}
-        if(callback){callback();callback=null;}
+    sheets.forEach((sh, idx)=>{
+      const scale = maxDrawW / SHEET.w;
+      const div = document.createElement('div');
+      const sheetLabelWrap = document.createElement('div');
+      sheetLabelWrap.className='sheet-label';
+      sheetLabelWrap.textContent = `Lámina ${idx+1} · esp. ${t} cm`;
+      const sheetDiv = document.createElement('div');
+      sheetDiv.className='sheet';
+      sheetDiv.style.width = (SHEET.w*scale)+'px';
+      sheetDiv.style.height = (SHEET.h*scale)+'px';
+      sh.placed.forEach(pl=>{
+        const c = document.createElement('div');
+        c.className='cut';
+        c.style.left=(pl.x*scale)+'px'; c.style.top=(pl.y*scale)+'px';
+        c.style.width=(pl.w*scale)+'px'; c.style.height=(pl.h*scale)+'px';
+        c.style.background = pl.color;
+        c.textContent = pl.name;
+        sheetDiv.appendChild(c);
       });
-    }else{
-      if(callback)callback();
-    }
+      div.appendChild(sheetLabelWrap);
+      div.appendChild(sheetDiv);
+      wrap.appendChild(div);
+    });
+  });
+
+  document.getElementById('nestSummary').textContent = `Total: ${totalSheets} lámina(s) de ${SHEET.w}×${SHEET.h} cm necesarias (agrupadas por espesor).`;
+}
+
+function tryPlace(sheet, rect){
+  // busca el primer espacio libre donde quepa (con o sin rotar 90°)
+  for(let i=0;i<sheet.free.length;i++){
+    const f = sheet.free[i];
+    let w=rect.w, h=rect.h, rotated=false;
+    if(w<=f.w && h<=f.h){ /* cabe normal */ }
+    else if(h<=f.w && w<=f.h){ w=rect.h; h=rect.w; rotated=true; }
+    else continue;
+
+    sheet.placed.push({ x:f.x, y:f.y, w, h, name:rect.name, color:rect.color });
+    // dividir el espacio libre (guillotina): resto a la derecha y resto abajo
+    const rightW = f.w - w, bottomH = f.h - h;
+    sheet.free.splice(i,1);
+    if(rightW>0) sheet.free.push({ x:f.x+w, y:f.y, w:rightW, h:h });
+    if(bottomH>0) sheet.free.push({ x:f.x, y:f.y+h, w:f.w, h:bottomH });
+    sheet.free.sort((a,b)=>(a.w*a.h)-(b.w*b.h));
+    return true;
   }
-  if(window.firebaseReady){cargar();}
-  else{window.addEventListener('firebaseReady',function(){cargar();});}
+  return false;
+}
+
+/* ============================================================
+   REFRESH GLOBAL
+============================================================ */
+function refreshAll(){
+  renderPieceList();
+  renderForm();
+  rebuild3D();
+  render2D();
+  renderCutlist();
+}
+
+// Igual que refreshAll pero sin tocar el formulario — se usa mientras se escribe
+// en un campo numérico para no perder el foco/cursor en cada tecla.
+function refreshLight(){
+  renderPieceList();
+  rebuild3D();
+  render2D();
+  renderCutlist();
+}
+
+/* ============================================================
+   GUARDAR / CARGAR PROYECTO
+============================================================ */
+function saveProject(){
+  const data = JSON.stringify({ pieces, nextId }, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'proyecto-mueble.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function loadProject(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      pieces = data.pieces || [];
+      nextId = data.nextId || (pieces.length+1);
+      selectedId = pieces.length ? pieces[0].id : null;
+      refreshAll();
+    }catch(err){
+      alert('No se pudo leer el archivo del proyecto.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exportCsv(){
+  let csv = 'Pieza,Ancho,Alto,Espesor,Cantidad,Canto,Orientacion\n';
+  pieces.forEach(p=>{
+    const tags = ['top','bottom','left','right'].filter(k=>p.canto[k]);
+    const labelMap = {top:'Superior',bottom:'Inferior',left:'Izquierdo',right:'Derecho'};
+    csv += `"${p.name}",${p.w},${p.h},${p.t},${p.qty},"${tags.map(t=>labelMap[t]).join(' + ')||'ninguno'}","${orientationLabel(p.orientation)}"\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='lista-de-corte.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+function openNewPieceModal(){
+  const overlay = document.getElementById('modalOverlay');
+  let mOrientation = 'vertical-front';
+  overlay.innerHTML = `
+    <div id="modalCard">
+      <h2>Nueva pieza</h2>
+      <div class="field"><label>Nombre</label><input type="text" id="m-name" value="Pieza ${pieces.length+1}"></div>
+      <div class="row2">
+        <div class="field"><label>Ancho (cm)</label><input type="number" step="0.1" id="m-w" value="60"></div>
+        <div class="field"><label>Alto (cm)</label><input type="number" step="0.1" id="m-h" value="40"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Espesor (cm)</label><input type="number" step="0.1" id="m-t" value="1.5"></div>
+        <div class="field"><label>Cantidad</label><input type="number" id="m-qty" value="1" min="1"></div>
+      </div>
+      <div class="field">
+        <label>Orientación</label>
+        <div class="seg">
+          <button type="button" data-mor="vertical-front" class="on">Frontal</button>
+          <button type="button" data-mor="vertical-side">Lateral</button>
+          <button type="button" data-mor="horizontal">Horizontal</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost" id="modalCancel">Cancelar</button>
+        <button class="primary" id="modalCreate">Crear pieza</button>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('open');
+
+  overlay.querySelectorAll('[data-mor]').forEach(b=>b.addEventListener('click', ()=>{
+    mOrientation = b.dataset.mor;
+    overlay.querySelectorAll('[data-mor]').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+  }));
+  document.getElementById('modalCancel').addEventListener('click', ()=> overlay.classList.remove('open'));
+  document.getElementById('modalCreate').addEventListener('click', ()=>{
+    snapshot();
+    const p = newPiece();
+    const name = document.getElementById('m-name').value.trim();
+    p.name = name || p.name;
+    p.w = parseFloat(document.getElementById('m-w').value) || 60;
+    p.h = parseFloat(document.getElementById('m-h').value) || 40;
+    p.t = parseFloat(document.getElementById('m-t').value) || 1.5;
+    p.qty = Math.max(1, parseInt(document.getElementById('m-qty').value) || 1);
+    p.orientation = mOrientation;
+    pieces.push(p);
+    selectedId = p.id;
+    overlay.classList.remove('open');
+    refreshAll();
+  });
+}
+
+document.getElementById('addBtn').addEventListener('click', openNewPieceModal);
+
+/* ---------- Marco prediseñado: costados por fuera / costados por dentro ---------- */
+function openFrameModal(){
+  const overlay = document.getElementById('modalOverlay');
+  let fStyle = 'A';
+  overlay.innerHTML = `
+    <div id="modalCard">
+      <h2>Marco prediseñado</h2>
+      <div class="row2">
+        <div class="field"><label>Ancho total (cm)</label><input type="number" step="0.1" id="fm-ancho" value="90"></div>
+        <div class="field"><label>Alto total (cm)</label><input type="number" step="0.1" id="fm-alto" value="180"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Profundidad (cm)</label><input type="number" step="0.1" id="fm-prof" value="50"></div>
+        <div class="field"><label>Espesor (cm)</label><input type="number" step="0.1" id="fm-esp" value="1.5"></div>
+      </div>
+      <div class="field">
+        <label>Forma de armar</label>
+        <div class="seg" style="flex-direction:column;height:auto;">
+          <button type="button" data-fstyle="A" class="on" style="text-align:left;padding:10px;">
+            Opción A — Costados por fuera<br><span class="hint" style="display:block;margin-top:2px;">Los costados van de punta a punta; techo y piso quedan encajados entre ellos.</span>
+          </button>
+          <button type="button" data-fstyle="B" style="text-align:left;padding:10px;">
+            Opción B — Costados por dentro<br><span class="hint" style="display:block;margin-top:2px;">Techo y piso van de punta a punta; los costados quedan encajados entre ellos.</span>
+          </button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost" id="frameCancel">Cancelar</button>
+        <button class="primary" id="frameCreate">Crear marco</button>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('open');
+
+  overlay.querySelectorAll('[data-fstyle]').forEach(b=>b.addEventListener('click', ()=>{
+    fStyle = b.dataset.fstyle;
+    overlay.querySelectorAll('[data-fstyle]').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+  }));
+  document.getElementById('frameCancel').addEventListener('click', ()=> overlay.classList.remove('open'));
+  document.getElementById('frameCreate').addEventListener('click', ()=>{
+    const ancho = parseFloat(document.getElementById('fm-ancho').value) || 90;
+    const alto = parseFloat(document.getElementById('fm-alto').value) || 180;
+    const prof = parseFloat(document.getElementById('fm-prof').value) || 50;
+    const esp = parseFloat(document.getElementById('fm-esp').value) || 1.5;
+    createFramePreset(ancho, alto, prof, esp, fStyle);
+    overlay.classList.remove('open');
+  });
+}
+
+// Crea las 4 piezas del marco (2 costados + techo + piso) ya posicionadas y
+// con el canto puesto según la forma de armar elegida.
+function createFramePreset(ancho, alto, prof, esp, style){
+  snapshot();
+  const color1 = MATERIAL_COLORS[pieces.length % MATERIAL_COLORS.length];
+  const color2 = MATERIAL_COLORS[(pieces.length+1) % MATERIAL_COLORS.length];
+
+  if(style === 'A'){
+    // costados de punta a punta; techo/piso encajados entre ellos
+    const izq = { ...newPiece(), name:'Costado izquierdo', w:prof, h:alto, t:esp, orientation:'vertical-side',
+      canto:{top:true,bottom:true,left:false,right:true}, color:color1, posMode:'free', x:0,y:0,z:0 };
+    izq.id = uid(); pieces.push(izq);
+
+    const der = { ...newPiece(), name:'Costado derecho', w:prof, h:alto, t:esp, orientation:'vertical-side',
+      canto:{top:true,bottom:true,left:false,right:true}, color:color1, posMode:'free', x:ancho-esp,y:0,z:0 };
+    der.id = uid(); pieces.push(der);
+
+    const techo = { ...newPiece(), name:'Techo', w:ancho-2*esp, h:prof, t:esp, orientation:'horizontal',
+      canto:{top:true,bottom:false,left:false,right:false}, color:color2, posMode:'free', x:esp, y:alto-esp, z:0 };
+    techo.id = uid(); pieces.push(techo);
+
+    const piso = { ...newPiece(), name:'Piso', w:ancho-2*esp, h:prof, t:esp, orientation:'horizontal',
+      canto:{top:true,bottom:false,left:false,right:false}, color:color2, posMode:'free', x:esp, y:0, z:0 };
+    piso.id = uid(); pieces.push(piso);
+
+    selectedId = izq.id;
+  } else {
+    // techo/piso de punta a punta; costados encajados entre ellos
+    const piso = { ...newPiece(), name:'Piso', w:ancho, h:prof, t:esp, orientation:'horizontal',
+      canto:{top:true,left:true,right:true,bottom:false}, color:color2, posMode:'free', x:0,y:0,z:0 };
+    piso.id = uid(); pieces.push(piso);
+
+    const techo = { ...newPiece(), name:'Techo', w:ancho, h:prof, t:esp, orientation:'horizontal',
+      canto:{top:true,left:true,right:true,bottom:false}, color:color2, posMode:'free', x:0,y:alto-esp,z:0 };
+    techo.id = uid(); pieces.push(techo);
+
+    const izq = { ...newPiece(), name:'Costado izquierdo', w:prof, h:alto-2*esp, t:esp, orientation:'vertical-side',
+      canto:{right:true,top:false,bottom:false,left:false}, color:color1, posMode:'attach', attachTo:piso.id, attachFace:'top', offsetA:0, offsetB:0 };
+    izq.id = uid(); pieces.push(izq);
+
+    const der = { ...newPiece(), name:'Costado derecho', w:prof, h:alto-2*esp, t:esp, orientation:'vertical-side',
+      canto:{right:true,top:false,bottom:false,left:false}, color:color1, posMode:'attach', attachTo:piso.id, attachFace:'top', offsetA:ancho-esp, offsetB:0 };
+    der.id = uid(); pieces.push(der);
+
+    selectedId = piso.id;
+  }
+
+  refreshAll();
+  autoFitCamera();
+}
+
+document.getElementById('frameBtn').addEventListener('click', openFrameModal);
+
+/* ---------- Fondo: lámina que cubre la parte de atrás del marco ---------- */
+function openFondoModal(){
+  const overlay = document.getElementById('modalOverlay');
+  let fMaterial = 'RH';
+  overlay.innerHTML = `
+    <div id="modalCard">
+      <h2>Fondo</h2>
+      <div class="row2">
+        <div class="field"><label>Ancho del marco (cm)</label><input type="number" step="0.1" id="fd-ancho" value="100"></div>
+        <div class="field"><label>Alto del marco (cm)</label><input type="number" step="0.1" id="fd-alto" value="160"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Profundidad del marco (cm)</label><input type="number" step="0.1" id="fd-prof" value="50"></div>
+        <div class="field"><label>Espesor de los laterales (cm)</label><input type="number" step="0.1" id="fd-esp" value="1.5"></div>
+      </div>
+      <div class="field">
+        <label>Material</label>
+        <div class="canto-grid">
+          <button type="button" data-fmat="TRIPLE" style="text-align:left;">Triple</button>
+          <button type="button" data-fmat="RH" class="on" style="text-align:left;">RH</button>
+          <button type="button" data-fmat="STANDAR" style="text-align:left;">Estándar</button>
+          <button type="button" data-fmat="MDF" style="text-align:left;">MDF</button>
+        </div>
+        <div class="hint" id="fd-hint" style="margin-top:6px;">RH y Estándar van por dentro del marco (se le resta el espesor de cada lateral). Triple y MDF van exactas al marco, clavadas por el borde.</div>
+      </div>
+      <div class="field"><label>Grosor del fondo (cm)</label><input type="number" step="0.1" id="fd-grosor" value="0.3"></div>
+      <div class="modal-actions">
+        <button class="ghost" id="fondoCancel">Cancelar</button>
+        <button class="primary" id="fondoCreate">Crear fondo</button>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('open');
+
+  overlay.querySelectorAll('[data-fmat]').forEach(b=>b.addEventListener('click', ()=>{
+    fMaterial = b.dataset.fmat;
+    overlay.querySelectorAll('[data-fmat]').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    const exact = (fMaterial==='TRIPLE' || fMaterial==='MDF');
+    document.getElementById('fd-hint').textContent = exact
+      ? 'Triple y MDF van exactas al marco (ancho x alto completos), clavadas por el borde.'
+      : 'RH y Estándar van por dentro del marco: se le resta el espesor de cada lateral (2 veces el espesor).';
+  }));
+  document.getElementById('fondoCancel').addEventListener('click', ()=> overlay.classList.remove('open'));
+  document.getElementById('fondoCreate').addEventListener('click', ()=>{
+    const ancho = parseFloat(document.getElementById('fd-ancho').value) || 100;
+    const alto = parseFloat(document.getElementById('fd-alto').value) || 160;
+    const prof = parseFloat(document.getElementById('fd-prof').value) || 50;
+    const esp = parseFloat(document.getElementById('fd-esp').value) || 1.5;
+    const grosor = parseFloat(document.getElementById('fd-grosor').value) || 0.3;
+    createFondoPreset(ancho, alto, prof, esp, fMaterial, grosor);
+    overlay.classList.remove('open');
+  });
+}
+
+// Crea la lámina de fondo. Exacta al marco y clavada detrás (triple/MDF), o
+// metida por dentro restando el espesor de cada lateral (RH/estándar).
+function createFondoPreset(ancho, alto, prof, esp, material, grosor){
+  snapshot();
+  const exact = (material === 'TRIPLE' || material === 'MDF');
+  const w = exact ? ancho : round1(ancho - 2*esp);
+  const h = exact ? alto : round1(alto - 2*esp);
+  const x = exact ? 0 : esp;
+  const y = exact ? 0 : esp;
+  const z = exact ? prof : round1(prof - grosor); // exacta: clavada detrás · por dentro: metida en el último tramo del fondo
+
+  const fondo = { ...newPiece(), name:'Fondo ('+material+')', w, h, t:grosor, orientation:'vertical-front',
+    canto:{top:false,bottom:false,left:false,right:false}, color:MATERIAL_COLORS[3],
+    posMode:'free', x, y, z,
+    isFondo:true, material, frameAncho:ancho, frameAlto:alto, frameEsp:esp };
+  fondo.id = uid(); pieces.push(fondo);
+  selectedId = fondo.id;
+
+  refreshAll();
+  autoFitCamera();
+}
+
+document.getElementById('fondoBtn').addEventListener('click', openFondoModal);
+
+/* ---------- Medir: distancia exacta entre dos piezas cualquiera ---------- */
+function openMeasureModal(){
+  const overlay = document.getElementById('modalOverlay');
+  if(pieces.length < 2){
+    overlay.innerHTML = `<div id="modalCard"><h2>Medir entre dos piezas</h2><div class="hint">Necesitas al menos 2 piezas creadas para poder medir entre ellas.</div><div class="modal-actions"><button class="primary" id="msClose">Cerrar</button></div></div>`;
+    overlay.classList.add('open');
+    document.getElementById('msClose').addEventListener('click', ()=> overlay.classList.remove('open'));
+    return;
+  }
+  const options = pieces.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  overlay.innerHTML = `
+    <div id="modalCard">
+      <h2>Medir entre dos piezas</h2>
+      <div class="field"><label>Pieza A</label><select id="ms-a">${options}</select></div>
+      <div class="field"><label>Pieza B</label><select id="ms-b">${options}</select></div>
+      <div id="ms-result"></div>
+      <div class="modal-actions">
+        <button class="primary" id="msClose">Cerrar</button>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('open');
+  document.getElementById('ms-b').selectedIndex = pieces.length > 1 ? 1 : 0;
+
+  function axisGap(minA,maxA,minB,maxB){
+    if(maxA <= minB + 0.05) return { gap: round1(minB-maxA), overlap:false };
+    if(maxB <= minA + 0.05) return { gap: round1(minA-maxB), overlap:false };
+    return { gap: null, overlap:true };
+  }
+  function line(label, g){
+    if(g.overlap) return `<div class="ts" style="margin-top:4px;">${label}: se superponen en este eje (no hay hueco libre)</div>`;
+    return `<div class="ts" style="margin-top:4px;">${label}: <b class="mono" style="font-size:14px;">${g.gap}</b> cm de separación</div>`;
+  }
+  function update(){
+    const a = pieces.find(x=>x.id===Number(document.getElementById('ms-a').value));
+    const b = pieces.find(x=>x.id===Number(document.getElementById('ms-b').value));
+    const result = document.getElementById('ms-result');
+    if(!a || !b || a.id===b.id){ result.innerHTML = '<div class="fitbox"><div class="ts">Elige dos piezas distintas.</div></div>'; return; }
+    const pa=piecePosition(a), sa=boxSize(a), pb=piecePosition(b), sb=boxSize(b);
+    const gx = axisGap(pa.x,pa.x+sa.sx, pb.x,pb.x+sb.sx);
+    const gy = axisGap(pa.y,pa.y+sa.sy, pb.y,pb.y+sb.sy);
+    const gz = axisGap(pa.z,pa.z+sa.sz, pb.z,pb.z+sb.sz);
+    result.innerHTML = `<div class="fitbox">
+      ${line('Ancho / eje X', gx)}
+      ${line('Alto / eje Y', gy)}
+      ${line('Profundidad / eje Z', gz)}
+    </div>`;
+  }
+  document.getElementById('ms-a').addEventListener('change', update);
+  document.getElementById('ms-b').addEventListener('change', update);
+  document.getElementById('msClose').addEventListener('click', ()=> overlay.classList.remove('open'));
+  update();
+}
+document.getElementById('measureBtn').addEventListener('click', openMeasureModal);
+
+document.getElementById('resetCam').addEventListener('click', autoFitCamera);
+
+function setDragMode(mode){
+  dragMode = mode;
+  document.getElementById('dm-h').classList.toggle('on', mode==='horizontal');
+  document.getElementById('dm-v').classList.toggle('on', mode==='vertical');
+}
+document.getElementById('dm-h').addEventListener('click', ()=>setDragMode('horizontal'));
+document.getElementById('dm-v').addEventListener('click', ()=>setDragMode('vertical'));
+setDragMode('horizontal');
+
+// Sube o baja la cámara y el punto de mira juntos, para poder ver la parte de
+// arriba de un mueble alto sin tener que alejarse ni pelear con el mouse.
+function panCameraVertical(delta){
+  camera.position.y += delta;
+  controls.target.y += delta;
+}
+document.getElementById('viewUp').addEventListener('click', ()=>panCameraVertical(40));
+document.getElementById('viewDown').addEventListener('click', ()=>panCameraVertical(-40));
+
+// Botones flotantes sobre el 3D: suben+acercan o bajan+alejan la cámara.
+// Se pueden dejar presionados para moverse de forma continua.
+function stepView(dir){ // dir = 1 (subir y acercar) · -1 (bajar y alejar)
+  panCameraVertical(dir*18);
+  const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+  let dist = offset.length();
+  dist = Math.max(controls.minDistance+5, Math.min(controls.maxDistance-5, dist - dir*14));
+  offset.setLength(dist);
+  camera.position.copy(controls.target).add(offset);
+}
+function holdRepeat(btnId, dir){
+  const btn = document.getElementById(btnId);
+  let interval = null;
+  const start = (e)=>{ e.preventDefault(); stepView(dir); interval = setInterval(()=>stepView(dir), 60); };
+  const stop = ()=>{ if(interval){ clearInterval(interval); interval=null; } };
+  btn.addEventListener('pointerdown', start);
+  btn.addEventListener('pointerup', stop);
+  btn.addEventListener('pointerleave', stop);
+  btn.addEventListener('pointercancel', stop);
+}
+holdRepeat('cc-up', 1);
+holdRepeat('cc-down', -1);
+
+// El abrir/cerrar del <details> lo maneja el navegador solo (nativo, nunca falla).
+// Este listener solo actualiza el texto del botón cuando se abre o cierra.
+document.getElementById('bottomBar').addEventListener('toggle', function(){
+  document.getElementById('toggleBottom').textContent = this.open ? 'Ocultar ▼' : 'Mostrar ▲';
 });
+
+document.getElementById('btnSave').addEventListener('click', saveProject);
+document.getElementById('btnLoad').addEventListener('click', ()=> document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', (e)=>{ if(e.target.files[0]) loadProject(e.target.files[0]); });
+document.getElementById('btnExportCsv').addEventListener('click', exportCsv);
+
+initThree();
+setup3DPicking();
+
+// pieza de ejemplo para partir de algo (armario simple: 2 laterales + techo + piso)
+(function seed(){
+  const left = { ...newPiece(), name:'Costado izquierdo', w:50, h:180, t:1.5, orientation:'vertical-side', canto:{top:false,bottom:false,left:false,right:true}, color:MATERIAL_COLORS[0], posMode:'free', x:0,y:0,z:0 };
+  left.id = uid(); pieces.push(left);
+
+  const right = { ...newPiece(), name:'Costado derecho', w:50, h:180, t:1.5, orientation:'vertical-side', canto:{top:false,bottom:false,left:false,right:true}, color:MATERIAL_COLORS[0], posMode:'free', x:90,y:0,z:0, offsetA:0, offsetB:0 };
+  right.id = uid(); pieces.push(right);
+
+  const top = { ...newPiece(), name:'Techo', w:90, h:50, t:1.5, orientation:'horizontal', canto:{top:false,bottom:false,left:true,right:true}, color:MATERIAL_COLORS[1], posMode:'attach', attachTo:left.id, attachFace:'top', offsetA:0, offsetB:0 };
+  top.id = uid(); pieces.push(top);
+
+  const bottom = { ...newPiece(), name:'Piso', w:90, h:50, t:1.5, orientation:'horizontal', canto:{top:false,bottom:false,left:true,right:true}, color:MATERIAL_COLORS[1], posMode:'free', x:0,y:0,z:0 };
+  bottom.id = uid(); pieces.push(bottom);
+
+  selectedId = left.id;
+})();
+
+refreshAll();
+autoFitCamera();
 </script>
 </body>
 </html>
