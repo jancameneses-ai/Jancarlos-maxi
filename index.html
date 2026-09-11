@@ -120,6 +120,7 @@
   }
   #camControls button:hover{background:var(--panel-2);border-color:var(--wood-dim);}
   #camControls button:active{background:var(--wood);color:#fff;}
+  #marqueeBox{position:absolute;display:none;border:1.5px dashed var(--wood);background:rgba(163,90,46,0.12);pointer-events:none;z-index:6;}
 
   /* ---------- 2D panel ---------- */
   #panel2d{height:38%;border-top:1px solid var(--line);display:flex;flex-shrink:0;background:var(--panel);}
@@ -135,7 +136,14 @@
   #bottomHead::-webkit-details-marker{display:none;}
   #bottomHead::marker{display:none;content:"";}
   #bottomHead .t{font-size:12.5px;font-weight:600;}
-  #bottomBody{max-height:260px;overflow-y:auto;padding:0 14px 14px;}
+  /* Cuando está abierta, la lista flota como una bandeja fija sobre todo lo
+     demás (no empuja ni aplasta el resto del diseño — así nunca se deforma). */
+  #bottomBody{
+    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    max-height:50vh; overflow-y:auto; padding:14px;
+    background:var(--panel); border-top:2px solid var(--line);
+    box-shadow:0 -8px 24px rgba(0,0,0,.18);
+  }
   table{width:100%;border-collapse:collapse;font-size:12px;}
   th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
   th{color:var(--text-dim);font-weight:500;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;}
@@ -186,6 +194,12 @@
         <button id="frameBtn" class="ghost" style="width:100%;margin-bottom:12px;">+ Marco (costados/tapas)</button>
         <button id="fondoBtn" class="ghost" style="width:100%;margin-bottom:12px;">+ Fondo</button>
         <button id="measureBtn" class="ghost" style="width:100%;margin-bottom:12px;">📏 Medir entre dos piezas</button>
+        <button id="multiSelectBtn" class="ghost" style="width:100%;margin-bottom:8px;">☑ Seleccionar varias (agrupar / repartir)</button>
+        <div id="groupActionBar" style="display:none;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+          <button id="doGroupBtn" class="primary small" style="flex:1;">Agrupar</button>
+          <button id="doSpreadBtn" class="primary small" style="flex:1;">↔ Repartir parejo</button>
+          <button id="cancelMultiBtn" class="ghost small" style="flex:1;">Cancelar</button>
+        </div>
         <div id="pieceList"></div>
       </div>
       <div class="form-panel" id="formPanel" style="display:none;"></div>
@@ -207,11 +221,12 @@
         <span class="hint" id="selInfo">Sin pieza seleccionada</span>
       </div>
       <div id="canvas3d-wrap">
-        <div class="badge3d">Clic y arrastra una pieza para moverla (se pega si queda cerca) · fondo: orbita · rueda: zoom · Ctrl+Z deshace</div>
+        <div class="badge3d" id="badge3dText">Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace</div>
         <div id="camControls">
           <button id="cc-up" title="Subir y acercar la vista (mantén presionado)">▲</button>
           <button id="cc-down" title="Bajar y alejar la vista (mantén presionado)">▼</button>
         </div>
+        <div id="marqueeBox"></div>
       </div>
 
       <div id="panel2d">
@@ -237,8 +252,29 @@
       <span id="toggleBottom" class="small ghost" style="display:inline-block;">Mostrar ▲</span>
     </summary>
     <div id="bottomBody">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:6px;">
+        <button class="small ghost" id="bottomCloseBtn">✕ Cerrar</button>
+      </div>
+
+      <div class="fitbox" style="margin-bottom:12px;">
+        <div class="ts" style="font-weight:600;margin-bottom:6px;">Antes de mandar a cortar, revisa esto:</div>
+        <div class="ts">1. El canto agrega grosor — abajo ya está la "medida de corte" (más chica) para que, después de pegado el canto, quede en la medida final.</div>
+        <div class="ts" style="margin-top:4px;">2. Mide el espacio real (pared/piso) antes del corte definitivo — no siempre está 100% cuadrado.</div>
+        <div class="ts" style="margin-top:4px;">3. Revisa que quede espacio libre donde van bisagras, correderas o tornillos de armado.</div>
+        <div class="ts" style="margin-top:4px;">4. El diagrama de láminas de abajo es para calcular cuántas comprar — dale al operario de la sierra la <b>lista de piezas</b>, no ese dibujo.</div>
+      </div>
+
+      <div class="row2" style="max-width:420px;margin-bottom:12px;">
+        <div class="field"><label>Grosor de canto (mm)</label><input type="number" step="0.1" id="cantoThicknessInput" value="0.4"></div>
+        <div class="field"><label>Grosor de sierra / kerf (mm)</label><input type="number" step="0.1" id="kerfInput" value="3"></div>
+      </div>
+
       <table>
-        <thead><tr><th>Pieza</th><th>Ancho</th><th>Alto</th><th>Esp.</th><th>Cant.</th><th>Canto (tapacanto)</th><th>Orientación</th></tr></thead>
+        <thead><tr>
+          <th>Pieza</th><th>Ancho final</th><th>Alto final</th>
+          <th>Corte ancho</th><th>Corte alto</th>
+          <th>Esp.</th><th>Cant.</th><th>Canto (tapacanto)</th><th>Orientación</th>
+        </tr></thead>
         <tbody id="cutlistBody"></tbody>
       </table>
       <div id="nestSummary" class="hint" style="margin-top:10px;"></div>
@@ -258,14 +294,37 @@ const MATERIAL_COLORS = ['#d8cdbb','#efe9e0','#8a6a4a','#3d3128','#c7c9cb','#4a4
 const SHEET = { w:183, h:244 }; // cm — lámina estándar 1.83 x 2.44 m
 const DRAG_SNAP_THRESHOLD = 3; // cm — distancia bajo la cual una pieza arrastrada se pega sola
 
+// Ajustes de taller: el canto (tapacanto) no sale de la lámina de melamina —
+// se pega después, de un rollo aparte — así que la pieza hay que cortarla
+// más chica en los lados con canto, para que al pegarlo quede en la medida
+// final. El grosor de sierra (kerf) es lo que se "come" el disco entre corte
+// y corte, para que el cálculo de láminas sea realista.
+let cantoThicknessMM = 0.4; // mm — grosor típico de un tapacanto de PVC
+let kerfMM = 3; // mm — grosor típico del disco de sierra
+
+// medida real a la que hay que cortar la pieza (antes de pegarle el canto),
+// para que después de encantada quede exacta en su medida final (w × h)
+function cutSizeFor(p){
+  const cantoCM = cantoThicknessMM / 10;
+  const cutW = round1(p.w - (p.canto.left?cantoCM:0) - (p.canto.right?cantoCM:0));
+  const cutH = round1(p.h - (p.canto.top?cantoCM:0) - (p.canto.bottom?cantoCM:0));
+  return { cutW, cutH };
+}
+
 let pieces = [];       // lista de piezas
 let selectedId = null;
 let nextId = 1;
 
+/* ---------- Grupos: mover varias piezas juntas, activable/desactivable ---------- */
+let groups = {};        // { [groupId]: { active: true } }
+let nextGroupId = 1;
+let multiSelectMode = false;
+let multiSelected = new Set();
+
 /* ---------- Deshacer (Ctrl+Z) ---------- */
 let undoStack = [];
 function snapshot(){
-  undoStack.push(JSON.stringify({ pieces, nextId, selectedId }));
+  undoStack.push(JSON.stringify({ pieces, nextId, selectedId, groups, nextGroupId }));
   if(undoStack.length > 60) undoStack.shift();
 }
 function undo(){
@@ -274,6 +333,8 @@ function undo(){
   pieces = state.pieces;
   nextId = state.nextId;
   selectedId = state.selectedId;
+  groups = state.groups || {};
+  nextGroupId = state.nextGroupId || 1;
   refreshAll();
 }
 window.addEventListener('keydown', (e)=>{
@@ -296,7 +357,8 @@ function newPiece(){
     posMode: 'free',
     x:0, y:0, z:0,
     attachTo: null, attachFace: 'top', offsetA:0, offsetB:0,
-    locked: false
+    locked: false,
+    groupId: null
   };
 }
 
@@ -356,7 +418,7 @@ function computeFitInfo(p){
   const expectedX = round1(left.pos.x+left.size.sx);
   const xDiffLeft = round1(pos.x - expectedX);
   const widthDiff = round1(size.sx - clearWidth);
-  const fitTol = 0.05; // prácticamente exacto — solo tolera el redondeo interno, no huecos reales
+  const fitTol = 0.01; // exacto de verdad — solo sobrevive el redondeo interno de la computadora, nada perceptible
   return {
     leftName:left.piece.name, rightName:right.piece.name, clearWidth,
     currentWidth: round1(size.sx), xDiffLeft, widthDiff,
@@ -382,6 +444,31 @@ function findOverlaps(p){
   return names;
 }
 
+// Para una pieza horizontal apoyada sobre UN solo soporte por debajo (por
+// ejemplo una repisa flotante que descansa en un lateral central, no entre
+// dos costados): busca ese soporte y compara la altura exacta a la que debería
+// quedar (justo tocando su tope) contra dónde está de verdad.
+function computeRestInfo(p){
+  if(p.orientation !== 'horizontal') return null;
+  const pos = piecePosition(p), size = boxSize(p);
+  const MAX_RANGE = 15; // cm — más allá de esto no es "su soporte", es otra pieza sin relación (como un costado normal del marco)
+  let support = null, bestGap = Infinity;
+  pieces.forEach(o=>{
+    if(o.id===p.id || o.orientation==='horizontal') return;
+    const op = piecePosition(o), os = boxSize(o);
+    const overlapX = Math.min(pos.x+size.sx, op.x+os.sx) - Math.max(pos.x, op.x);
+    const overlapZ = Math.min(pos.z+size.sz, op.z+os.sz) - Math.max(pos.z, op.z);
+    if(overlapX <= 0.3 || overlapZ <= 0.3) return; // no queda realmente debajo
+    const supportTop = op.y + os.sy;
+    const gap = pos.y - supportTop; // 0 = toca exacto · negativo = se mete dentro · positivo = queda flotando con hueco
+    if(Math.abs(gap) > MAX_RANGE) return; // muy lejos para ser de verdad su soporte
+    if(Math.abs(gap) < Math.abs(bestGap)){ bestGap = gap; support = { piece:o, top:supportTop }; }
+  });
+  if(!support) return null;
+  const tol = 0.01; // exacto de verdad — solo sobrevive el redondeo interno de la computadora, nada perceptible
+  return { supportName: support.piece.name, expectedY: round1(support.top), currentY: round1(pos.y), gap: round1(bestGap), ok: Math.abs(bestGap) <= tol };
+}
+
 // Para un Fondo: compara su medida/posición actual contra lo que debería ser
 // según el marco con el que se creó. Solo avisa si de verdad se salió del
 // marco (se corrió o le cambiaron la medida) — no por tocar los bordes normales.
@@ -391,7 +478,7 @@ function computeFondoInfo(p){
   const expectedW = exact ? p.frameAncho : round1(p.frameAncho - 2*p.frameEsp);
   const expectedH = exact ? p.frameAlto : round1(p.frameAlto - 2*p.frameEsp);
   const size = boxSize(p);
-  const tol = 0.05;
+  const tol = 0.01; // exacto de verdad — solo sobrevive el redondeo interno de la computadora, nada perceptible
   return {
     expectedW, expectedH, currentW: round1(size.sx), currentH: round1(size.sy),
     ok: Math.abs(size.sx-expectedW) <= tol && Math.abs(size.sy-expectedH) <= tol
@@ -399,14 +486,20 @@ function computeFondoInfo(p){
 }
 
 // ids de piezas con algún problema: no calzan en su hueco, se salieron del
-// marco (fondo), o se están encimando con otra
+// marco (fondo), no tocan bien su soporte, o se están encimando con otra
 function getWarningIds(){
   const s = new Set();
   pieces.forEach(p=>{
+    const restInfo = computeRestInfo(p);
+    const restOk = restInfo && restInfo.ok;
+    // si ya está apoyada exacta sobre su propio soporte (repisa flotante),
+    // no tiene por qué llenar todo el hueco entre los dos costados — eso
+    // solo aplica a piezas que van de pared a pared (piso, techo, etc.)
     const info = computeFitInfo(p);
-    if(info && !info.ok) s.add(p.id);
+    if(info && !info.ok && !restOk) s.add(p.id);
     const fondoInfo = computeFondoInfo(p);
     if(fondoInfo && !fondoInfo.ok) s.add(p.id);
+    if(restInfo && !restInfo.ok) s.add(p.id);
     if(findOverlaps(p).length) s.add(p.id);
   });
   return s;
@@ -439,6 +532,19 @@ function fixFondoToFrame(id){
   p.h = info.expectedH;
   p.x = exact ? 0 : p.frameEsp;
   p.y = exact ? 0 : p.frameEsp;
+  p.posMode = 'free';
+  p.attachTo = null;
+  refreshAll();
+}
+
+// deja la pieza exactamente apoyada sobre su soporte (sin meterse ni flotar)
+function fixRestOnSupport(id){
+  const p = pieces.find(x=>x.id===id);
+  if(!p) return;
+  const info = computeRestInfo(p);
+  if(!info) return;
+  snapshot();
+  p.y = info.expectedY;
   p.posMode = 'free';
   p.attachTo = null;
   refreshAll();
@@ -540,10 +646,11 @@ function rebuild3D(){
     const size = boxSize(p);
     const pos = piecePosition(p);
     const warn = warnIds.has(p.id);
+    const picked = multiSelectMode && multiSelected.has(p.id);
     const geo = new THREE.BoxGeometry(size.sx, size.sy, size.sz);
     const mat = new THREE.MeshStandardMaterial({
       color: warn ? '#d0473a' : p.color, roughness:0.75, metalness:0.05,
-      emissive: p.id===selectedId ? 0x3a2210 : 0x000000
+      emissive: picked ? 0x1c3a5c : (p.id===selectedId ? 0x3a2210 : 0x000000)
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(pos.x + size.sx/2, pos.y + size.sy/2, pos.z + size.sz/2);
@@ -551,7 +658,7 @@ function rebuild3D(){
     meshGroup.add(mesh);
 
     const edges = new THREE.EdgesGeometry(geo);
-    const lineMat = new THREE.LineBasicMaterial({ color: warn ? 0x7a1c12 : (p.id===selectedId ? 0xa35a2e : 0x35322c) });
+    const lineMat = new THREE.LineBasicMaterial({ color: warn ? 0x7a1c12 : (picked ? 0x2f6fb0 : (p.id===selectedId ? 0xa35a2e : 0x35322c)) });
     const line = new THREE.LineSegments(edges, lineMat);
     line.position.copy(mesh.position);
     meshGroup.add(line);
@@ -566,11 +673,78 @@ function rebuild3D(){
       meshGroup.add(new THREE.Line(g, cantoMat));
     });
   });
+
+  // guía de centrado, dibujada directo en el 3D (no solo en los planos 2D)
+  if(guideLineX !== null || guideLineZ !== null){
+    const b = overallBounds();
+    const guideMat = new THREE.LineBasicMaterial({ color:0xe33d8f, linewidth:2 });
+    if(guideLineX !== null){
+      const topY = b.maxY + 15;
+      const g = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(guideLineX, 0, b.minZ-15),
+        new THREE.Vector3(guideLineX, topY, b.minZ-15),
+        new THREE.Vector3(guideLineX, topY, b.maxZ+15),
+        new THREE.Vector3(guideLineX, 0, b.maxZ+15),
+        new THREE.Vector3(guideLineX, 0, b.minZ-15)
+      ]);
+      meshGroup.add(new THREE.Line(g, guideMat));
+    }
+    if(guideLineZ !== null){
+      const g2 = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(b.minX-15, 0.3, guideLineZ),
+        new THREE.Vector3(b.maxX+15, 0.3, guideLineZ)
+      ]);
+      meshGroup.add(new THREE.Line(g2, guideMat));
+    }
+  }
 }
 
 /* click para seleccionar + arrastrar piezas en 3D, con imán al acercarse a otra pieza */
 let dragMode = 'horizontal'; // 'horizontal' (X/Z) | 'vertical' (Y)
+let ctrlHeld = false; // mientras se mantenga Ctrl (o Cmd) presionado, se apaga el imán al soltar
+window.addEventListener('keydown', e=>{ if(e.key==='Control' || e.key==='Meta') ctrlHeld = true; });
+window.addEventListener('keyup', e=>{ if(e.key==='Control' || e.key==='Meta') ctrlHeld = false; });
+window.addEventListener('blur', ()=>{ ctrlHeld = false; });
 let dragState = null;
+let guideLineX = null, guideLineZ = null; // posición (coordenada de centro) de la guía de centrado activa, o null
+
+// centro del conjunto de las demás piezas en ese eje, restándole la mitad del
+// tamaño de esta pieza — así, si esta pieza cae ahí, queda perfectamente
+// centrada respecto a todo lo demás (como la guía rosa de centrado en Canva)
+// Cuando editas X/Y/Z a mano y la pieza pertenece a un grupo activo, el resto
+// del grupo debe correrse exactamente lo mismo — como si fuera una sola pieza.
+let groupEditStart = null;
+function beginGroupEdit(p, axis){
+  const groupMembers = (p.groupId && groups[p.groupId] && groups[p.groupId].active)
+    ? pieces.filter(x => x.groupId === p.groupId)
+    : [p];
+  groupEditStart = {
+    pieceId: p.id, axis,
+    pieceStartVal: p[axis],
+    members: groupMembers.filter(m=>m.id!==p.id).map(m=>({ id:m.id, val:m[axis] }))
+  };
+}
+function applyGroupEdit(p, axis, newVal){
+  if(!groupEditStart || groupEditStart.pieceId!==p.id || groupEditStart.axis!==axis) return;
+  const delta = newVal - groupEditStart.pieceStartVal;
+  groupEditStart.members.forEach(m=>{
+    const mp = pieces.find(x=>x.id===m.id);
+    if(mp) mp[axis] = m.val + delta;
+  });
+}
+
+function frameCenterCandidate(pieceId, axis, size){
+  const others = pieces.filter(o=>o.id!==pieceId);
+  if(!others.length) return null;
+  const key = 's'+axis;
+  let minB=Infinity, maxB=-Infinity;
+  others.forEach(o=>{
+    const op = piecePosition(o), os = boxSize(o);
+    minB = Math.min(minB, op[axis]);
+    maxB = Math.max(maxB, op[axis]+os[key]);
+  });
+  return round1((minB+maxB)/2 - size/2);
+}
 
 function snapAxis(pieceId, axis, rawMin, size){
   let best = rawMin, bestDist = DRAG_SNAP_THRESHOLD, snappedToPiece = false;
@@ -584,8 +758,13 @@ function snapAxis(pieceId, axis, rawMin, size){
       if(d < bestDist){ bestDist = d; best = cand; snappedToPiece = true; }
     });
   });
-  // si no quedó cerca de ninguna pieza, al menos que caiga en un número
-  // limpio (medio centímetro) en vez del valor "sucio" que da el mouse.
+  const centerCand = frameCenterCandidate(pieceId, axis, size);
+  if(centerCand !== null){
+    const d = Math.abs(centerCand - rawMin);
+    if(d < bestDist){ bestDist = d; best = centerCand; snappedToPiece = true; }
+  }
+  // si no quedó cerca de ninguna pieza ni del centro, al menos que caiga en un
+  // número limpio (medio centímetro) en vez del valor "sucio" que da el mouse.
   if(!snappedToPiece) best = Math.round(rawMin*2)/2;
   return best;
 }
@@ -611,10 +790,70 @@ function setup3DPicking(){
     return raycaster.ray.intersectPlane(groundPlane, pt) ? pt : null;
   }
 
+  let marqueeState = null;
+
+  function startMarquee(e){
+    const rect = renderer.domElement.getBoundingClientRect();
+    marqueeState = { startX: e.clientX-rect.left, startY: e.clientY-rect.top };
+    controls.enabled = false;
+    const box = document.getElementById('marqueeBox');
+    box.style.display = 'block';
+    box.style.left = marqueeState.startX+'px';
+    box.style.top = marqueeState.startY+'px';
+    box.style.width = '0px';
+    box.style.height = '0px';
+    renderer.domElement.setPointerCapture(e.pointerId);
+  }
+  function updateMarquee(e){
+    const rect = renderer.domElement.getBoundingClientRect();
+    const curX = e.clientX-rect.left, curY = e.clientY-rect.top;
+    const x = Math.min(marqueeState.startX, curX), y = Math.min(marqueeState.startY, curY);
+    const box = document.getElementById('marqueeBox');
+    box.style.left = x+'px'; box.style.top = y+'px';
+    box.style.width = Math.abs(curX-marqueeState.startX)+'px';
+    box.style.height = Math.abs(curY-marqueeState.startY)+'px';
+  }
+  function finishMarquee(){
+    const box = document.getElementById('marqueeBox');
+    const bx = parseFloat(box.style.left), by = parseFloat(box.style.top);
+    const bw = parseFloat(box.style.width), bh = parseFloat(box.style.height);
+    box.style.display = 'none';
+    if(bw > 4 || bh > 4){ // arrastre real, no solo un clic
+      const rect = renderer.domElement.getBoundingClientRect();
+      pieces.forEach(p=>{
+        const pos = piecePosition(p), size = boxSize(p);
+        const centerWorld = new THREE.Vector3(pos.x+size.sx/2, pos.y+size.sy/2, pos.z+size.sz/2);
+        const v = centerWorld.project(camera);
+        const sx = (v.x*0.5+0.5)*rect.width;
+        const sy = (-v.y*0.5+0.5)*rect.height;
+        if(sx>=bx && sx<=bx+bw && sy>=by && sy<=by+bh) multiSelected.add(p.id);
+      });
+      renderPieceList();
+      updateGroupActionBar();
+      rebuild3D();
+    }
+    marqueeState = null;
+    controls.enabled = true;
+  }
+
   renderer.domElement.addEventListener('pointerdown', (e)=>{
     toMouse(e);
     raycaster.setFromCamera(mouse, camera);
     const hits = raycaster.intersectObjects(meshGroup.children.filter(o=>o.type==='Mesh'));
+
+    if(multiSelectMode){
+      if(hits.length){
+        const id = hits[0].object.userData.pieceId;
+        if(multiSelected.has(id)) multiSelected.delete(id); else multiSelected.add(id);
+        renderPieceList();
+        updateGroupActionBar();
+        rebuild3D();
+        return;
+      }
+      startMarquee(e);
+      return;
+    }
+
     if(!hits.length) return;
     const id = hits[0].object.userData.pieceId;
     selectPiece(id);
@@ -622,26 +861,36 @@ function setup3DPicking(){
     if(p.locked) return; // seleccionada pero no se arrastra
     const pos = piecePosition(p);
 
+    // si la pieza pertenece a un grupo activo, se arrastran todas juntas
+    const groupMembers = (p.groupId && groups[p.groupId] && groups[p.groupId].active)
+      ? pieces.filter(x => x.groupId === p.groupId && !x.locked)
+      : [p];
+    const members = groupMembers.map(m => {
+      const mp = piecePosition(m);
+      return { id: m.id, startX: mp.x, startY: mp.y, startZ: mp.z };
+    });
+
     if(dragMode === 'horizontal'){
       const start = planeIntersect(pos.y);
       if(!start) return; // ángulo de cámara demasiado rasante para arrastrar ahora
       snapshot();
       controls.enabled = false;
-      dragState = { id, mode:'horizontal', startX: start.x, startZ: start.z, pieceStartX: pos.x, pieceStartZ: pos.z, pieceY: pos.y, lastX: pos.x, lastZ: pos.z };
+      dragState = { id, mode:'horizontal', startX: start.x, startZ: start.z, pieceStartX: pos.x, pieceStartZ: pos.z, pieceY: pos.y, lastX: pos.x, lastZ: pos.z, members };
     } else {
       snapshot();
       controls.enabled = false;
-      dragState = { id, mode:'vertical', startClientY: e.clientY, pieceStartY: pos.y };
+      dragState = { id, mode:'vertical', startClientY: e.clientY, pieceStartY: pos.y, lastY: pos.y, members };
     }
     renderer.domElement.setPointerCapture(e.pointerId);
   });
 
   renderer.domElement.addEventListener('pointermove', (e)=>{
+    if(marqueeState){ updateMarquee(e); return; }
     if(!dragState) return;
     const p = pieces.find(x=>x.id===dragState.id);
     if(!p) return;
     toMouse(e);
-    const MAX_JUMP = 150; // cm — protección: ignora saltos irreales en un solo movimiento
+    const MAX_JUMP = 35; // cm — protección: ignora saltos irreales en un solo movimiento (más estricto)
 
     if(dragState.mode === 'horizontal'){
       const pt = planeIntersect(dragState.pieceY);
@@ -650,36 +899,74 @@ function setup3DPicking(){
       const rawZ = dragState.pieceStartZ + (pt.z - dragState.startZ);
       if(Math.abs(rawX-dragState.lastX) > MAX_JUMP || Math.abs(rawZ-dragState.lastZ) > MAX_JUMP) return;
       dragState.lastX = rawX; dragState.lastZ = rawZ;
-      p.posMode = 'free'; p.attachTo = null;
+      // guía de centrado visual: se muestra si el centro de la pieza está
+      // cerca de quedar centrado respecto al resto del conjunto — pero no si
+      // Ctrl está presionado, porque en ese caso el imán no se va a aplicar
+      const size = boxSize(p);
+      const candX = frameCenterCandidate(p.id, 'x', size.sx);
+      const candZ = frameCenterCandidate(p.id, 'z', size.sz);
+      guideLineX = (!ctrlHeld && candX !== null && Math.abs(rawX-candX) < DRAG_SNAP_THRESHOLD) ? candX + size.sx/2 : null;
+      guideLineZ = (!ctrlHeld && candZ !== null && Math.abs(rawZ-candZ) < DRAG_SNAP_THRESHOLD) ? candZ + size.sz/2 : null;
       // sin imán mientras se mueve — se mueve suave, parejo con el mouse.
       // El imán se aplica una sola vez, al soltar (ver endDrag), para que no tiemble.
-      p.x = rawX;
-      p.z = rawZ;
-      p.y = dragState.pieceY;
+      const deltaX = rawX - dragState.pieceStartX;
+      const deltaZ = rawZ - dragState.pieceStartZ;
+      dragState.members.forEach(m=>{
+        const mp = pieces.find(x=>x.id===m.id);
+        if(!mp) return;
+        mp.posMode = 'free'; mp.attachTo = null;
+        mp.x = m.startX + deltaX;
+        mp.z = m.startZ + deltaZ;
+        mp.y = m.startY;
+      });
     } else {
       const deltaPx = e.clientY - dragState.startClientY;
       const rawY = dragState.pieceStartY - deltaPx * 0.5; // 0.5 cm por pixel
-      p.posMode = 'free'; p.attachTo = null;
-      p.y = rawY;
+      if(Math.abs(rawY-dragState.lastY) > MAX_JUMP) return; // mismo seguro que en horizontal
+      dragState.lastY = rawY;
+      const deltaY = rawY - dragState.pieceStartY;
+      dragState.members.forEach(m=>{
+        const mp = pieces.find(x=>x.id===m.id);
+        if(!mp) return;
+        mp.posMode = 'free'; mp.attachTo = null;
+        mp.y = m.startY + deltaY;
+      });
     }
     rebuild3D();
     render2D();
   });
 
   function endDrag(){
+    if(marqueeState){ finishMarquee(); return; }
     if(!dragState) return;
     const p = pieces.find(x=>x.id===dragState.id);
-    if(p){
+    if(p && !ctrlHeld){
       const size = boxSize(p);
-      // acá sí se aplica el imán, una sola vez, con la posición final ya soltada
+      // el imán solo decide la posición final de la pieza que agarraste; el
+      // resto del grupo se corre exactamente lo mismo, para no desarmar el conjunto
       if(dragState.mode === 'horizontal'){
-        p.x = snapAxis(p.id, 'x', p.x, size.sx);
-        p.z = snapAxis(p.id, 'z', p.z, size.sz);
+        const snappedX = snapAxis(p.id, 'x', p.x, size.sx);
+        const snappedZ = snapAxis(p.id, 'z', p.z, size.sz);
+        const dX = snappedX - p.x, dZ = snappedZ - p.z;
+        dragState.members.forEach(m=>{
+          const mp = pieces.find(x=>x.id===m.id);
+          if(!mp) return;
+          mp.x += dX; mp.z += dZ;
+        });
       } else {
-        p.y = snapAxis(p.id, 'y', p.y, size.sy);
+        const snappedY = snapAxis(p.id, 'y', p.y, size.sy);
+        const dY = snappedY - p.y;
+        dragState.members.forEach(m=>{
+          const mp = pieces.find(x=>x.id===m.id);
+          if(!mp) return;
+          mp.y += dY;
+        });
       }
     }
+    // si Ctrl estaba presionado, no se toca nada más: queda exactamente
+    // donde la soltaste, sin imán ni redondeo.
     dragState = null;
+    guideLineX = null; guideLineZ = null;
     controls.enabled = true;
     refreshAll();
   }
@@ -752,6 +1039,14 @@ function renderTopView(){
     rect.addEventListener('click', ()=>selectPiece(p.id));
     svg.appendChild(rect);
   });
+  if(guideLineX !== null){
+    const gx = pad + (guideLineX-b.minX)*scale;
+    svg.appendChild(svgEl('line',{x1:gx,y1:0,x2:gx,y2:h,stroke:'#e33d8f','stroke-width':1.5,'stroke-dasharray':'5 4'}));
+  }
+  if(guideLineZ !== null){
+    const gy = pad + (spanZ - (guideLineZ-b.minZ))*scale;
+    svg.appendChild(svgEl('line',{x1:0,y1:gy,x2:w,y2:gy,stroke:'#e33d8f','stroke-width':1.5,'stroke-dasharray':'5 4'}));
+  }
   document.getElementById('topDims').textContent = `${round1(b.maxX-b.minX)} × ${round1(b.maxZ-b.minZ)} cm`;
 }
 
@@ -777,6 +1072,10 @@ function renderFrontView(){
     rect.addEventListener('click', ()=>selectPiece(p.id));
     svg.appendChild(rect);
   });
+  if(guideLineX !== null){
+    const gx = pad + (guideLineX-b.minX)*scale;
+    svg.appendChild(svgEl('line',{x1:gx,y1:0,x2:gx,y2:h,stroke:'#e33d8f','stroke-width':1.5,'stroke-dasharray':'5 4'}));
+  }
   document.getElementById('frontDims').textContent = `${round1(b.maxX-b.minX)} × ${round1(b.maxY-b.minY)} cm`;
 }
 
@@ -829,26 +1128,169 @@ function renderPieceList(){
     const card = document.createElement('div');
     card.className = 'piece-card' + (p.id===selectedId ? ' active':'');
     if(warnIds.has(p.id)) card.style.borderColor = 'var(--danger)';
+
+    const groupBadge = p.groupId ? `
+      <button class="small ghost" data-gtoggle="${p.groupId}" title="${groups[p.groupId] && groups[p.groupId].active ? 'Grupo activo: se mueven juntas — clic para pausar' : 'Grupo en pausa: se mueven por separado — clic para activar'}">${groups[p.groupId] && groups[p.groupId].active ? '🔗' : '⛓️‍💥'}</button>
+      <button class="small ghost" data-ungroup="${p.groupId}" title="Desagrupar">Desagrupar</button>
+    ` : '';
+
+    const checkboxHtml = multiSelectMode ? `<input type="checkbox" data-check="${p.id}" ${multiSelected.has(p.id)?'checked':''} style="margin-right:8px;width:16px;height:16px;">` : '';
+
     card.innerHTML = `
       <div class="pc-top">
-        <div><span class="swatch" style="background:${p.color}"></span><span class="pc-name">${p.name}</span>${p.locked ? ' 🔒' : ''}${warnIds.has(p.id) ? ' <span style="color:var(--danger);font-weight:600;">⚠ no calza</span>' : ''}</div>
+        <div style="display:flex;align-items:center;">${checkboxHtml}<span class="swatch" style="background:${p.color}"></span><span class="pc-name">${p.name}</span>${p.locked ? ' 🔒' : ''}${warnIds.has(p.id) ? ' <span style="color:var(--danger);font-weight:600;">⚠ no calza</span>' : ''}</div>
         <div style="display:flex;gap:2px;">
+          ${groupBadge}
+          ${multiSelectMode ? '' : `
           <button class="small ghost" data-lock="${p.id}" title="${p.locked?'Desbloquear':'Bloquear (evita moverla sin querer)'}">${p.locked?'🔒':'🔓'}</button>
           <button class="small ghost" data-dup="${p.id}" title="Duplicar pieza">⧉</button>
-          <button class="small ghost danger" data-del="${p.id}">✕</button>
+          <button class="small ghost danger" data-del="${p.id}">✕</button>`}
         </div>
       </div>
       <div class="pc-dims mono">${p.w}×${p.h}×${p.t} cm · x${p.qty} · ${orientationLabel(p.orientation)}</div>
     `;
     card.addEventListener('click', (e)=>{
-      if(e.target.closest('[data-del],[data-lock],[data-dup]')) return;
+      if(e.target.closest('[data-del],[data-lock],[data-dup],[data-gtoggle],[data-ungroup]')) return;
+      if(multiSelectMode){
+        if(e.target.closest('[data-check]')) return; // el checkbox maneja su propio cambio
+        if(multiSelected.has(p.id)) multiSelected.delete(p.id); else multiSelected.add(p.id);
+        renderPieceList();
+        updateGroupActionBar();
+        return;
+      }
       selectPiece(p.id);
     });
-    card.querySelector('[data-del]').addEventListener('click', ()=>deletePiece(p.id));
-    card.querySelector('[data-lock]').addEventListener('click', ()=>togglePieceLock(p.id));
-    card.querySelector('[data-dup]').addEventListener('click', ()=>duplicatePiece(p.id));
+    const chk = card.querySelector('[data-check]');
+    if(chk) chk.addEventListener('change', (e)=>{
+      if(e.target.checked) multiSelected.add(p.id); else multiSelected.delete(p.id);
+      updateGroupActionBar();
+    });
+    if(!multiSelectMode){
+      card.querySelector('[data-del]').addEventListener('click', ()=>deletePiece(p.id));
+      card.querySelector('[data-lock]').addEventListener('click', ()=>togglePieceLock(p.id));
+      card.querySelector('[data-dup]').addEventListener('click', ()=>duplicatePiece(p.id));
+    }
+    const gToggleBtn = card.querySelector('[data-gtoggle]');
+    if(gToggleBtn) gToggleBtn.addEventListener('click', ()=>toggleGroupActive(p.groupId));
+    const ungroupBtn = card.querySelector('[data-ungroup]');
+    if(ungroupBtn) ungroupBtn.addEventListener('click', ()=>ungroup(p.groupId));
     list.appendChild(card);
   });
+}
+
+// Agrupa las piezas actualmente marcadas (multiSelected) en un grupo nuevo.
+// Un grupo activo hace que, al arrastrar cualquiera de sus piezas, todas se
+// muevan juntas. Se puede pausar (desactivar) sin desagrupar, y desagrupar
+// del todo cuando ya no se necesite.
+/* ---------- Repartir parejo: divide el espacio en partes iguales entre las piezas elegidas ---------- */
+function openSpreadModal(){
+  if(multiSelected.size < 2) return;
+  const overlay = document.getElementById('modalOverlay');
+  let axis = 'x';
+  overlay.innerHTML = `
+    <div id="modalCard">
+      <h2>Repartir ${multiSelected.size} piezas parejo</h2>
+      <div class="field">
+        <label>Eje a lo largo del cual se reparten</label>
+        <div class="seg">
+          <button type="button" data-ax="x" class="on">Ancho (X)</button>
+          <button type="button" data-ax="y">Alto (Y)</button>
+          <button type="button" data-ax="z">Profundidad (Z)</button>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Desde (cm)</label><input type="number" step="0.1" id="sp-from"></div>
+        <div class="field"><label>Hasta (cm)</label><input type="number" step="0.1" id="sp-to"></div>
+      </div>
+      <div class="hint">Por defecto toma el espacio ocupado por las demás piezas (el marco). Puedes escribir otros números si quieres repartir en un tramo distinto.</div>
+      <div class="modal-actions">
+        <button class="ghost" id="spCancel">Cancelar</button>
+        <button class="primary" id="spDo">Repartir</button>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('open');
+
+  function fillDefaults(){
+    const others = pieces.filter(p=>!multiSelected.has(p.id));
+    let min=0, max=100;
+    if(others.length){
+      min=Infinity; max=-Infinity;
+      others.forEach(o=>{
+        const op=piecePosition(o), os=boxSize(o), key='s'+axis;
+        min=Math.min(min, op[axis]); max=Math.max(max, op[axis]+os[key]);
+      });
+    }
+    document.getElementById('sp-from').value = round1(min);
+    document.getElementById('sp-to').value = round1(max);
+  }
+  fillDefaults();
+
+  overlay.querySelectorAll('[data-ax]').forEach(b=>b.addEventListener('click', ()=>{
+    axis = b.dataset.ax;
+    overlay.querySelectorAll('[data-ax]').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    fillDefaults();
+  }));
+  document.getElementById('spCancel').addEventListener('click', ()=> overlay.classList.remove('open'));
+  document.getElementById('spDo').addEventListener('click', ()=>{
+    const from = parseFloat(document.getElementById('sp-from').value) || 0;
+    const to = parseFloat(document.getElementById('sp-to').value) || 100;
+    spreadPiecesEvenly(Array.from(multiSelected), axis, from, to);
+    overlay.classList.remove('open');
+  });
+}
+
+// reparte las piezas dadas en partes iguales a lo largo del eje indicado,
+// entre "from" y "to" (cm), dejando el mismo hueco libre entre cada una
+function spreadPiecesEvenly(ids, axis, from, to){
+  const key = 's'+axis;
+  let selected = ids.map(id=>pieces.find(p=>p.id===id)).filter(Boolean);
+  if(selected.length < 2) return;
+  // conserva el orden visual que ya tenían a lo largo de ese eje
+  selected.sort((a,b)=> piecePosition(a)[axis] - piecePosition(b)[axis]);
+  const totalThickness = selected.reduce((sum,p)=> sum + boxSize(p)[key], 0);
+  const gap = round1((to - from - totalThickness) / (selected.length+1));
+  snapshot();
+  let cursor = from + gap;
+  selected.forEach(p=>{
+    p.posMode = 'free';
+    p.attachTo = null;
+    p[axis] = round1(cursor);
+    cursor += boxSize(p)[key] + gap;
+  });
+  multiSelectMode = false;
+  multiSelected = new Set();
+  refreshAll();
+}
+
+function createGroupFromSelection(){
+  if(multiSelected.size < 2) return;
+  snapshot();
+  const gid = 'g' + (nextGroupId++);
+  groups[gid] = { active: true };
+  multiSelected.forEach(id=>{
+    const p = pieces.find(x=>x.id===id);
+    if(p) p.groupId = gid;
+  });
+  multiSelected = new Set();
+  multiSelectMode = false;
+  refreshAll();
+}
+
+function toggleGroupActive(gid){
+  if(!groups[gid]) return;
+  snapshot();
+  groups[gid].active = !groups[gid].active;
+  refreshAll();
+}
+
+function ungroup(gid){
+  if(!groups[gid]) return;
+  snapshot();
+  pieces.forEach(p=>{ if(p.groupId===gid) p.groupId = null; });
+  delete groups[gid];
+  refreshAll();
 }
 
 function togglePieceLock(id){
@@ -910,8 +1352,12 @@ function renderForm(){
   const size = boxSize(p);
   const fitInfo = computeFitInfo(p);
   const fondoInfo = computeFondoInfo(p);
+  const restInfo = computeRestInfo(p);
 
   let infoHtml = `<div class="fitbox"><div class="ts">Esta pieza queda de <b class="mono">${round1(pos.y)}</b> a <b class="mono">${round1(pos.y+size.sy)}</b> cm de altura desde el piso.</div>`;
+  if(p.groupId && groups[p.groupId] && groups[p.groupId].active){
+    infoHtml += `<div class="ts" style="margin-top:4px;color:var(--blue);">🔗 Pertenece a un grupo activo: al arrastrarla o cambiar X/Y/Z, se mueve junto con el resto del grupo.</div>`;
+  }
   const overlaps = findOverlaps(p);
   if(overlaps.length){
     infoHtml += `<div class="ts" style="margin-top:4px;color:var(--danger);font-weight:600;">⚠ Se está encimando con: ${overlaps.join(', ')}. Muévela o ajusta su medida.</div>`;
@@ -924,7 +1370,18 @@ function renderForm(){
         <button class="small primary" id="f-fixfondo" style="margin-top:6px;">Ajustar automáticamente a ${fondoInfo.expectedW}×${fondoInfo.expectedH} cm</button>`;
     }
   }
-  if(fitInfo){
+  if(restInfo){
+    if(restInfo.ok){
+      infoHtml += `<div class="ts" style="margin-top:4px;color:var(--ok);">✓ Apoyada exacta sobre "${restInfo.supportName}" (a ${restInfo.expectedY} cm de altura).</div>`;
+    } else {
+      const word = restInfo.gap < 0 ? 'se mete' : 'queda flotando (hueco de';
+      const tail = restInfo.gap < 0 ? `${Math.abs(restInfo.gap)} cm dentro de` : `${restInfo.gap} cm sobre`;
+      infoHtml += `<div class="ts" style="margin-top:4px;color:var(--danger);font-weight:600;">⚠ Esta pieza ${word} ${tail} "${restInfo.supportName}": debería quedar a ${restInfo.expectedY} cm y está a ${restInfo.currentY} cm.</div>
+        <button class="small primary" id="f-fixrest" style="margin-top:6px;">Ajustar automáticamente a ${restInfo.expectedY} cm</button>`;
+    }
+  }
+  const restOk = restInfo && restInfo.ok;
+  if(fitInfo && !restOk){
     if(fitInfo.ok){
       infoHtml += `<div class="ts" style="margin-top:4px;color:var(--ok);">✓ Encaja bien entre "${fitInfo.leftName}" y "${fitInfo.rightName}" (hueco libre: <b class="mono">${fitInfo.clearWidth}</b> cm).</div>`;
     } else {
@@ -1027,6 +1484,8 @@ function renderForm(){
   if(fitBtn) fitBtn.addEventListener('click', ()=>fitPieceToGap(p.id));
   const fixFondoBtn = panel.querySelector('#f-fixfondo');
   if(fixFondoBtn) fixFondoBtn.addEventListener('click', ()=>fixFondoToFrame(p.id));
+  const fixRestBtn = panel.querySelector('#f-fixrest');
+  if(fixRestBtn) fixRestBtn.addEventListener('click', ()=>fixRestOnSupport(p.id));
   panel.querySelector('#f-dup').addEventListener('click', ()=>duplicatePiece(p.id));
   panel.querySelector('#f-lock').addEventListener('click', ()=>togglePieceLock(p.id));
   // Los campos numéricos usan refreshLight (no redibuja el formulario) para no perder
@@ -1053,12 +1512,12 @@ function renderForm(){
   }));
 
   if(p.posMode==='free'){
-    panel.querySelector('#f-x').addEventListener('focus', snapshot);
-    panel.querySelector('#f-x').addEventListener('input', e=>{ p.x=parseFloat(e.target.value); if(isNaN(p.x)) p.x=0; refreshLight(); });
-    panel.querySelector('#f-y').addEventListener('focus', snapshot);
-    panel.querySelector('#f-y').addEventListener('input', e=>{ p.y=parseFloat(e.target.value); if(isNaN(p.y)) p.y=0; refreshLight(); });
-    panel.querySelector('#f-z').addEventListener('focus', snapshot);
-    panel.querySelector('#f-z').addEventListener('input', e=>{ p.z=parseFloat(e.target.value); if(isNaN(p.z)) p.z=0; refreshLight(); });
+    panel.querySelector('#f-x').addEventListener('focus', ()=>{ snapshot(); beginGroupEdit(p,'x'); });
+    panel.querySelector('#f-x').addEventListener('input', e=>{ const v=parseFloat(e.target.value); p.x=isNaN(v)?0:v; applyGroupEdit(p,'x',p.x); refreshLight(); });
+    panel.querySelector('#f-y').addEventListener('focus', ()=>{ snapshot(); beginGroupEdit(p,'y'); });
+    panel.querySelector('#f-y').addEventListener('input', e=>{ const v=parseFloat(e.target.value); p.y=isNaN(v)?0:v; applyGroupEdit(p,'y',p.y); refreshLight(); });
+    panel.querySelector('#f-z').addEventListener('focus', ()=>{ snapshot(); beginGroupEdit(p,'z'); });
+    panel.querySelector('#f-z').addEventListener('input', e=>{ const v=parseFloat(e.target.value); p.z=isNaN(v)?0:v; applyGroupEdit(p,'z',p.z); refreshLight(); });
   } else {
     const targetSel = panel.querySelector('#attachTarget');
     if(targetSel) targetSel.addEventListener('change', e=>{ snapshot(); p.attachTo = e.target.value ? Number(e.target.value) : null; refreshAll(); });
@@ -1080,11 +1539,14 @@ function renderCutlist(){
   pieces.forEach(p=>{
     const tags = ['top','bottom','left','right'].filter(k=>p.canto[k]);
     const labelMap = {top:'Sup',bottom:'Inf',left:'Izq',right:'Der'};
+    const { cutW, cutH } = cutSizeFor(p);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${p.name}</td>
       <td class="mono">${p.w}</td>
       <td class="mono">${p.h}</td>
+      <td class="mono" style="color:var(--wood);font-weight:600;">${cutW}</td>
+      <td class="mono" style="color:var(--wood);font-weight:600;">${cutH}</td>
       <td class="mono">${p.t}</td>
       <td class="mono">${p.qty}</td>
       <td class="cantos-tags">${tags.length ? tags.map(t=>`<span>${labelMap[t]}</span>`).join('') : '<span style="opacity:.4;background:transparent;border-color:var(--line);color:var(--text-dim)">sin canto</span>'}</td>
@@ -1103,11 +1565,16 @@ function nestSheets(){
   document.getElementById('nestSummary').textContent = '';
   if(!pieces.length) return;
 
+  const kerfCM = kerfMM / 10;
+
   // agrupar por espesor (cada espesor = un set de láminas distinto)
+  // usa la medida DE CORTE (sin el canto, que no sale de la lámina) y le
+  // suma el grosor de la sierra, para que el cálculo de láminas sea realista
   const byThickness = {};
   pieces.forEach(p=>{
+    const { cutW, cutH } = cutSizeFor(p);
     for(let i=0;i<p.qty;i++){
-      (byThickness[p.t] = byThickness[p.t]||[]).push({ w:p.w, h:p.h, name:p.name, color:p.color });
+      (byThickness[p.t] = byThickness[p.t]||[]).push({ w:round1(cutW+kerfCM), h:round1(cutH+kerfCM), name:p.name, color:p.color });
     }
   });
 
@@ -1155,7 +1622,7 @@ function nestSheets(){
     });
   });
 
-  document.getElementById('nestSummary').textContent = `Total: ${totalSheets} lámina(s) de ${SHEET.w}×${SHEET.h} cm necesarias (agrupadas por espesor).`;
+  document.getElementById('nestSummary').textContent = `Total: ${totalSheets} lámina(s) de ${SHEET.w}×${SHEET.h} cm necesarias (agrupadas por espesor · calculado con la medida de corte real, sin canto, más ${kerfMM} mm de sierra entre pieza y pieza).`;
 }
 
 function tryPlace(sheet, rect){
@@ -1229,11 +1696,12 @@ function loadProject(file){
 }
 
 function exportCsv(){
-  let csv = 'Pieza,Ancho,Alto,Espesor,Cantidad,Canto,Orientacion\n';
+  let csv = 'Pieza,Ancho final,Alto final,Ancho de corte,Alto de corte,Espesor,Cantidad,Canto,Orientacion\n';
   pieces.forEach(p=>{
     const tags = ['top','bottom','left','right'].filter(k=>p.canto[k]);
     const labelMap = {top:'Superior',bottom:'Inferior',left:'Izquierdo',right:'Derecho'};
-    csv += `"${p.name}",${p.w},${p.h},${p.t},${p.qty},"${tags.map(t=>labelMap[t]).join(' + ')||'ninguno'}","${orientationLabel(p.orientation)}"\n`;
+    const { cutW, cutH } = cutSizeFor(p);
+    csv += `"${p.name}",${p.w},${p.h},${cutW},${cutH},${p.t},${p.qty},"${tags.map(t=>labelMap[t]).join(' + ')||'ninguno'}","${orientationLabel(p.orientation)}"\n`;
   });
   const blob = new Blob([csv], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
@@ -1538,6 +2006,39 @@ function openMeasureModal(){
 }
 document.getElementById('measureBtn').addEventListener('click', openMeasureModal);
 
+/* ---------- Modo de selección múltiple (para agrupar) ---------- */
+function updateGroupActionBar(){
+  const bar = document.getElementById('groupActionBar');
+  bar.style.display = multiSelectMode ? 'flex' : 'none';
+  document.getElementById('doGroupBtn').disabled = multiSelected.size < 2;
+  document.getElementById('doGroupBtn').textContent = multiSelected.size >= 2
+    ? `Agrupar (${multiSelected.size})` : 'Agrupar';
+  document.getElementById('doSpreadBtn').disabled = multiSelected.size < 2;
+  document.getElementById('doSpreadBtn').textContent = multiSelected.size >= 2
+    ? `↔ Repartir parejo (${multiSelected.size})` : '↔ Repartir parejo';
+}
+document.getElementById('multiSelectBtn').addEventListener('click', ()=>{
+  multiSelectMode = true;
+  multiSelected = new Set();
+  document.getElementById('badge3dText').textContent = 'Clic en piezas para marcarlas, o arrastra un recuadro sobre varias · luego "Agrupar seleccionadas"';
+  renderPieceList();
+  updateGroupActionBar();
+  rebuild3D();
+});
+document.getElementById('cancelMultiBtn').addEventListener('click', ()=>{
+  multiSelectMode = false;
+  multiSelected = new Set();
+  document.getElementById('badge3dText').textContent = 'Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace';
+  renderPieceList();
+  updateGroupActionBar();
+  rebuild3D();
+});
+document.getElementById('doGroupBtn').addEventListener('click', ()=>{
+  createGroupFromSelection();
+  document.getElementById('badge3dText').textContent = 'Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace';
+});
+document.getElementById('doSpreadBtn').addEventListener('click', openSpreadModal);
+
 document.getElementById('resetCam').addEventListener('click', autoFitCamera);
 
 function setDragMode(mode){
@@ -1585,6 +2086,19 @@ holdRepeat('cc-down', -1);
 // Este listener solo actualiza el texto del botón cuando se abre o cierra.
 document.getElementById('bottomBar').addEventListener('toggle', function(){
   document.getElementById('toggleBottom').textContent = this.open ? 'Ocultar ▼' : 'Mostrar ▲';
+});
+document.getElementById('bottomCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('bottomBar').open = false;
+});
+document.getElementById('cantoThicknessInput').addEventListener('input', e=>{
+  const v = parseFloat(e.target.value);
+  cantoThicknessMM = isNaN(v) ? 0 : v;
+  renderCutlist();
+});
+document.getElementById('kerfInput').addEventListener('input', e=>{
+  const v = parseFloat(e.target.value);
+  kerfMM = isNaN(v) ? 0 : v;
+  renderCutlist();
 });
 
 document.getElementById('btnSave').addEventListener('click', saveProject);
