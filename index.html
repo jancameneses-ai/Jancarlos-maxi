@@ -58,6 +58,10 @@
     width:300px;flex-shrink:0;border-right:1px solid var(--line);background:var(--panel);
     display:flex;flex-direction:column;overflow:hidden;
   }
+  #rightPanel{
+    width:300px;flex-shrink:0;border-left:1px solid var(--line);background:var(--panel);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
   .side-scroll{overflow-y:auto;flex:1;padding:14px;}
   .side-scroll::-webkit-scrollbar{width:8px;}
   .side-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
@@ -71,13 +75,21 @@
   .piece-card .pc-name{font-weight:600;font-size:13px;}
   .piece-card .pc-dims{font-size:11px;color:var(--text-dim);margin-top:3px;}
   .swatch{width:12px;height:12px;border-radius:2px;display:inline-block;margin-right:6px;border:1px solid rgba(255,255,255,.2);}
+  .pc-actions{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:150px;}
+  .pc-actions button{padding:4px 7px;}
 
   #addBtn{width:100%;margin-bottom:12px;}
+  .side-label{
+    font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+    color:var(--text-dim);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line);
+  }
+  .side-scroll > .side-label:first-child{margin-top:2px;}
 
   /* ---------- form ---------- */
-  .form-panel{border-top:1px solid var(--line);padding:14px;max-height:56%;overflow-y:auto;}
+  .form-panel{padding:14px;flex:1;overflow-y:auto;}
   .form-panel::-webkit-scrollbar{width:8px;}
   .form-panel::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+  .form-empty{color:var(--text-dim);font-size:12.5px;line-height:1.5;padding:4px 0;}
   .field{margin-bottom:10px;}
   .field label{display:block;font-size:11px;color:var(--text-dim);margin-bottom:4px;}
   .field input[type=text], .field input[type=number], .field select{
@@ -109,7 +121,7 @@
     flex-shrink:0;align-items:center;
   }
   #viewToolbar .spacer{flex:1;}
-  #canvas3d-wrap{flex:1;position:relative;min-height:0;background:radial-gradient(circle at 50% 30%, #f4f2ee 0%, #e7e4dd 100%);}
+  #canvas3d-wrap{flex:1;position:relative;min-height:0;background:radial-gradient(circle at 50% 30%, #f2e9dc 0%, #e6d7c0 100%);}
   #canvas3d-wrap canvas{display:block;width:100%;height:100%;}
   .badge3d{position:absolute;top:10px;left:12px;font-size:11px;color:var(--text-dim);background:rgba(255,255,255,.75);padding:4px 8px;border-radius:4px;border:1px solid var(--line);}
   #camControls{position:absolute;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:5;}
@@ -165,6 +177,7 @@
 
   @media (max-width:900px){
     #sidebar{width:240px;}
+    #rightPanel{width:240px;}
     #panel2d{flex-direction:column;height:56%;}
     .view2d-box{border-right:none;border-bottom:1px solid var(--line);}
   }
@@ -190,19 +203,30 @@
     <!-- SIDEBAR -->
     <div id="sidebar">
       <div class="side-scroll">
-        <button id="addBtn" class="primary">+ Nueva pieza</button>
-        <button id="frameBtn" class="ghost" style="width:100%;margin-bottom:12px;">+ Marco (costados/tapas)</button>
-        <button id="fondoBtn" class="ghost" style="width:100%;margin-bottom:12px;">+ Fondo</button>
-        <button id="measureBtn" class="ghost" style="width:100%;margin-bottom:12px;">📏 Medir entre dos piezas</button>
+        <div class="side-label">Crear</div>
+        <button id="addBtn" class="primary" style="width:100%;margin-bottom:8px;">+ Nueva pieza</button>
+        <div class="row2" style="margin-bottom:12px;">
+          <button id="frameBtn" class="ghost" style="flex:1;">+ Marco</button>
+          <button id="fondoBtn" class="ghost" style="flex:1;">+ Fondo</button>
+        </div>
+        <button id="doorBtn" class="ghost" style="width:100%;margin-bottom:12px;">🚪 + Puerta (con bisagra)</button>
+        <button id="casterBtn" class="ghost" style="width:100%;margin-bottom:12px;">🛞 + Rodachines (y realza el mueble)</button>
+
+        <div class="side-label">Herramientas</div>
+        <div class="row2" style="margin-bottom:8px;">
+          <button id="measureBtn" class="ghost" style="flex:1;">📏 Medir</button>
+          <button id="placeAtHeightBtn" class="ghost" style="flex:1;">🎯 Colocar a altura</button>
+        </div>
         <button id="multiSelectBtn" class="ghost" style="width:100%;margin-bottom:8px;">☑ Seleccionar varias (agrupar / repartir)</button>
-        <div id="groupActionBar" style="display:none;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+        <div id="groupActionBar" style="display:none;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
           <button id="doGroupBtn" class="primary small" style="flex:1;">Agrupar</button>
           <button id="doSpreadBtn" class="primary small" style="flex:1;">↔ Repartir parejo</button>
           <button id="cancelMultiBtn" class="ghost small" style="flex:1;">Cancelar</button>
         </div>
+
+        <div class="side-label" id="pieceCountLabel">Piezas</div>
         <div id="pieceList"></div>
       </div>
-      <div class="form-panel" id="formPanel" style="display:none;"></div>
     </div>
 
     <!-- CENTER -->
@@ -217,11 +241,14 @@
           <button class="small ghost" id="viewUp" title="Subir la vista para ver la parte de arriba">▲ Ver arriba</button>
           <button class="small ghost" id="viewDown" title="Bajar la vista">▼ Ver abajo</button>
         </div>
+        <button class="small ghost" id="measure3dBtn" title="Marca dos puntos en el 3D para medir la distancia exacta entre ellos">📐 Medir en 3D</button>
+        <button class="small ghost" id="measure3dClear" style="display:none;">Limpiar medición</button>
         <span class="spacer"></span>
         <span class="hint" id="selInfo">Sin pieza seleccionada</span>
       </div>
+      <div id="measure3dResult" class="hint" style="display:none;padding:6px 14px;border-bottom:1px solid var(--line);background:var(--panel-2);"></div>
       <div id="canvas3d-wrap">
-        <div class="badge3d" id="badge3dText">Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace</div>
+        <div class="badge3d" id="badge3dText">Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace · clic corto en una puerta la abre/cierra</div>
         <div id="camControls">
           <button id="cc-up" title="Subir y acercar la vista (mantén presionado)">▲</button>
           <button id="cc-down" title="Bajar y alejar la vista (mantén presionado)">▼</button>
@@ -243,6 +270,12 @@
           <div class="view2d-body"><svg id="svgPiece"></svg></div>
         </div>
       </div>
+    </div>
+
+    <!-- RIGHT PANEL: edición de la pieza seleccionada -->
+    <div id="rightPanel">
+      <div class="side-label" style="margin:14px 14px 0;">Editar pieza</div>
+      <div class="form-panel" id="formPanel"></div>
     </div>
   </main>
 
@@ -279,6 +312,14 @@
       </table>
       <div id="nestSummary" class="hint" style="margin-top:10px;"></div>
       <div id="nestWrap"></div>
+
+      <div class="ts" style="font-weight:600;margin-top:18px;">🔩 Plan de perforación por lateral (coordenadas del panel — para la máquina)</div>
+      <div class="hint" style="margin-bottom:8px;">Alto = desde la base de ESE lateral · Ancho = desde el borde frontal de ESE lateral. No es la posición general del mueble, es la del panel tal cual va a la máquina.</div>
+      <div class="field" style="max-width:200px;margin-bottom:10px;">
+        <label>Diámetro de perforación (mm)</label>
+        <input type="number" step="0.1" id="drillDiamInput" value="8">
+      </div>
+      <div id="drillPlanWrap"></div>
     </div>
   </details>
 
@@ -301,6 +342,7 @@ const DRAG_SNAP_THRESHOLD = 3; // cm — distancia bajo la cual una pieza arrast
 // y corte, para que el cálculo de láminas sea realista.
 let cantoThicknessMM = 0.4; // mm — grosor típico de un tapacanto de PVC
 let kerfMM = 3; // mm — grosor típico del disco de sierra
+let drillDiamMM = 8; // mm — diámetro típico de perforación (sistema minifix/cam, o espigas de 5mm si usas repisas fijas)
 
 // medida real a la que hay que cortar la pieza (antes de pegarle el canto),
 // para que después de encantada quede exacta en su medida final (w × h)
@@ -358,7 +400,9 @@ function newPiece(){
     x:0, y:0, z:0,
     attachTo: null, attachFace: 'top', offsetA:0, offsetB:0,
     locked: false,
-    groupId: null
+    groupId: null,
+    isDoor: false, hinge: 'left', doorOpen: false,
+    isCaster: false
   };
 }
 
@@ -403,7 +447,7 @@ function computeFitInfo(p){
   const tol = 0.6;
   let left=null, right=null;
   pieces.forEach(o=>{
-    if(o.id===p.id || o.orientation==='horizontal') return;
+    if(o.id===p.id || o.orientation==='horizontal' || o.isDoor) return;
     const oPos=piecePosition(o), oSize=boxSize(o);
     if(centerY < oPos.y - tol || centerY > oPos.y+oSize.sy + tol) return; // no cubre esta altura
     if(oPos.x + oSize.sx <= pos.x + tol){
@@ -420,7 +464,7 @@ function computeFitInfo(p){
   const widthDiff = round1(size.sx - clearWidth);
   const fitTol = 0.01; // exacto de verdad — solo sobrevive el redondeo interno de la computadora, nada perceptible
   return {
-    leftName:left.piece.name, rightName:right.piece.name, clearWidth,
+    leftName:left.piece.name, rightName:right.piece.name, leftId:left.piece.id, rightId:right.piece.id, clearWidth,
     currentWidth: round1(size.sx), xDiffLeft, widthDiff,
     ok: Math.abs(xDiffLeft) <= fitTol && Math.abs(widthDiff) <= fitTol,
     expectedX
@@ -430,11 +474,12 @@ function computeFitInfo(p){
 // nombres de otras piezas con las que esta pieza realmente se encima/choca en
 // el espacio (no solo tocarse en un borde, que es normal en un ensamble)
 function findOverlaps(p){
+  if(p.isDoor) return []; // las puertas van pegadas por delante a propósito — no cuenta como choque
   const pa = piecePosition(p), sa = boxSize(p);
   const eps = 0.3;
   const names = [];
   pieces.forEach(o=>{
-    if(o.id===p.id) return;
+    if(o.id===p.id || o.isDoor) return; // tampoco cuenta chocar con una puerta
     const pb = piecePosition(o), sb = boxSize(o);
     const ox = Math.min(pa.x+sa.sx, pb.x+sb.sx) - Math.max(pa.x, pb.x);
     const oy = Math.min(pa.y+sa.sy, pb.y+sb.sy) - Math.max(pa.y, pb.y);
@@ -448,30 +493,118 @@ function findOverlaps(p){
 // ejemplo una repisa flotante que descansa en un lateral central, no entre
 // dos costados): busca ese soporte y compara la altura exacta a la que debería
 // quedar (justo tocando su tope) contra dónde está de verdad.
+// ¿Esta pieza se pasa de la profundidad del marco (adelante o atrás)? Se
+// calcula con el rango de profundidad de las demás piezas del proyecto — no
+// exige que la toque ni que la llene, solo que no se salga de ese rango.
+function computeDepthLimitInfo(p){
+  if(p.isDoor) return null; // las puertas van por delante del marco a propósito, no cuenta como "salirse"
+  const pos = piecePosition(p), size = boxSize(p);
+  const others = pieces.filter(o=>o.id!==p.id && !o.isDoor);
+  if(!others.length) return null;
+  let frameMinZ=Infinity, frameMaxZ=-Infinity;
+  others.forEach(o=>{
+    const op=piecePosition(o), os=boxSize(o);
+    frameMinZ=Math.min(frameMinZ, op.z);
+    frameMaxZ=Math.max(frameMaxZ, op.z+os.sz);
+  });
+  const tol = 0.01; // exacto de verdad — solo sobrevive el redondeo interno de la computadora, nada perceptible
+  const outFront = Math.max(0, round1(frameMinZ - pos.z));
+  const outBack = Math.max(0, round1((pos.z+size.sz) - frameMaxZ));
+  return {
+    frameMinZ: round1(frameMinZ), frameMaxZ: round1(frameMaxZ),
+    currentFrom: round1(pos.z), currentTo: round1(pos.z+size.sz),
+    outFront, outBack, ok: outFront <= tol && outBack <= tol
+  };
+}
+
 function computeRestInfo(p){
-  if(p.orientation !== 'horizontal') return null;
+  if(p.isDoor) return null; // las puertas no "descansan" en algo fijo — se posicionan por su bisagra
   const pos = piecePosition(p), size = boxSize(p);
   const MAX_RANGE = 15; // cm — más allá de esto no es "su soporte", es otra pieza sin relación (como un costado normal del marco)
-  let support = null, bestGap = Infinity;
+  let supportName = null, supportTop = null, bestGap = Infinity;
+
+  // candidato base: el suelo real (Y = 0) — para laterales/piezas que deberían
+  // ir paradas directo en el piso, sin nada debajo
+  const floorGap = round1(pos.y - 0);
+  if(Math.abs(floorGap) <= MAX_RANGE){ bestGap = floorGap; supportName = 'el suelo'; supportTop = 0; }
+
+  // candidato: cualquier otra pieza cuyo tope quede cerca, justo debajo (o casi)
   pieces.forEach(o=>{
-    if(o.id===p.id || o.orientation==='horizontal') return;
+    if(o.id===p.id || o.isDoor) return;
     const op = piecePosition(o), os = boxSize(o);
     const overlapX = Math.min(pos.x+size.sx, op.x+os.sx) - Math.max(pos.x, op.x);
     const overlapZ = Math.min(pos.z+size.sz, op.z+os.sz) - Math.max(pos.z, op.z);
     if(overlapX <= 0.3 || overlapZ <= 0.3) return; // no queda realmente debajo
-    const supportTop = op.y + os.sy;
-    const gap = pos.y - supportTop; // 0 = toca exacto · negativo = se mete dentro · positivo = queda flotando con hueco
+    const top = op.y + os.sy;
+    const gap = round1(pos.y - top); // 0 = toca exacto · negativo = se mete dentro · positivo = queda flotando con hueco
     if(Math.abs(gap) > MAX_RANGE) return; // muy lejos para ser de verdad su soporte
-    if(Math.abs(gap) < Math.abs(bestGap)){ bestGap = gap; support = { piece:o, top:supportTop }; }
+    if(Math.abs(gap) < Math.abs(bestGap)){ bestGap = gap; supportName = o.name; supportTop = round1(top); }
   });
-  if(!support) return null;
+
+  if(supportName === null) return null;
   const tol = 0.01; // exacto de verdad — solo sobrevive el redondeo interno de la computadora, nada perceptible
-  return { supportName: support.piece.name, expectedY: round1(support.top), currentY: round1(pos.y), gap: round1(bestGap), ok: Math.abs(bestGap) <= tol };
+  return { supportName, expectedY: supportTop, currentY: round1(pos.y), gap: bestGap, ok: Math.abs(bestGap) <= tol };
 }
 
 // Para un Fondo: compara su medida/posición actual contra lo que debería ser
 // según el marco con el que se creó. Solo avisa si de verdad se salió del
 // marco (se corrió o le cambiaron la medida) — no por tocar los bordes normales.
+// Calcula dónde perforar en los costados para atornillar esta tabla: la
+// altura exacta (Y, el centro del espesor de la tabla) y, a esa altura, las
+// posiciones de profundidad (Z) donde va cada tornillo. Si la tabla ocupa
+// todo el ancho del marco (calza entre los dos costados), van 3 tornillos
+// por lado; si es una tabla más chica/flotante, van 2.
+function computeScrewPoints(p){
+  if(p.orientation !== 'horizontal') return null;
+  const pos = piecePosition(p), size = boxSize(p);
+  if(size.sz < 6) return null; // muy angosta de profundidad para repartir tornillos con sentido
+  const fitInfo = computeFitInfo(p);
+  const fullWidth = !!(fitInfo && fitInfo.ok);
+  const count = fullWidth ? 3 : 2;
+  const margin = Math.min(5, size.sz/4);
+  const zPositions = count === 3
+    ? [round1(pos.z+margin), round1(pos.z+size.sz/2), round1(pos.z+size.sz-margin)]
+    : [round1(pos.z+margin), round1(pos.z+size.sz-margin)];
+  return {
+    y: round1(pos.y + size.sy/2),
+    count, fullWidth, zPositions,
+    depthFrom: round1(pos.z), depthTo: round1(pos.z+size.sz)
+  };
+}
+
+// Plan de perforación por LATERAL, en el sistema de coordenadas propio de
+// cada panel (no el general del mueble) — listo para pasarle a una máquina
+// de perforar: por cada costado, la lista de huecos con su Alto (desde la
+// base del panel) y Ancho (desde el borde frontal del panel).
+function computeDrillPlan(){
+  const plan = {}; // costadoId -> { piece, holes:[{ pieceName, alto, ancho }] }
+  pieces.forEach(p=>{
+    if(p.orientation !== 'horizontal') return;
+    const info = computeFitInfo(p);
+    if(!info || !info.ok) return;
+    const screw = computeScrewPoints(p);
+    if(!screw) return;
+    [info.leftId, info.rightId].forEach(costadoId=>{
+      const costado = pieces.find(x=>x.id===costadoId);
+      if(!costado) return;
+      const costadoPos = piecePosition(costado);
+      if(!plan[costadoId]) plan[costadoId] = { piece: costado, holes: [] };
+      screw.zPositions.forEach(z=>{
+        plan[costadoId].holes.push({
+          pieceName: p.name,
+          alto: round1(screw.y - costadoPos.y),
+          ancho: round1(z - costadoPos.z)
+        });
+      });
+    });
+  });
+  // ordena los huecos de cada panel de abajo hacia arriba, y de frente hacia atrás
+  Object.values(plan).forEach(entry=>{
+    entry.holes.sort((a,b)=> a.alto - b.alto || a.ancho - b.ancho);
+  });
+  return plan;
+}
+
 function computeFondoInfo(p){
   if(!p.isFondo) return null;
   const exact = (p.material === 'TRIPLE' || p.material === 'MDF');
@@ -500,6 +633,8 @@ function getWarningIds(){
     const fondoInfo = computeFondoInfo(p);
     if(fondoInfo && !fondoInfo.ok) s.add(p.id);
     if(restInfo && !restInfo.ok) s.add(p.id);
+    const depthInfo = computeDepthLimitInfo(p);
+    if(depthInfo && !depthInfo.ok) s.add(p.id);
     if(findOverlaps(p).length) s.add(p.id);
   });
   return s;
@@ -550,6 +685,21 @@ function fixRestOnSupport(id){
   refreshAll();
 }
 
+// vuelve a meter la pieza dentro del rango de profundidad del marco (sin
+// cambiar su ancho ni su altura, solo corrigiendo Z)
+function fixDepthToFrame(id){
+  const p = pieces.find(x=>x.id===id);
+  if(!p) return;
+  const info = computeDepthLimitInfo(p);
+  if(!info) return;
+  const size = boxSize(p);
+  snapshot();
+  p.z = round1(Math.max(info.frameMinZ, Math.min(p.z, info.frameMaxZ - size.sz)));
+  p.posMode = 'free';
+  p.attachTo = null;
+  refreshAll();
+}
+
 // devuelve los 4 segmentos de canto (en el plano local ancho/alto de la pieza) mapeados a coords 3D mundo, para dibujarlos
 function cantoWorldSegments(p){
   const pos = piecePosition(p);
@@ -586,6 +736,34 @@ function cantoWorldSegments(p){
 ============================================================ */
 let scene, camera, renderer, controls, wrapEl;
 let meshGroup;
+let doorPivots = {}; // pieceId -> THREE.Group (el eje/pivote de cada puerta, para animar)
+
+// abre o cierra la puerta girando su pivote (eje de bisagra) suavemente
+function animateDoor(p, opening){
+  const pivot = doorPivots[p.id];
+  if(!pivot) return;
+  const sign = p.hinge === 'left' ? -1 : 1;
+  const fromAngle = pivot.rotation.y;
+  const toAngle = opening ? sign * (100*Math.PI/180) : 0;
+  const duration = 350;
+  const start = performance.now();
+  function step(now){
+    const t = Math.min(1, (now-start)/duration);
+    const eased = t<0.5 ? 2*t*t : -1+(4-2*t)*t; // easeInOutQuad
+    const currentPivot = doorPivots[p.id];
+    if(!currentPivot) return; // se reconstruyó la escena a mitad de la animación
+    currentPivot.rotation.y = fromAngle + (toAngle-fromAngle)*eased;
+    if(t<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+  p.doorOpen = opening;
+}
+
+function toggleDoor(id){
+  const p = pieces.find(x=>x.id===id);
+  if(!p || !p.isDoor) return;
+  animateDoor(p, !p.doorOpen);
+}
 
 function initThree(){
   wrapEl = document.getElementById('canvas3d-wrap');
@@ -614,7 +792,7 @@ function initThree(){
   dir2.position.set(-120,80,-100);
   scene.add(dir2);
 
-  const grid = new THREE.GridHelper(400, 40, 0xc9c4b8, 0xe3dfd6);
+  const grid = new THREE.GridHelper(400, 40, 0xc9ab84, 0xe0cba9);
   scene.add(grid);
 
   meshGroup = new THREE.Group();
@@ -641,37 +819,65 @@ function animate(){
 function rebuild3D(){
   while(meshGroup.children.length) meshGroup.remove(meshGroup.children[0]);
   const warnIds = getWarningIds();
+  doorPivots = {};
 
   pieces.forEach(p => {
     const size = boxSize(p);
     const pos = piecePosition(p);
     const warn = warnIds.has(p.id);
     const picked = multiSelectMode && multiSelected.has(p.id);
-    const geo = new THREE.BoxGeometry(size.sx, size.sy, size.sz);
+    const geo = p.isCaster
+      ? new THREE.CylinderGeometry(size.sx/2, size.sx/2, size.sy, 16)
+      : new THREE.BoxGeometry(size.sx, size.sy, size.sz);
     const mat = new THREE.MeshStandardMaterial({
       color: warn ? '#d0473a' : p.color, roughness:0.75, metalness:0.05,
       emissive: picked ? 0x1c3a5c : (p.id===selectedId ? 0x3a2210 : 0x000000)
     });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(pos.x + size.sx/2, pos.y + size.sy/2, pos.z + size.sz/2);
-    mesh.userData.pieceId = p.id;
-    meshGroup.add(mesh);
-
     const edges = new THREE.EdgesGeometry(geo);
     const lineMat = new THREE.LineBasicMaterial({ color: warn ? 0x7a1c12 : (picked ? 0x2f6fb0 : (p.id===selectedId ? 0xa35a2e : 0x35322c)) });
-    const line = new THREE.LineSegments(edges, lineMat);
-    line.position.copy(mesh.position);
-    meshGroup.add(line);
 
-    // canto highlight
-    const cantoMat = new THREE.LineBasicMaterial({ color:0x2f6fb0, linewidth:2 });
-    cantoWorldSegments(p).forEach(seg=>{
-      const g = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(seg[0].x, seg[0].y, seg[0].z),
-        new THREE.Vector3(seg[1].x, seg[1].y, seg[1].z)
-      ]);
-      meshGroup.add(new THREE.Line(g, cantoMat));
-    });
+    if(p.isDoor){
+      // la puerta gira alrededor de un eje pegado al borde de la bisagra,
+      // no de su propio centro — por eso usamos un grupo "pivote"
+      const hingeX = p.hinge === 'left' ? pos.x : pos.x + size.sx;
+      const pivot = new THREE.Group();
+      pivot.position.set(hingeX, pos.y + size.sy/2, pos.z + size.sz/2);
+      const sign = p.hinge === 'left' ? -1 : 1;
+      pivot.rotation.y = p.doorOpen ? sign * (100*Math.PI/180) : 0;
+      const localX = p.hinge === 'left' ? size.sx/2 : -size.sx/2;
+
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(localX, 0, 0);
+      mesh.userData.pieceId = p.id;
+      pivot.add(mesh);
+
+      const line = new THREE.LineSegments(edges, lineMat);
+      line.position.set(localX, 0, 0);
+      pivot.add(line);
+
+      meshGroup.add(pivot);
+      doorPivots[p.id] = pivot;
+    } else {
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(pos.x + size.sx/2, pos.y + size.sy/2, pos.z + size.sz/2);
+      mesh.userData.pieceId = p.id;
+      meshGroup.add(mesh);
+
+      const line = new THREE.LineSegments(edges, lineMat);
+      line.position.copy(mesh.position);
+      meshGroup.add(line);
+
+      // canto highlight (las puertas no lo muestran en 3D mientras abren/cierran,
+      // para que no quede desalineado con el giro — sí se ve en la ficha 2D)
+      const cantoMat = new THREE.LineBasicMaterial({ color:0x2f6fb0, linewidth:2 });
+      cantoWorldSegments(p).forEach(seg=>{
+        const g = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(seg[0].x, seg[0].y, seg[0].z),
+          new THREE.Vector3(seg[1].x, seg[1].y, seg[1].z)
+        ]);
+        meshGroup.add(new THREE.Line(g, cantoMat));
+      });
+    }
   });
 
   // guía de centrado, dibujada directo en el 3D (no solo en los planos 2D)
@@ -697,6 +903,27 @@ function rebuild3D(){
       meshGroup.add(new THREE.Line(g2, guideMat));
     }
   }
+
+  // puntos y línea de la herramienta "Medir en 3D"
+  if(measurePointA || measurePointB){
+    const dotMat = new THREE.MeshBasicMaterial({ color:0x2f6fb0 });
+    [measurePointA, measurePointB].forEach(pt=>{
+      if(!pt) return;
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(1.1, 12, 12), dotMat);
+      dot.position.set(pt.x, pt.y, pt.z);
+      meshGroup.add(dot);
+    });
+    if(measurePointA && measurePointB){
+      const lineMat2 = new THREE.LineDashedMaterial({ color:0x2f6fb0, dashSize:2, gapSize:1.2, linewidth:2 });
+      const g3 = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(measurePointA.x, measurePointA.y, measurePointA.z),
+        new THREE.Vector3(measurePointB.x, measurePointB.y, measurePointB.z)
+      ]);
+      const line3 = new THREE.Line(g3, lineMat2);
+      line3.computeLineDistances();
+      meshGroup.add(line3);
+    }
+  }
 }
 
 /* click para seleccionar + arrastrar piezas en 3D, con imán al acercarse a otra pieza */
@@ -707,6 +934,32 @@ window.addEventListener('keyup', e=>{ if(e.key==='Control' || e.key==='Meta') ct
 window.addEventListener('blur', ()=>{ ctrlHeld = false; });
 let dragState = null;
 let guideLineX = null, guideLineZ = null; // posición (coordenada de centro) de la guía de centrado activa, o null
+
+/* ---------- Medir en 3D: dos puntos exactos marcados con clic ---------- */
+let measureMode = false;
+let measurePointA = null, measurePointB = null; // {x,y,z} en coordenadas del mundo, o null
+
+function clearMeasure3D(){
+  measurePointA = null; measurePointB = null;
+  document.getElementById('measure3dResult').style.display = 'none';
+  rebuild3D();
+}
+
+function updateMeasure3DResult(){
+  const el = document.getElementById('measure3dResult');
+  if(!measurePointA){ el.style.display='none'; return; }
+  if(!measurePointB){
+    el.style.display='block';
+    el.textContent = 'Primer punto marcado — haz clic en el segundo punto para medir.';
+    return;
+  }
+  const dx = round1(Math.abs(measurePointB.x-measurePointA.x));
+  const dy = round1(Math.abs(measurePointB.y-measurePointA.y));
+  const dz = round1(Math.abs(measurePointB.z-measurePointA.z));
+  const dist = round1(Math.hypot(measurePointB.x-measurePointA.x, measurePointB.y-measurePointA.y, measurePointB.z-measurePointA.z));
+  el.style.display = 'block';
+  el.innerHTML = `📐 Distancia entre los dos puntos: <b class="mono" style="font-size:13px;color:var(--wood);">${dist}</b> cm — (Ancho/X: ${dx} cm · Alto/Y: ${dy} cm · Profundidad/Z: ${dz} cm)`;
+}
 
 // centro del conjunto de las demás piezas en ese eje, restándole la mitad del
 // tamaño de esta pieza — así, si esta pieza cae ahí, queda perfectamente
@@ -839,7 +1092,20 @@ function setup3DPicking(){
   renderer.domElement.addEventListener('pointerdown', (e)=>{
     toMouse(e);
     raycaster.setFromCamera(mouse, camera);
-    const hits = raycaster.intersectObjects(meshGroup.children.filter(o=>o.type==='Mesh'));
+    const hits = raycaster.intersectObjects(meshGroup.children, true).filter(h=>h.object.userData.pieceId !== undefined);
+
+    if(measureMode){
+      if(!hits.length) return; // clic en el fondo: no marca nada, deja orbitar normal
+      const point = { x: hits[0].point.x, y: hits[0].point.y, z: hits[0].point.z };
+      if(!measurePointA || measurePointB){
+        measurePointA = point; measurePointB = null;
+      } else {
+        measurePointB = point;
+      }
+      rebuild3D();
+      updateMeasure3DResult();
+      return;
+    }
 
     if(multiSelectMode){
       if(hits.length){
@@ -865,21 +1131,37 @@ function setup3DPicking(){
     const groupMembers = (p.groupId && groups[p.groupId] && groups[p.groupId].active)
       ? pieces.filter(x => x.groupId === p.groupId && !x.locked)
       : [p];
+    const memberIds = new Set(groupMembers.map(m=>m.id));
     const members = groupMembers.map(m => {
       const mp = piecePosition(m);
       return { id: m.id, startX: mp.x, startY: mp.y, startZ: mp.z };
     });
+
+    // límite de profundidad: no dejar que la pieza (ni el grupo) se pase del
+    // fondo/frente del marco — se calcula con las demás piezas del proyecto
+    // (las puertas no cuentan: van pegadas por delante del marco a propósito)
+    const isDoorDrag = p.isDoor;
+    const others = pieces.filter(o=>!memberIds.has(o.id) && !o.isDoor);
+    let frameMinZ = -Infinity, frameMaxZ = Infinity;
+    if(others.length && !isDoorDrag){
+      let mn=Infinity, mx=-Infinity;
+      others.forEach(o=>{
+        const op=piecePosition(o), os=boxSize(o);
+        mn=Math.min(mn, op.z); mx=Math.max(mx, op.z+os.sz);
+      });
+      frameMinZ = mn; frameMaxZ = mx;
+    }
 
     if(dragMode === 'horizontal'){
       const start = planeIntersect(pos.y);
       if(!start) return; // ángulo de cámara demasiado rasante para arrastrar ahora
       snapshot();
       controls.enabled = false;
-      dragState = { id, mode:'horizontal', startX: start.x, startZ: start.z, pieceStartX: pos.x, pieceStartZ: pos.z, pieceY: pos.y, lastX: pos.x, lastZ: pos.z, members };
+      dragState = { id, mode:'horizontal', startX: start.x, startZ: start.z, pieceStartX: pos.x, pieceStartZ: pos.z, pieceY: pos.y, lastX: pos.x, lastZ: pos.z, members, frameMinZ, frameMaxZ, downX: e.clientX, downY: e.clientY };
     } else {
       snapshot();
       controls.enabled = false;
-      dragState = { id, mode:'vertical', startClientY: e.clientY, pieceStartY: pos.y, lastY: pos.y, members };
+      dragState = { id, mode:'vertical', startClientY: e.clientY, pieceStartY: pos.y, lastY: pos.y, members, downX: e.clientX, downY: e.clientY };
     }
     renderer.domElement.setPointerCapture(e.pointerId);
   });
@@ -899,18 +1181,20 @@ function setup3DPicking(){
       const rawZ = dragState.pieceStartZ + (pt.z - dragState.startZ);
       if(Math.abs(rawX-dragState.lastX) > MAX_JUMP || Math.abs(rawZ-dragState.lastZ) > MAX_JUMP) return;
       dragState.lastX = rawX; dragState.lastZ = rawZ;
+      const size = boxSize(p);
+      // límite: no dejar que se pase de la profundidad del marco (adelante/atrás)
+      const clampedZ = Math.max(dragState.frameMinZ, Math.min(rawZ, dragState.frameMaxZ - size.sz));
       // guía de centrado visual: se muestra si el centro de la pieza está
       // cerca de quedar centrado respecto al resto del conjunto — pero no si
       // Ctrl está presionado, porque en ese caso el imán no se va a aplicar
-      const size = boxSize(p);
       const candX = frameCenterCandidate(p.id, 'x', size.sx);
       const candZ = frameCenterCandidate(p.id, 'z', size.sz);
       guideLineX = (!ctrlHeld && candX !== null && Math.abs(rawX-candX) < DRAG_SNAP_THRESHOLD) ? candX + size.sx/2 : null;
-      guideLineZ = (!ctrlHeld && candZ !== null && Math.abs(rawZ-candZ) < DRAG_SNAP_THRESHOLD) ? candZ + size.sz/2 : null;
+      guideLineZ = (!ctrlHeld && candZ !== null && Math.abs(clampedZ-candZ) < DRAG_SNAP_THRESHOLD) ? candZ + size.sz/2 : null;
       // sin imán mientras se mueve — se mueve suave, parejo con el mouse.
       // El imán se aplica una sola vez, al soltar (ver endDrag), para que no tiemble.
       const deltaX = rawX - dragState.pieceStartX;
-      const deltaZ = rawZ - dragState.pieceStartZ;
+      const deltaZ = clampedZ - dragState.pieceStartZ;
       dragState.members.forEach(m=>{
         const mp = pieces.find(x=>x.id===m.id);
         if(!mp) return;
@@ -936,17 +1220,21 @@ function setup3DPicking(){
     render2D();
   });
 
-  function endDrag(){
+  function endDrag(e){
     if(marqueeState){ finishMarquee(); return; }
     if(!dragState) return;
     const p = pieces.find(x=>x.id===dragState.id);
+    const moveDist = (e && e.type==='pointerup' && dragState.downX!==undefined)
+      ? Math.hypot(e.clientX-dragState.downX, e.clientY-dragState.downY) : 999;
+    const wasClick = moveDist < 6;
     if(p && !ctrlHeld){
       const size = boxSize(p);
       // el imán solo decide la posición final de la pieza que agarraste; el
       // resto del grupo se corre exactamente lo mismo, para no desarmar el conjunto
       if(dragState.mode === 'horizontal'){
-        const snappedX = snapAxis(p.id, 'x', p.x, size.sx);
-        const snappedZ = snapAxis(p.id, 'z', p.z, size.sz);
+        let snappedX = snapAxis(p.id, 'x', p.x, size.sx);
+        let snappedZ = snapAxis(p.id, 'z', p.z, size.sz);
+        snappedZ = Math.max(dragState.frameMinZ, Math.min(snappedZ, dragState.frameMaxZ - size.sz));
         const dX = snappedX - p.x, dZ = snappedZ - p.z;
         dragState.members.forEach(m=>{
           const mp = pieces.find(x=>x.id===m.id);
@@ -968,6 +1256,9 @@ function setup3DPicking(){
     dragState = null;
     guideLineX = null; guideLineZ = null;
     controls.enabled = true;
+    if(wasClick && p && p.isDoor && !p.locked){
+      toggleDoor(p.id);
+    }
     refreshAll();
   }
   renderer.domElement.addEventListener('pointerup', endDrag);
@@ -1123,6 +1414,7 @@ function render2D(){ renderTopView(); renderFrontView(); renderPieceFicha(); }
 function renderPieceList(){
   const list = document.getElementById('pieceList');
   list.innerHTML = '';
+  document.getElementById('pieceCountLabel').textContent = `Piezas (${pieces.length})`;
   const warnIds = getWarningIds();
   pieces.forEach(p=>{
     const card = document.createElement('div');
@@ -1138,9 +1430,8 @@ function renderPieceList(){
 
     card.innerHTML = `
       <div class="pc-top">
-        <div style="display:flex;align-items:center;">${checkboxHtml}<span class="swatch" style="background:${p.color}"></span><span class="pc-name">${p.name}</span>${p.locked ? ' 🔒' : ''}${warnIds.has(p.id) ? ' <span style="color:var(--danger);font-weight:600;">⚠ no calza</span>' : ''}</div>
-        <div style="display:flex;gap:2px;">
-          ${groupBadge}
+        <div style="display:flex;align-items:center;">${checkboxHtml}<span class="swatch" style="background:${p.color}"></span><span class="pc-name">${p.name}</span>${p.isDoor ? ' 🚪' : ''}${p.locked ? ' 🔒' : ''}${warnIds.has(p.id) ? ' <span style="color:var(--danger);font-weight:600;">⚠ no calza</span>' : ''}</div>
+        <div class="pc-actions">${groupBadge}
           ${multiSelectMode ? '' : `
           <button class="small ghost" data-lock="${p.id}" title="${p.locked?'Desbloquear':'Bloquear (evita moverla sin querer)'}">${p.locked?'🔒':'🔓'}</button>
           <button class="small ghost" data-dup="${p.id}" title="Duplicar pieza">⧉</button>
@@ -1343,8 +1634,11 @@ function selectPiece(id){
 function renderForm(){
   const panel = document.getElementById('formPanel');
   const p = pieces.find(x=>x.id===selectedId);
-  if(!p){ panel.style.display='none'; document.getElementById('selInfo').textContent='Sin pieza seleccionada'; return; }
-  panel.style.display='block';
+  if(!p){
+    panel.innerHTML = `<div class="form-empty">Selecciona una pieza (en la lista o en el 3D) para ver y editar su medida, posición y canto aquí.</div>`;
+    document.getElementById('selInfo').textContent='Sin pieza seleccionada';
+    return;
+  }
   document.getElementById('selInfo').textContent = `Editando: ${p.name}`;
 
   const otherPieces = pieces.filter(x=>x.id!==p.id);
@@ -1353,6 +1647,8 @@ function renderForm(){
   const fitInfo = computeFitInfo(p);
   const fondoInfo = computeFondoInfo(p);
   const restInfo = computeRestInfo(p);
+  const screwInfo = computeScrewPoints(p);
+  const depthInfo = computeDepthLimitInfo(p);
 
   let infoHtml = `<div class="fitbox"><div class="ts">Esta pieza queda de <b class="mono">${round1(pos.y)}</b> a <b class="mono">${round1(pos.y+size.sy)}</b> cm de altura desde el piso.</div>`;
   if(p.groupId && groups[p.groupId] && groups[p.groupId].active){
@@ -1361,6 +1657,11 @@ function renderForm(){
   const overlaps = findOverlaps(p);
   if(overlaps.length){
     infoHtml += `<div class="ts" style="margin-top:4px;color:var(--danger);font-weight:600;">⚠ Se está encimando con: ${overlaps.join(', ')}. Muévela o ajusta su medida.</div>`;
+  }
+  if(depthInfo && !depthInfo.ok){
+    const dir = depthInfo.outFront > 0 ? `se pasa ${depthInfo.outFront} cm hacia el frente` : `se pasa ${depthInfo.outBack} cm hacia atrás`;
+    infoHtml += `<div class="ts" style="margin-top:4px;color:var(--danger);font-weight:600;">⚠ Esta pieza ${dir} del rango de profundidad del marco (debería estar entre ${depthInfo.frameMinZ} y ${depthInfo.frameMaxZ} cm).</div>
+      <button class="small primary" id="f-fixdepth" style="margin-top:6px;">Ajustar automáticamente dentro del marco</button>`;
   }
   if(fondoInfo){
     if(fondoInfo.ok){
@@ -1388,6 +1689,14 @@ function renderForm(){
       infoHtml += `<div class="ts" style="margin-top:4px;color:var(--danger);font-weight:600;">⚠ No calza bien entre "${fitInfo.leftName}" y "${fitInfo.rightName}": el hueco libre es de <b class="mono">${fitInfo.clearWidth}</b> cm y esta pieza mide <b class="mono">${fitInfo.currentWidth}</b> cm.</div>
         <button class="small primary" id="f-fit" style="margin-top:6px;">Ajustar automáticamente a ${fitInfo.clearWidth} cm</button>`;
     }
+  }
+  if(screwInfo){
+    const zList = screwInfo.zPositions.map((z,i)=>`${i+1}) ${z} cm`).join(' · ');
+    infoHtml += `<div class="ts" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);">
+      🔩 <b>Puntos de tornillo</b> (${screwInfo.fullWidth ? 'ancho completo → 3 por lado' : 'tabla más chica → 2 por lado'}):<br>
+      Perfora en cada costado a <b class="mono">${screwInfo.y}</b> cm de altura desde el piso.<br>
+      A esa altura, en profundidad (Z), los tornillos van en: <b class="mono">${zList}</b>.
+    </div>`;
   }
   infoHtml += `</div>`;
 
@@ -1426,6 +1735,20 @@ function renderForm(){
       <div class="colors">
         ${MATERIAL_COLORS.map(c=>`<div class="color-dot ${p.color===c?'sel':''}" style="background:${c}" data-color="${c}"></div>`).join('')}
       </div>
+    </div>
+
+    <div class="field">
+      <label class="canto-chip ${p.isDoor?'on':''}" style="display:flex;width:100%;box-sizing:border-box;"><input type="checkbox" id="f-isdoor" ${p.isDoor?'checked':''}> 🚪 Es una puerta (con bisagra, abre al hacerle clic)</label>
+      ${p.isDoor ? `
+        <div style="margin-top:8px;">
+          <label>Lado de la bisagra</label>
+          <div class="seg">
+            <button type="button" data-hinge="left" class="${p.hinge==='left'?'on':''}">Izquierda</button>
+            <button type="button" data-hinge="right" class="${p.hinge==='right'?'on':''}">Derecha</button>
+          </div>
+          <button type="button" class="small ghost" id="f-toggledoor" style="margin-top:8px;">${p.doorOpen ? '◐ Cerrar (probar)' : '◑ Abrir (probar)'}</button>
+        </div>
+      ` : ''}
     </div>
 
     <div class="field">
@@ -1486,6 +1809,8 @@ function renderForm(){
   if(fixFondoBtn) fixFondoBtn.addEventListener('click', ()=>fixFondoToFrame(p.id));
   const fixRestBtn = panel.querySelector('#f-fixrest');
   if(fixRestBtn) fixRestBtn.addEventListener('click', ()=>fixRestOnSupport(p.id));
+  const fixDepthBtn = panel.querySelector('#f-fixdepth');
+  if(fixDepthBtn) fixDepthBtn.addEventListener('click', ()=>fixDepthToFrame(p.id));
   panel.querySelector('#f-dup').addEventListener('click', ()=>duplicatePiece(p.id));
   panel.querySelector('#f-lock').addEventListener('click', ()=>togglePieceLock(p.id));
   // Los campos numéricos usan refreshLight (no redibuja el formulario) para no perder
@@ -1502,6 +1827,20 @@ function renderForm(){
   panel.querySelector('#f-qty').addEventListener('input', e=>{ p.qty=Math.max(1,parseInt(e.target.value)||1); refreshLight(); });
 
   panel.querySelectorAll('[data-or]').forEach(b=>b.addEventListener('click', ()=>{ snapshot(); p.orientation=b.dataset.or; refreshAll(); }));
+  panel.querySelector('#f-isdoor').addEventListener('change', e=>{
+    snapshot();
+    p.isDoor = e.target.checked;
+    if(p.isDoor) p.canto = { top:true, bottom:true, left:true, right:true };
+    refreshAll();
+  });
+  panel.querySelectorAll('[data-hinge]').forEach(b=>b.addEventListener('click', ()=>{
+    snapshot();
+    p.hinge = b.dataset.hinge;
+    p.doorOpen = false;
+    refreshAll();
+  }));
+  const toggleDoorBtn = panel.querySelector('#f-toggledoor');
+  if(toggleDoorBtn) toggleDoorBtn.addEventListener('click', ()=>{ toggleDoor(p.id); renderForm(); });
   panel.querySelectorAll('[data-color]').forEach(d=>d.addEventListener('click', ()=>{ snapshot(); p.color=d.dataset.color; refreshAll(); }));
   panel.querySelectorAll('[data-canto]').forEach(chk=>chk.addEventListener('change', e=>{ snapshot(); p.canto[e.target.dataset.canto]=e.target.checked; refreshAll(); }));
   panel.querySelectorAll('[data-pm]').forEach(b=>b.addEventListener('click', ()=>{
@@ -1555,7 +1894,44 @@ function renderCutlist(){
     body.appendChild(tr);
   });
 
+  renderScrewTable();
   nestSheets();
+}
+
+// Tabla con los puntos de tornillo de TODAS las tablas horizontales de una
+// sola vez — para no tener que ir pieza por pieza.
+function renderScrewTable(){
+  const wrap = document.getElementById('drillPlanWrap');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  const plan = computeDrillPlan();
+  const costadoIds = Object.keys(plan);
+  if(!costadoIds.length){
+    wrap.innerHTML = `<div class="hint">Todavía no hay tablas horizontales que calcen exacto entre dos laterales — ahí es cuando se calculan los huecos.</div>`;
+    return;
+  }
+  costadoIds.forEach(cid=>{
+    const entry = plan[cid];
+    const box = document.createElement('div');
+    box.className = 'fitbox';
+    box.style.marginBottom = '12px';
+    const rows = entry.holes.map((h,i)=>`
+      <tr>
+        <td class="mono">${i+1}</td>
+        <td>${h.pieceName}</td>
+        <td class="mono" style="color:var(--wood);font-weight:600;">${h.alto}</td>
+        <td class="mono" style="color:var(--wood);font-weight:600;">${h.ancho}</td>
+        <td class="mono">Ø${drillDiamMM} mm</td>
+      </tr>`).join('');
+    box.innerHTML = `
+      <div class="ts" style="font-weight:600;margin-bottom:6px;">${entry.piece.name} — panel de ${entry.piece.w}×${entry.piece.h} cm (${entry.holes.length} huecos)</div>
+      <table>
+        <thead><tr><th>#</th><th>Pieza que se atornilla</th><th>Alto (cm)</th><th>Ancho (cm)</th><th>Broca</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+    wrap.appendChild(box);
+  });
 }
 
 // bin packing tipo guillotina muy simple, por lámina de espesor uniforme más común
@@ -1951,6 +2327,212 @@ function createFondoPreset(ancho, alto, prof, esp, material, grosor){
 
 document.getElementById('fondoBtn').addEventListener('click', openFondoModal);
 
+/* ---------- Puerta: panel con bisagra que abre/cierra al hacerle clic ---------- */
+function openDoorModal(){
+  const overlay = document.getElementById('modalOverlay');
+  let hinge = 'left';
+  let mode = 'auto'; // 'auto' = ajustar sola al hueco que elijas · 'manual' = tú escribes ancho/alto
+  const options = pieces.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+
+  function bodyHtml(){
+    if(mode === 'auto'){
+      if(pieces.length < 2){
+        return `<div class="hint">Necesitas al menos las piezas que rodean el hueco ya creadas (costados, entrepaños, etc.) antes de poder ajustar una puerta automáticamente. Usa "Medida manual" mientras tanto.</div>`;
+      }
+      return `
+        <div class="hint" style="margin-bottom:10px;">Elige las piezas que forman ese hueco específico — la puerta se ajusta exacta a ese espacio, ni a otro.</div>
+        <div class="row2">
+          <div class="field"><label>Lado izquierdo</label><select id="dr-left">${options}</select></div>
+          <div class="field"><label>Lado derecho</label><select id="dr-right">${options}</select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Abajo</label><select id="dr-below">${options}</select></div>
+          <div class="field"><label>Arriba</label><select id="dr-above">${options}</select></div>
+        </div>
+        <div class="hint" id="dr-preview" style="margin-top:-4px;"></div>
+      `;
+    }
+    return `
+      <div class="row2">
+        <div class="field"><label>Ancho (cm)</label><input type="number" step="0.1" id="dr-w" value="40"></div>
+        <div class="field"><label>Alto (cm)</label><input type="number" step="0.1" id="dr-h" value="60"></div>
+      </div>
+    `;
+  }
+
+  function render(){
+    overlay.innerHTML = `
+      <div id="modalCard">
+        <h2>Nueva puerta</h2>
+        <div class="field">
+          <label>Medida</label>
+          <div class="seg">
+            <button type="button" data-mode="auto" class="${mode==='auto'?'on':''}">Ajustar sola al hueco</button>
+            <button type="button" data-mode="manual" class="${mode==='manual'?'on':''}">Medida manual</button>
+          </div>
+        </div>
+        <div id="dr-body">${bodyHtml()}</div>
+        <div class="field"><label>Espesor (cm)</label><input type="number" step="0.1" id="dr-t" value="1.5"></div>
+        <div class="field">
+          <label>Lado de la bisagra</label>
+          <div class="seg">
+            <button type="button" data-hinge="left" class="${hinge==='left'?'on':''}">Izquierda</button>
+            <button type="button" data-hinge="right" class="${hinge==='right'?'on':''}">Derecha</button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="ghost" id="doorCancel">Cancelar</button>
+          <button class="primary" id="doorCreate">Crear puerta</button>
+        </div>
+      </div>
+    `;
+    overlay.classList.add('open');
+
+    overlay.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click', ()=>{ mode=b.dataset.mode; render(); }));
+    overlay.querySelectorAll('[data-hinge]').forEach(b=>b.addEventListener('click', ()=>{
+      hinge = b.dataset.hinge;
+      overlay.querySelectorAll('[data-hinge]').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+    }));
+    document.getElementById('doorCancel').addEventListener('click', ()=> overlay.classList.remove('open'));
+
+    if(mode==='auto' && pieces.length>=2){
+      const sels = ['dr-left','dr-right','dr-below','dr-above'].map(id=>document.getElementById(id));
+      // valores iniciales distintos entre sí, para que la vista previa tenga sentido desde el arranque
+      sels.forEach((s,i)=>{ if(s) s.selectedIndex = Math.min(i, pieces.length-1); });
+      function updatePreview(){
+        const left = pieces.find(x=>x.id===Number(document.getElementById('dr-left').value));
+        const right = pieces.find(x=>x.id===Number(document.getElementById('dr-right').value));
+        const below = pieces.find(x=>x.id===Number(document.getElementById('dr-below').value));
+        const above = pieces.find(x=>x.id===Number(document.getElementById('dr-above').value));
+        const el = document.getElementById('dr-preview');
+        if(!left||!right||!below||!above||!el) return;
+        const lp=piecePosition(left), ls=boxSize(left);
+        const rp=piecePosition(right);
+        const bp=piecePosition(below), bs=boxSize(below);
+        const ap=piecePosition(above);
+        const w = round1(rp.x - (lp.x+ls.sx));
+        const h = round1(ap.y - (bp.y+bs.sy));
+        el.textContent = `Esta puerta quedaría de ${w} × ${h} cm.`;
+      }
+      sels.forEach(s=>{ if(s) s.addEventListener('change', updatePreview); });
+      updatePreview();
+    }
+
+    document.getElementById('doorCreate').addEventListener('click', ()=>{
+      snapshot();
+      const p = newPiece();
+      p.name = 'Puerta ' + (pieces.filter(x=>x.isDoor).length+1);
+      p.t = parseFloat(document.getElementById('dr-t').value) || 1.5;
+      p.orientation = 'vertical-front';
+      p.canto = { top:true, bottom:true, left:true, right:true };
+      p.isDoor = true;
+      p.hinge = hinge;
+      p.doorOpen = false;
+
+      if(mode==='auto' && pieces.length>=2){
+        const left = pieces.find(x=>x.id===Number(document.getElementById('dr-left').value));
+        const right = pieces.find(x=>x.id===Number(document.getElementById('dr-right').value));
+        const below = pieces.find(x=>x.id===Number(document.getElementById('dr-below').value));
+        const above = pieces.find(x=>x.id===Number(document.getElementById('dr-above').value));
+        const lp=piecePosition(left), ls=boxSize(left);
+        const rp=piecePosition(right);
+        const bp=piecePosition(below), bs=boxSize(below);
+        const ap=piecePosition(above);
+        p.w = round1(rp.x - (lp.x+ls.sx));
+        p.h = round1(ap.y - (bp.y+bs.sy));
+        p.posMode = 'free';
+        p.x = round1(lp.x+ls.sx);
+        p.y = round1(bp.y+bs.sy);
+        p.z = round1(Math.min(lp.z, rp.z, bp.z, ap.z));
+      } else {
+        p.w = parseFloat(document.getElementById('dr-w').value) || 40;
+        p.h = parseFloat(document.getElementById('dr-h').value) || 60;
+        p.posMode = 'free'; p.x=0; p.y=0; p.z=0;
+      }
+
+      pieces.push(p);
+      selectedId = p.id;
+      overlay.classList.remove('open');
+      refreshAll();
+    });
+  }
+  render();
+}
+document.getElementById('doorBtn').addEventListener('click', openDoorModal);
+
+/* ---------- Rodachines: los pone solo en las esquinas y realza el mueble ---------- */
+function openCasterModal(){
+  const overlay = document.getElementById('modalOverlay');
+  if(!pieces.length){
+    overlay.innerHTML = `<div id="modalCard"><h2>Rodachines</h2><div class="hint">Primero arma el mueble (marco, piso, etc.) antes de agregar rodachines.</div><div class="modal-actions"><button class="primary" id="crClose">Cerrar</button></div></div>`;
+    overlay.classList.add('open');
+    document.getElementById('crClose').addEventListener('click', ()=> overlay.classList.remove('open'));
+    return;
+  }
+  const b = overallBounds();
+  const ancho = round1(b.maxX - b.minX);
+  const count = ancho <= 120 ? 4 : 6;
+  overlay.innerHTML = `
+    <div id="modalCard">
+      <h2>Agregar rodachines</h2>
+      <div class="hint" style="margin-bottom:10px;">El mueble mide ${ancho} cm de ancho → como ${ancho<=120?'no pasa de':'pasa de'} 120 cm, se ponen <b>${count} rodachines</b> (${count===4?'uno en cada esquina':'2 en cada esquina + 2 al centro, por el ancho'}).</div>
+      <div class="row2">
+        <div class="field"><label>Altura del rodachín (cm)</label><input type="number" step="0.1" id="cr-h" value="5"></div>
+        <div class="field"><label>Diámetro (cm)</label><input type="number" step="0.1" id="cr-d" value="4"></div>
+      </div>
+      <div class="field"><label>Margen desde el borde (cm)</label><input type="number" step="0.1" id="cr-margin" value="3"></div>
+      <div class="hint">El mueble completo se sube automáticamente esa misma altura, para que quede parado sobre los rodachines, no enterrado.</div>
+      <div class="modal-actions">
+        <button class="ghost" id="crCancel">Cancelar</button>
+        <button class="primary" id="crCreate">Agregar y realzar</button>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('open');
+  document.getElementById('crCancel').addEventListener('click', ()=> overlay.classList.remove('open'));
+  document.getElementById('crCreate').addEventListener('click', ()=>{
+    const h = parseFloat(document.getElementById('cr-h').value) || 5;
+    const d = parseFloat(document.getElementById('cr-d').value) || 4;
+    const margin = parseFloat(document.getElementById('cr-margin').value) || 3;
+    addCasters(h, d, margin);
+    overlay.classList.remove('open');
+  });
+}
+
+function addCasters(height, diam, margin){
+  snapshot();
+  const b = overallBounds();
+  const ancho = round1(b.maxX - b.minX);
+  const count = ancho <= 120 ? 4 : 6;
+
+  // posiciones (centro X,Z) de cada rodachín, según cuántos van
+  const xs = count === 4 ? [b.minX+margin, b.maxX-margin] : [b.minX+margin, (b.minX+b.maxX)/2, b.maxX-margin];
+  const zs = [b.minZ+margin, b.maxZ-margin];
+  const centers = [];
+  xs.forEach(x=> zs.forEach(z=> centers.push({x,z})));
+
+  centers.forEach((c,i)=>{
+    const cst = { ...newPiece(), name:'Rodachín '+(i+1), w:diam, h:height, t:diam,
+      orientation:'vertical-front', canto:{top:false,bottom:false,left:false,right:false},
+      color:'#2b2b2e', posMode:'free', x:round1(c.x-diam/2), y:0, z:round1(c.z-diam/2),
+      isCaster:true };
+    cst.id = uid(); pieces.push(cst);
+  });
+
+  // realza el mueble entero la misma altura de los rodachines — solo hace
+  // falta subir las piezas en modo "libre"; las que están "pegadas a otra
+  // pieza" ya suben solas porque su referencia también subió
+  pieces.forEach(p=>{
+    if(!p.isCaster && p.posMode === 'free') p.y = round1(p.y + height);
+  });
+
+  selectedId = null;
+  refreshAll();
+  autoFitCamera();
+}
+document.getElementById('casterBtn').addEventListener('click', openCasterModal);
+
 /* ---------- Medir: distancia exacta entre dos piezas cualquiera ---------- */
 function openMeasureModal(){
   const overlay = document.getElementById('modalOverlay');
@@ -2006,6 +2588,74 @@ function openMeasureModal(){
 }
 document.getElementById('measureBtn').addEventListener('click', openMeasureModal);
 
+/* ---------- Colocar una pieza a una altura medida desde la base de otra ---------- */
+function openPlaceAtHeightModal(){
+  const overlay = document.getElementById('modalOverlay');
+  if(pieces.length < 2){
+    overlay.innerHTML = `<div id="modalCard"><h2>Colocar a una altura</h2><div class="hint">Necesitas al menos 2 piezas: la que vas a colocar y la de referencia.</div><div class="modal-actions"><button class="primary" id="pahClose">Cerrar</button></div></div>`;
+    overlay.classList.add('open');
+    document.getElementById('pahClose').addEventListener('click', ()=> overlay.classList.remove('open'));
+    return;
+  }
+  const axis = 'y';
+  const options = pieces.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  overlay.innerHTML = `
+    <div id="modalCard">
+      <h2>Colocar a una altura</h2>
+      <div class="field"><label>Pieza a colocar</label><select id="pah-piece">${options}</select></div>
+      <div class="field"><label>Pieza de referencia (se mide desde SU base)</label><select id="pah-ref">${options}</select></div>
+      <div class="field"><label>Altura deseada, medida desde la base de la referencia (cm)</label><input type="number" step="0.1" id="pah-height" value="45"></div>
+      <div class="hint" id="pah-preview" style="margin-top:-4px;margin-bottom:10px;"></div>
+      <div class="modal-actions">
+        <button class="ghost" id="pahCancel">Cancelar</button>
+        <button class="primary" id="pahDo">Colocar</button>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('open');
+  if(selectedId) document.getElementById('pah-piece').value = selectedId;
+  document.getElementById('pah-ref').selectedIndex = pieces.length>1 ? 1 : 0;
+
+  function updatePreview(){
+    const refId = Number(document.getElementById('pah-ref').value);
+    const ref = pieces.find(x=>x.id===refId);
+    const dist = parseFloat(document.getElementById('pah-height').value) || 0;
+    if(!ref){ return; }
+    const refPos = piecePosition(ref);
+    document.getElementById('pah-preview').textContent =
+      `"${ref.name}" arranca en Y = ${round1(refPos.y)} cm → la pieza quedará en Y = ${round1(refPos.y + dist)} cm.`;
+  }
+  document.getElementById('pah-ref').addEventListener('change', updatePreview);
+  document.getElementById('pah-height').addEventListener('input', updatePreview);
+  updatePreview();
+
+  document.getElementById('pahCancel').addEventListener('click', ()=> overlay.classList.remove('open'));
+  document.getElementById('pahDo').addEventListener('click', ()=>{
+    const pieceId = Number(document.getElementById('pah-piece').value);
+    const refId = Number(document.getElementById('pah-ref').value);
+    const dist = parseFloat(document.getElementById('pah-height').value) || 0;
+    placeAtDistanceOfReference(pieceId, refId, axis, dist);
+    overlay.classList.remove('open');
+  });
+}
+
+// Coloca una pieza en el eje elegido (X, Y o Z) a la distancia que resulte de
+// sumarla a donde arranca (base) la pieza de referencia en ese mismo eje —
+// sirve igual para laterales (X), pisos/horizontales (Y), o profundidad (Z).
+function placeAtDistanceOfReference(pieceId, refId, axis, dist){
+  const p = pieces.find(x=>x.id===pieceId);
+  const ref = pieces.find(x=>x.id===refId);
+  if(!p || !ref || p.id===ref.id) return;
+  const refPos = piecePosition(ref);
+  snapshot();
+  p[axis] = round1(refPos[axis] + dist);
+  p.posMode = 'free';
+  p.attachTo = null;
+  selectedId = p.id;
+  refreshAll();
+}
+document.getElementById('placeAtHeightBtn').addEventListener('click', openPlaceAtHeightModal);
+
 /* ---------- Modo de selección múltiple (para agrupar) ---------- */
 function updateGroupActionBar(){
   const bar = document.getElementById('groupActionBar');
@@ -2028,18 +2678,32 @@ document.getElementById('multiSelectBtn').addEventListener('click', ()=>{
 document.getElementById('cancelMultiBtn').addEventListener('click', ()=>{
   multiSelectMode = false;
   multiSelected = new Set();
-  document.getElementById('badge3dText').textContent = 'Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace';
+  document.getElementById('badge3dText').textContent = 'Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace · clic corto en una puerta la abre/cierra';
   renderPieceList();
   updateGroupActionBar();
   rebuild3D();
 });
 document.getElementById('doGroupBtn').addEventListener('click', ()=>{
   createGroupFromSelection();
-  document.getElementById('badge3dText').textContent = 'Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace';
+  document.getElementById('badge3dText').textContent = 'Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace · clic corto en una puerta la abre/cierra';
 });
 document.getElementById('doSpreadBtn').addEventListener('click', openSpreadModal);
 
 document.getElementById('resetCam').addEventListener('click', autoFitCamera);
+
+document.getElementById('measure3dBtn').addEventListener('click', ()=>{
+  measureMode = !measureMode;
+  document.getElementById('measure3dBtn').classList.toggle('primary', measureMode);
+  document.getElementById('measure3dClear').style.display = measureMode ? 'inline-block' : 'none';
+  if(measureMode){
+    multiSelectMode = false; // modos exclusivos
+    document.getElementById('badge3dText').textContent = 'Modo medir: haz clic en un punto de una pieza, luego en otro, para ver la distancia exacta entre ambos.';
+  } else {
+    clearMeasure3D();
+    document.getElementById('badge3dText').textContent = 'Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace · clic corto en una puerta la abre/cierra';
+  }
+});
+document.getElementById('measure3dClear').addEventListener('click', clearMeasure3D);
 
 function setDragMode(mode){
   dragMode = mode;
@@ -2099,6 +2763,11 @@ document.getElementById('kerfInput').addEventListener('input', e=>{
   const v = parseFloat(e.target.value);
   kerfMM = isNaN(v) ? 0 : v;
   renderCutlist();
+});
+document.getElementById('drillDiamInput').addEventListener('input', e=>{
+  const v = parseFloat(e.target.value);
+  drillDiamMM = isNaN(v) ? 0 : v;
+  renderScrewTable();
 });
 
 document.getElementById('btnSave').addEventListener('click', saveProject);
