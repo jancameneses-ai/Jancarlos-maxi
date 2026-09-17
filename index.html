@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diseñador de Muebles en Melamina</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>JANKMUEBLES</title>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <style>
@@ -25,8 +23,8 @@
     --radius:6px;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;}
-  .mono{font-family:'IBM Plex Mono',monospace;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;}
+  .mono{font-family:Arial,Helvetica,sans-serif;}
   #app{display:flex;flex-direction:column;height:100vh;}
 
   header{
@@ -44,9 +42,9 @@
     background:var(--panel-2);color:var(--text);padding:7px 12px;cursor:pointer;transition:.15s;
   }
   button:hover{border-color:var(--wood-dim);}
-  button.primary{background:var(--wood);border-color:var(--wood);color:#fff;font-weight:600;}
-  button.primary:hover{background:#b5652f;}
   button.ghost{background:transparent;}
+  button.primary{background:var(--wood)!important;border-color:var(--wood)!important;color:#fff!important;font-weight:600;}
+  button.primary:hover{background:#b5652f!important;}
   button.small{padding:4px 8px;font-size:11px;}
   button.danger{color:var(--danger);}
   button:disabled{opacity:.35;cursor:not-allowed;}
@@ -67,16 +65,17 @@
   .side-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
 
   .piece-card{
-    border:1px solid var(--line);border-radius:var(--radius);padding:10px;margin-bottom:8px;
-    background:var(--panel-2);cursor:pointer;
+    border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px;margin-bottom:6px;
+    background:var(--panel-2);cursor:pointer;overflow:hidden;
   }
   .piece-card.active{border-color:var(--wood);}
-  .piece-card .pc-top{display:flex;justify-content:space-between;align-items:center;gap:6px;}
-  .piece-card .pc-name{font-weight:600;font-size:13px;}
-  .piece-card .pc-dims{font-size:11px;color:var(--text-dim);margin-top:3px;}
-  .swatch{width:12px;height:12px;border-radius:2px;display:inline-block;margin-right:6px;border:1px solid rgba(255,255,255,.2);}
-  .pc-actions{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:150px;}
-  .pc-actions button{padding:4px 7px;}
+  .piece-card .pc-top{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:nowrap;}
+  .piece-card .pc-name-row{display:flex;align-items:center;overflow:hidden;white-space:nowrap;min-width:0;flex:1;}
+  .piece-card .pc-name{font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .piece-card .pc-dims{font-size:11px;color:var(--text);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .swatch{width:12px;height:12px;border-radius:2px;display:inline-block;margin-right:6px;flex-shrink:0;border:1px solid rgba(255,255,255,.2);}
+  .pc-actions{display:flex;gap:3px;flex-wrap:nowrap;justify-content:flex-end;flex-shrink:0;}
+  .pc-actions button{padding:4px 6px;}
 
   #addBtn{width:100%;margin-bottom:12px;}
   .side-label{
@@ -90,11 +89,11 @@
   .form-panel::-webkit-scrollbar{width:8px;}
   .form-panel::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
   .form-empty{color:var(--text-dim);font-size:12.5px;line-height:1.5;padding:4px 0;}
-  .field{margin-bottom:10px;}
-  .field label{display:block;font-size:11px;color:var(--text-dim);margin-bottom:4px;}
+  .field{margin-bottom:8px;}
+  .field label{display:block;font-size:10.5px;color:var(--text-dim);margin-bottom:3px;}
   .field input[type=text], .field input[type=number], .field select{
     width:100%;padding:7px 8px;border-radius:var(--radius);border:1px solid var(--line);
-    background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12.5px;
+    background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;font-size:12.5px;
   }
   .row2{display:flex;gap:8px;}
   .row2 .field{flex:1;}
@@ -112,19 +111,28 @@
   .seg button{flex:1;border:none;border-radius:0;background:var(--bg);}
   .seg button.on{background:var(--wood);color:#fff;font-weight:600;}
   .hint{font-size:10.5px;color:var(--text-dim);margin-top:4px;line-height:1.4;}
-  .fitbox{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);padding:10px;margin-bottom:12px;}
+  .ts{font-size:11.5px;line-height:1.4;}
+  .th{font-size:12.5px;font-weight:600;}
+  .fitbox{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);padding:9px 10px;margin-bottom:10px;}
 
   /* ---------- center viewport ---------- */
   #center{flex:1;display:flex;flex-direction:column;min-width:0;}
   #viewToolbar{
     display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel);
-    flex-shrink:0;align-items:center;
+    flex-shrink:0;align-items:center;flex-wrap:wrap;row-gap:6px;
   }
-  #viewToolbar .spacer{flex:1;}
+  #viewToolbar button{flex-shrink:0;}
+  #moveModes button{min-width:118px;display:inline-flex;align-items:center;justify-content:center;}
+  #moveModes{flex-wrap:wrap;row-gap:6px;}
+  #viewToolbar .spacer{flex:1;min-width:8px;}
   #canvas3d-wrap{flex:1;position:relative;min-height:0;background:radial-gradient(circle at 50% 30%, #f2e9dc 0%, #e6d7c0 100%);}
   #canvas3d-wrap canvas{display:block;width:100%;height:100%;}
-  .badge3d{position:absolute;top:10px;left:12px;font-size:11px;color:var(--text-dim);background:rgba(255,255,255,.75);padding:4px 8px;border-radius:4px;border:1px solid var(--line);}
-  #camControls{position:absolute;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:5;}
+  .badge3d{display:none;}
+  #camControls{position:absolute;right:16px;bottom:16px;display:grid;grid-template-columns:44px 44px 44px;grid-template-rows:44px 44px 44px;gap:6px;z-index:5;}
+  #cc-up{grid-column:2;grid-row:1;}
+  #cc-left{grid-column:1;grid-row:2;}
+  #cc-right{grid-column:3;grid-row:2;}
+  #cc-down{grid-column:2;grid-row:3;}
   #camControls button{
     width:44px;height:44px;border-radius:50%;font-size:17px;line-height:1;
     background:var(--panel);border:1px solid var(--line);box-shadow:0 3px 10px rgba(0,0,0,.15);
@@ -140,7 +148,7 @@
   .view2d-box:last-child{border-right:none;}
   .view2d-head{padding:6px 10px;font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;}
   .view2d-body{flex:1;overflow:hidden;position:relative;}
-  svg{width:100%;height:100%;display:block;}
+  .view2d-body svg{width:100%;height:100%;display:block;}
 
   /* ---------- bottom cutlist ---------- */
   #bottomBar{border-top:1px solid var(--line);background:var(--panel);flex-shrink:0;}
@@ -188,7 +196,7 @@
 
   <header>
     <div>
-      <h1>Diseñador de Muebles <span>· Melamina RH</span></h1>
+      <h1>JANKMUEBLES <span>· Melamina RH</span></h1>
       <div class="sub">Piezas → ensamble 3D/2D → lista de corte y aprovechamiento de láminas</div>
     </div>
     <div class="hdr-actions">
@@ -209,18 +217,20 @@
           <button id="frameBtn" class="ghost" style="flex:1;">+ Marco</button>
           <button id="fondoBtn" class="ghost" style="flex:1;">+ Fondo</button>
         </div>
-        <button id="doorBtn" class="ghost" style="width:100%;margin-bottom:12px;">🚪 + Puerta (con bisagra)</button>
-        <button id="casterBtn" class="ghost" style="width:100%;margin-bottom:12px;">🛞 + Rodachines (y realza el mueble)</button>
+        <div class="row2" style="margin-bottom:12px;">
+          <button id="doorBtn" class="ghost" style="flex:1;" title="Puerta con bisagra — abre al hacerle clic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><rect x="5" y="3" width="14" height="18" rx="1"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/></svg> + Puerta</button>
+          <button id="casterBtn" class="ghost" style="flex:1;" title="Agrega rodachines y realza el mueble"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><circle cx="12" cy="12" r="7"/><path d="M12 5v14M5 12h14M7.8 7.8l8.4 8.4M16.2 7.8l-8.4 8.4"/></svg> + Rodachines</button>
+        </div>
+        <button id="rodBtn" class="ghost" style="width:100%;margin-bottom:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="4" cy="12" r="2"/><circle cx="20" cy="12" r="2"/><path d="M6 12h12"/></svg> + Colgadero (tubo de punto a punto)</button>
 
         <div class="side-label">Herramientas</div>
         <div class="row2" style="margin-bottom:8px;">
-          <button id="measureBtn" class="ghost" style="flex:1;">📏 Medir</button>
-          <button id="placeAtHeightBtn" class="ghost" style="flex:1;">🎯 Colocar a altura</button>
+          <button id="measureBtn" class="ghost" style="flex:1;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><rect x="2" y="7" width="20" height="10" rx="1"/><path d="M6 7v3M10 7v5M14 7v3M18 7v5"/></svg> Medir</button>
+          <button id="placeAtHeightBtn" class="ghost" style="flex:1;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg> Colocar a altura</button>
         </div>
-        <button id="multiSelectBtn" class="ghost" style="width:100%;margin-bottom:8px;">☑ Seleccionar varias (agrupar / repartir)</button>
+        <button id="multiSelectBtn" class="ghost" style="width:100%;margin-bottom:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg> Seleccionar varias (agrupar / repartir)</button>
         <div id="groupActionBar" style="display:none;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
           <button id="doGroupBtn" class="primary small" style="flex:1;">Agrupar</button>
-          <button id="doSpreadBtn" class="primary small" style="flex:1;">↔ Repartir parejo</button>
           <button id="cancelMultiBtn" class="ghost small" style="flex:1;">Cancelar</button>
         </div>
 
@@ -233,15 +243,17 @@
     <div id="center">
       <div id="viewToolbar">
         <button class="small ghost" id="resetCam">Centrar cámara</button>
-        <div class="seg" style="width:auto;">
-          <button class="small" data-dragmode="horizontal" id="dm-h">Mover: horizontal</button>
-          <button class="small" data-dragmode="vertical" id="dm-v">Mover: vertical</button>
+        <div id="moveModes" style="display:flex;gap:4px;">
+          <button class="small ghost" data-dragmode="horizontal" id="dm-h"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg> Horizontal</button>
+          <button class="small ghost" data-dragmode="vertical" id="dm-v"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg> Vertical</button>
+          <button class="small ghost" data-dragmode="depth" id="dm-d"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M6 18L18 6M18 6h-6M18 6v6M6 18h6M6 18v-6"/></svg> Adelante/atrás</button>
+          <button class="small ghost" data-dragmode="free" id="dm-f"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="vertical-align:-2px;margin-right:3px;"><path d="M4 3l7.5 18 2.2-7.3 7.3-2.2z"/></svg> Mover con clic</button>
         </div>
         <div class="seg" style="width:auto;">
           <button class="small ghost" id="viewUp" title="Subir la vista para ver la parte de arriba">▲ Ver arriba</button>
           <button class="small ghost" id="viewDown" title="Bajar la vista">▼ Ver abajo</button>
         </div>
-        <button class="small ghost" id="measure3dBtn" title="Marca dos puntos en el 3D para medir la distancia exacta entre ellos">📐 Medir en 3D</button>
+        <button class="small ghost" id="measure3dBtn" title="Marca dos puntos en el 3D para medir la distancia exacta entre ellos"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M4 20L20 20L4 4Z"/><path d="M8 20v-4M12 20v-6"/></svg> Medir en 3D</button>
         <button class="small ghost" id="measure3dClear" style="display:none;">Limpiar medición</button>
         <span class="spacer"></span>
         <span class="hint" id="selInfo">Sin pieza seleccionada</span>
@@ -251,6 +263,8 @@
         <div class="badge3d" id="badge3dText">Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace · clic corto en una puerta la abre/cierra</div>
         <div id="camControls">
           <button id="cc-up" title="Subir y acercar la vista (mantén presionado)">▲</button>
+          <button id="cc-left" title="Mover la vista a la izquierda (mantén presionado)">◀</button>
+          <button id="cc-right" title="Mover la vista a la derecha (mantén presionado)">▶</button>
           <button id="cc-down" title="Bajar y alejar la vista (mantén presionado)">▼</button>
         </div>
         <div id="marqueeBox"></div>
@@ -313,7 +327,7 @@
       <div id="nestSummary" class="hint" style="margin-top:10px;"></div>
       <div id="nestWrap"></div>
 
-      <div class="ts" style="font-weight:600;margin-top:18px;">🔩 Plan de perforación por lateral (coordenadas del panel — para la máquina)</div>
+      <div class="ts" style="font-weight:600;margin-top:18px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><circle cx="12" cy="6" r="3"/><rect x="10.2" y="9" width="3.6" height="12" rx="0.5"/><path d="M8.5 12.5h7M8.5 15.5h7M8.5 18.5h7"/></svg> Plan de perforación por lateral (coordenadas del panel — para la máquina)</div>
       <div class="hint" style="margin-bottom:8px;">Alto = desde la base de ESE lateral · Ancho = desde el borde frontal de ESE lateral. No es la posición general del mueble, es la del panel tal cual va a la máquina.</div>
       <div class="field" style="max-width:200px;margin-bottom:10px;">
         <label>Diámetro de perforación (mm)</label>
@@ -334,6 +348,12 @@
 const MATERIAL_COLORS = ['#d8cdbb','#efe9e0','#8a6a4a','#3d3128','#c7c9cb','#4a4d52','#7a5a41','#e3d3c0'];
 const SHEET = { w:183, h:244 }; // cm — lámina estándar 1.83 x 2.44 m
 const DRAG_SNAP_THRESHOLD = 3; // cm — distancia bajo la cual una pieza arrastrada se pega sola
+
+// iconos de línea (en vez de emoji) para botones e indicadores
+const ICON_LOCK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+const ICON_UNLOCK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 7-2.6"/></svg>';
+const ICON_LINK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><path d="M9 15l6-6"/><path d="M8 12l-2 2a3 3 0 0 0 4 4l2-2"/><path d="M16 12l2-2a3 3 0 0 0-4-4l-2 2"/></svg>';
+const ICON_UNLINK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><path d="M8 12l-2 2a3 3 0 0 0 4 4l1-1"/><path d="M16 12l2-2a3 3 0 0 0-4-4l-1 1"/></svg>';
 
 // Ajustes de taller: el canto (tapacanto) no sale de la lámina de melamina —
 // se pega después, de un rollo aparte — así que la pieza hay que cortarla
@@ -402,7 +422,8 @@ function newPiece(){
     locked: false,
     groupId: null,
     isDoor: false, hinge: 'left', doorOpen: false,
-    isCaster: false
+    isCaster: false,
+    isRod: false
   };
 }
 
@@ -447,7 +468,7 @@ function computeFitInfo(p){
   const tol = 0.6;
   let left=null, right=null;
   pieces.forEach(o=>{
-    if(o.id===p.id || o.orientation==='horizontal' || o.isDoor) return;
+    if(o.id===p.id || o.orientation==='horizontal' || o.isDoor || o.isRod || o.isCaster) return;
     const oPos=piecePosition(o), oSize=boxSize(o);
     if(centerY < oPos.y - tol || centerY > oPos.y+oSize.sy + tol) return; // no cubre esta altura
     if(oPos.x + oSize.sx <= pos.x + tol){
@@ -826,11 +847,18 @@ function rebuild3D(){
     const pos = piecePosition(p);
     const warn = warnIds.has(p.id);
     const picked = multiSelectMode && multiSelected.has(p.id);
-    const geo = p.isCaster
-      ? new THREE.CylinderGeometry(size.sx/2, size.sx/2, size.sy, 16)
-      : new THREE.BoxGeometry(size.sx, size.sy, size.sz);
+    let geo;
+    if(p.isCaster){
+      geo = new THREE.CylinderGeometry(size.sx/2, size.sx/2, size.sy, 16);
+    } else if(p.isRod){
+      geo = new THREE.CylinderGeometry(size.sy/2, size.sy/2, size.sx, 16);
+      geo.rotateZ(Math.PI/2); // el cilindro nace parado (eje Y) — lo acostamos para que quede a lo largo de X
+    } else {
+      geo = new THREE.BoxGeometry(size.sx, size.sy, size.sz);
+    }
     const mat = new THREE.MeshStandardMaterial({
-      color: warn ? '#d0473a' : p.color, roughness:0.75, metalness:0.05,
+      color: warn ? '#d0473a' : p.color,
+      roughness: p.isRod ? 0.35 : 0.75, metalness: p.isRod ? 0.7 : 0.05,
       emissive: picked ? 0x1c3a5c : (p.id===selectedId ? 0x3a2210 : 0x000000)
     });
     const edges = new THREE.EdgesGeometry(geo);
@@ -958,7 +986,7 @@ function updateMeasure3DResult(){
   const dz = round1(Math.abs(measurePointB.z-measurePointA.z));
   const dist = round1(Math.hypot(measurePointB.x-measurePointA.x, measurePointB.y-measurePointA.y, measurePointB.z-measurePointA.z));
   el.style.display = 'block';
-  el.innerHTML = `📐 Distancia entre los dos puntos: <b class="mono" style="font-size:13px;color:var(--wood);">${dist}</b> cm — (Ancho/X: ${dx} cm · Alto/Y: ${dy} cm · Profundidad/Z: ${dz} cm)`;
+  el.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M4 20L20 20L4 4Z"/><path d="M8 20v-4M12 20v-6"/></svg> Distancia entre los dos puntos: <b class="mono" style="font-size:13px;color:var(--wood);">${dist}</b> cm — (Ancho/X: ${dx} cm · Alto/Y: ${dy} cm · Profundidad/Z: ${dz} cm)`;
 }
 
 // centro del conjunto de las demás piezas en ese eje, restándole la mitad del
@@ -1152,13 +1180,14 @@ function setup3DPicking(){
       frameMinZ = mn; frameMaxZ = mx;
     }
 
-    if(dragMode === 'horizontal'){
+    if(dragMode === 'horizontal' || dragMode === 'depth' || dragMode === 'free'){
       const start = planeIntersect(pos.y);
       if(!start) return; // ángulo de cámara demasiado rasante para arrastrar ahora
       snapshot();
       controls.enabled = false;
-      dragState = { id, mode:'horizontal', startX: start.x, startZ: start.z, pieceStartX: pos.x, pieceStartZ: pos.z, pieceY: pos.y, lastX: pos.x, lastZ: pos.z, members, frameMinZ, frameMaxZ, downX: e.clientX, downY: e.clientY };
+      dragState = { id, mode: dragMode, startX: start.x, startZ: start.z, pieceStartX: pos.x, pieceStartZ: pos.z, pieceY: pos.y, lastX: pos.x, lastZ: pos.z, members, frameMinZ, frameMaxZ, downX: e.clientX, downY: e.clientY };
     } else {
+      // vertical: por píxeles del mouse (arriba/abajo de la pantalla)
       snapshot();
       controls.enabled = false;
       dragState = { id, mode:'vertical', startClientY: e.clientY, pieceStartY: pos.y, lastY: pos.y, members, downX: e.clientX, downY: e.clientY };
@@ -1172,29 +1201,29 @@ function setup3DPicking(){
     const p = pieces.find(x=>x.id===dragState.id);
     if(!p) return;
     toMouse(e);
-    const MAX_JUMP = 35; // cm — protección: ignora saltos irreales en un solo movimiento (más estricto)
 
-    if(dragState.mode === 'horizontal'){
+    if(dragState.mode === 'horizontal' || dragState.mode === 'depth' || dragState.mode === 'free'){
       const pt = planeIntersect(dragState.pieceY);
-      if(!pt) return;
-      const rawX = dragState.pieceStartX + (pt.x - dragState.startX);
-      const rawZ = dragState.pieceStartZ + (pt.z - dragState.startZ);
-      if(Math.abs(rawX-dragState.lastX) > MAX_JUMP || Math.abs(rawZ-dragState.lastZ) > MAX_JUMP) return;
-      dragState.lastX = rawX; dragState.lastZ = rawZ;
+      if(!pt) return; // el propio planeIntersect ya descarta ángulos de cámara demasiado rasantes
+      const lockX = dragState.mode === 'depth'; // adelante/atrás: solo profundidad, el ancho no se toca
+      const lockZ = dragState.mode === 'horizontal'; // horizontal: solo ancho, la profundidad no se toca
+      const rawX = lockX ? dragState.pieceStartX : dragState.pieceStartX + (pt.x - dragState.startX);
+      const rawZ = lockZ ? dragState.pieceStartZ : dragState.pieceStartZ + (pt.z - dragState.startZ);
       const size = boxSize(p);
-      // límite: no dejar que se pase de la profundidad del marco (adelante/atrás)
-      const clampedZ = Math.max(dragState.frameMinZ, Math.min(rawZ, dragState.frameMaxZ - size.sz));
       // guía de centrado visual: se muestra si el centro de la pieza está
       // cerca de quedar centrado respecto al resto del conjunto — pero no si
       // Ctrl está presionado, porque en ese caso el imán no se va a aplicar
       const candX = frameCenterCandidate(p.id, 'x', size.sx);
       const candZ = frameCenterCandidate(p.id, 'z', size.sz);
-      guideLineX = (!ctrlHeld && candX !== null && Math.abs(rawX-candX) < DRAG_SNAP_THRESHOLD) ? candX + size.sx/2 : null;
-      guideLineZ = (!ctrlHeld && candZ !== null && Math.abs(clampedZ-candZ) < DRAG_SNAP_THRESHOLD) ? candZ + size.sz/2 : null;
+      guideLineX = (!lockX && !ctrlHeld && candX !== null && Math.abs(rawX-candX) < DRAG_SNAP_THRESHOLD) ? candX + size.sx/2 : null;
+      guideLineZ = (!lockZ && !ctrlHeld && candZ !== null && Math.abs(rawZ-candZ) < DRAG_SNAP_THRESHOLD) ? candZ + size.sz/2 : null;
       // sin imán mientras se mueve — se mueve suave, parejo con el mouse.
       // El imán se aplica una sola vez, al soltar (ver endDrag), para que no tiemble.
-      const deltaX = rawX - dragState.pieceStartX;
-      const deltaZ = clampedZ - dragState.pieceStartZ;
+      // (el límite de profundidad del marco ya no se aplica aquí en vivo —
+      // se avisa después, en rojo, con botón de ajuste, para no "trabar" el
+      // mouse cuando la pieza que arrastras es del mismo ancho que el marco)
+      const deltaX = lockX ? 0 : (rawX - dragState.pieceStartX);
+      const deltaZ = lockZ ? 0 : (rawZ - dragState.pieceStartZ);
       dragState.members.forEach(m=>{
         const mp = pieces.find(x=>x.id===m.id);
         if(!mp) return;
@@ -1204,10 +1233,9 @@ function setup3DPicking(){
         mp.y = m.startY;
       });
     } else {
+      // vertical: por píxeles del mouse (arriba/abajo de la pantalla)
       const deltaPx = e.clientY - dragState.startClientY;
       const rawY = dragState.pieceStartY - deltaPx * 0.5; // 0.5 cm por pixel
-      if(Math.abs(rawY-dragState.lastY) > MAX_JUMP) return; // mismo seguro que en horizontal
-      dragState.lastY = rawY;
       const deltaY = rawY - dragState.pieceStartY;
       dragState.members.forEach(m=>{
         const mp = pieces.find(x=>x.id===m.id);
@@ -1231,23 +1259,42 @@ function setup3DPicking(){
       const size = boxSize(p);
       // el imán solo decide la posición final de la pieza que agarraste; el
       // resto del grupo se corre exactamente lo mismo, para no desarmar el conjunto
+      // (el límite de profundidad del marco ya no se fuerza aquí — si la pieza
+      // que sueltas es del mismo ancho que las que definen el marco, ese límite
+      // quedaba en 0 y la dejaba pegada sin poder moverla; ahora solo se avisa
+      // en rojo después, con botón de ajuste, en vez de bloquear el suelte)
       if(dragState.mode === 'horizontal'){
         let snappedX = snapAxis(p.id, 'x', p.x, size.sx);
-        let snappedZ = snapAxis(p.id, 'z', p.z, size.sz);
-        snappedZ = Math.max(dragState.frameMinZ, Math.min(snappedZ, dragState.frameMaxZ - size.sz));
-        const dX = snappedX - p.x, dZ = snappedZ - p.z;
+        const dX = snappedX - p.x;
         dragState.members.forEach(m=>{
           const mp = pieces.find(x=>x.id===m.id);
           if(!mp) return;
-          mp.x += dX; mp.z += dZ;
+          mp.x += dX;
         });
-      } else {
+      } else if(dragState.mode === 'vertical'){
         const snappedY = snapAxis(p.id, 'y', p.y, size.sy);
         const dY = snappedY - p.y;
         dragState.members.forEach(m=>{
           const mp = pieces.find(x=>x.id===m.id);
           if(!mp) return;
           mp.y += dY;
+        });
+      } else if(dragState.mode === 'depth'){
+        let snappedZ = snapAxis(p.id, 'z', p.z, size.sz);
+        const dZ = snappedZ - p.z;
+        dragState.members.forEach(m=>{
+          const mp = pieces.find(x=>x.id===m.id);
+          if(!mp) return;
+          mp.z += dZ;
+        });
+      } else { // 'free'
+        let snappedX = snapAxis(p.id, 'x', p.x, size.sx);
+        let snappedZ = snapAxis(p.id, 'z', p.z, size.sz);
+        const dX = snappedX - p.x, dZ = snappedZ - p.z;
+        dragState.members.forEach(m=>{
+          const mp = pieces.find(x=>x.id===m.id);
+          if(!mp) return;
+          mp.x += dX; mp.z += dZ;
         });
       }
     }
@@ -1396,11 +1443,11 @@ function renderPieceFicha(){
 
   // etiquetas de medida
   const lbl = (x,y,text,anchor)=>{
-    const t = svgEl('text',{x,y,fill:'#9a9fa6','font-size':11,'font-family':'IBM Plex Mono, monospace','text-anchor':anchor||'middle'});
+    const t = svgEl('text',{x,y,fill:'#9a9fa6','font-size':11,'font-family':'Arial, sans-serif','text-anchor':anchor||'middle'});
     t.textContent = text; svg.appendChild(t);
   };
   lbl(x0+rw/2, y0-14, p.w+' cm');
-  const tv = svgEl('text',{x:x0-14,y:y0+rh/2,fill:'#9a9fa6','font-size':11,'font-family':'IBM Plex Mono, monospace','text-anchor':'middle'});
+  const tv = svgEl('text',{x:x0-14,y:y0+rh/2,fill:'#9a9fa6','font-size':11,'font-family':'Arial, sans-serif','text-anchor':'middle'});
   tv.setAttribute('transform', `rotate(-90 ${x0-14} ${y0+rh/2})`);
   tv.textContent = p.h+' cm';
   svg.appendChild(tv);
@@ -1422,18 +1469,18 @@ function renderPieceList(){
     if(warnIds.has(p.id)) card.style.borderColor = 'var(--danger)';
 
     const groupBadge = p.groupId ? `
-      <button class="small ghost" data-gtoggle="${p.groupId}" title="${groups[p.groupId] && groups[p.groupId].active ? 'Grupo activo: se mueven juntas — clic para pausar' : 'Grupo en pausa: se mueven por separado — clic para activar'}">${groups[p.groupId] && groups[p.groupId].active ? '🔗' : '⛓️‍💥'}</button>
-      <button class="small ghost" data-ungroup="${p.groupId}" title="Desagrupar">Desagrupar</button>
+      <button class="small ghost" data-gtoggle="${p.groupId}" title="${groups[p.groupId] && groups[p.groupId].active ? 'Grupo activo: se mueven juntas — clic para pausar' : 'Grupo en pausa: se mueven por separado — clic para activar'}">${groups[p.groupId] && groups[p.groupId].active ? ICON_LINK : ICON_UNLINK}</button>
+      <button class="small ghost" data-ungroup="${p.groupId}" title="Desagrupar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     ` : '';
 
     const checkboxHtml = multiSelectMode ? `<input type="checkbox" data-check="${p.id}" ${multiSelected.has(p.id)?'checked':''} style="margin-right:8px;width:16px;height:16px;">` : '';
 
     card.innerHTML = `
       <div class="pc-top">
-        <div style="display:flex;align-items:center;">${checkboxHtml}<span class="swatch" style="background:${p.color}"></span><span class="pc-name">${p.name}</span>${p.isDoor ? ' 🚪' : ''}${p.locked ? ' 🔒' : ''}${warnIds.has(p.id) ? ' <span style="color:var(--danger);font-weight:600;">⚠ no calza</span>' : ''}</div>
+        <div class="pc-name-row">${checkboxHtml}<span class="swatch" style="background:${p.color}"></span><span class="pc-name">${p.name}</span>${p.isDoor ? ' <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><rect x="5" y="3" width="14" height="18" rx="1"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/></svg>' : ''}${p.locked ? ' '+ICON_LOCK : ''}${warnIds.has(p.id) ? ' <span style="color:var(--danger);font-weight:600;">⚠</span>' : ''}</div>
         <div class="pc-actions">${groupBadge}
           ${multiSelectMode ? '' : `
-          <button class="small ghost" data-lock="${p.id}" title="${p.locked?'Desbloquear':'Bloquear (evita moverla sin querer)'}">${p.locked?'🔒':'🔓'}</button>
+          <button class="small ghost" data-lock="${p.id}" title="${p.locked?'Desbloquear':'Bloquear (evita moverla sin querer)'}">${p.locked?ICON_LOCK:ICON_UNLOCK}</button>
           <button class="small ghost" data-dup="${p.id}" title="Duplicar pieza">⧉</button>
           <button class="small ghost danger" data-del="${p.id}">✕</button>`}
         </div>
@@ -1652,7 +1699,7 @@ function renderForm(){
 
   let infoHtml = `<div class="fitbox"><div class="ts">Esta pieza queda de <b class="mono">${round1(pos.y)}</b> a <b class="mono">${round1(pos.y+size.sy)}</b> cm de altura desde el piso.</div>`;
   if(p.groupId && groups[p.groupId] && groups[p.groupId].active){
-    infoHtml += `<div class="ts" style="margin-top:4px;color:var(--blue);">🔗 Pertenece a un grupo activo: al arrastrarla o cambiar X/Y/Z, se mueve junto con el resto del grupo.</div>`;
+    infoHtml += `<div class="ts" style="margin-top:4px;color:var(--blue);">${ICON_LINK} Pertenece a un grupo activo: al arrastrarla o cambiar X/Y/Z, se mueve junto con el resto del grupo.</div>`;
   }
   const overlaps = findOverlaps(p);
   if(overlaps.length){
@@ -1693,7 +1740,7 @@ function renderForm(){
   if(screwInfo){
     const zList = screwInfo.zPositions.map((z,i)=>`${i+1}) ${z} cm`).join(' · ');
     infoHtml += `<div class="ts" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);">
-      🔩 <b>Puntos de tornillo</b> (${screwInfo.fullWidth ? 'ancho completo → 3 por lado' : 'tabla más chica → 2 por lado'}):<br>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><circle cx="12" cy="6" r="3"/><rect x="10.2" y="9" width="3.6" height="12" rx="0.5"/><path d="M8.5 12.5h7M8.5 15.5h7M8.5 18.5h7"/></svg> <b>Puntos de tornillo</b> (${screwInfo.fullWidth ? 'ancho completo → 3 por lado' : 'tabla más chica → 2 por lado'}):<br>
       Perfora en cada costado a <b class="mono">${screwInfo.y}</b> cm de altura desde el piso.<br>
       A esa altura, en profundidad (Z), los tornillos van en: <b class="mono">${zList}</b>.
     </div>`;
@@ -1704,7 +1751,7 @@ function renderForm(){
     ${infoHtml}
     <div class="field" style="display:flex;gap:8px;">
       <button class="small ghost" id="f-dup" style="flex:1;">⧉ Duplicar pieza</button>
-      <button class="small ghost" id="f-lock" style="flex:1;">${p.locked ? '🔒 Bloqueada' : '🔓 Bloquear'}</button>
+      <button class="small ghost" id="f-lock" style="flex:1;">${p.locked ? ICON_LOCK+' Bloqueada' : ICON_UNLOCK+' Bloquear'}</button>
     </div>
     <div class="field">
       <label>Nombre de la pieza</label>
@@ -1738,7 +1785,7 @@ function renderForm(){
     </div>
 
     <div class="field">
-      <label class="canto-chip ${p.isDoor?'on':''}" style="display:flex;width:100%;box-sizing:border-box;"><input type="checkbox" id="f-isdoor" ${p.isDoor?'checked':''}> 🚪 Es una puerta (con bisagra, abre al hacerle clic)</label>
+      <label class="canto-chip ${p.isDoor?'on':''}" style="display:flex;width:100%;box-sizing:border-box;"><input type="checkbox" id="f-isdoor" ${p.isDoor?'checked':''}> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><rect x="5" y="3" width="14" height="18" rx="1"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/></svg> Es una puerta (con bisagra, abre al hacerle clic)</label>
       ${p.isDoor ? `
         <div style="margin-top:8px;">
           <label>Lado de la bisagra</label>
@@ -2533,6 +2580,83 @@ function addCasters(height, diam, margin){
 }
 document.getElementById('casterBtn').addEventListener('click', openCasterModal);
 
+/* ---------- Colgadero: tubo horizontal de un lateral a otro ---------- */
+function openRodModal(){
+  const overlay = document.getElementById('modalOverlay');
+  if(pieces.length < 2){
+    overlay.innerHTML = `<div id="modalCard"><h2>Colgadero</h2><div class="hint">Necesitas al menos los dos laterales entre los que va el colgadero ya creados.</div><div class="modal-actions"><button class="primary" id="rdClose">Cerrar</button></div></div>`;
+    overlay.classList.add('open');
+    document.getElementById('rdClose').addEventListener('click', ()=> overlay.classList.remove('open'));
+    return;
+  }
+  const options = pieces.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  overlay.innerHTML = `
+    <div id="modalCard">
+      <h2>Nuevo colgadero</h2>
+      <div class="row2">
+        <div class="field"><label>Lateral izquierdo</label><select id="rd-left">${options}</select></div>
+        <div class="field"><label>Lateral derecho</label><select id="rd-right">${options}</select></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Altura (cm desde el piso)</label><input type="number" step="0.1" id="rd-y" value="180"></div>
+        <div class="field"><label>Diámetro (cm)</label><input type="number" step="0.1" id="rd-d" value="2.5"></div>
+      </div>
+      <div class="field"><label>Profundidad — Z (cm)</label><input type="number" step="0.1" id="rd-z" value="25"></div>
+      <div class="hint" id="rd-preview" style="margin-top:-4px;"></div>
+      <div class="modal-actions">
+        <button class="ghost" id="rdCancel">Cancelar</button>
+        <button class="primary" id="rdCreate">Crear colgadero</button>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('open');
+  document.getElementById('rd-right').selectedIndex = pieces.length>1 ? 1 : 0;
+
+  function updatePreview(){
+    const left = pieces.find(x=>x.id===Number(document.getElementById('rd-left').value));
+    const right = pieces.find(x=>x.id===Number(document.getElementById('rd-right').value));
+    const el = document.getElementById('rd-preview');
+    if(!left||!right||left.id===right.id){ el.textContent='Elige dos laterales distintos.'; return; }
+    const lp=piecePosition(left), ls=boxSize(left);
+    const rp=piecePosition(right);
+    const len = round1(rp.x - (lp.x+ls.sx));
+    el.textContent = `Este colgadero mediría ${len} cm de largo.`;
+  }
+  ['rd-left','rd-right'].forEach(id=>document.getElementById(id).addEventListener('change', updatePreview));
+  updatePreview();
+
+  document.getElementById('rdCancel').addEventListener('click', ()=> overlay.classList.remove('open'));
+  document.getElementById('rdCreate').addEventListener('click', ()=>{
+    const left = pieces.find(x=>x.id===Number(document.getElementById('rd-left').value));
+    const right = pieces.find(x=>x.id===Number(document.getElementById('rd-right').value));
+    if(!left || !right || left.id===right.id){ return; }
+    const y = parseFloat(document.getElementById('rd-y').value) || 180;
+    const d = parseFloat(document.getElementById('rd-d').value) || 2.5;
+    const z = parseFloat(document.getElementById('rd-z').value) || 25;
+
+    snapshot();
+    const lp=piecePosition(left), ls=boxSize(left);
+    const rp=piecePosition(right);
+    const len = round1(rp.x - (lp.x+ls.sx));
+    const p = newPiece();
+    p.name = 'Colgadero ' + (pieces.filter(x=>x.isRod).length+1);
+    p.w = len; p.h = d; p.t = d;
+    p.orientation = 'vertical-front';
+    p.canto = { top:false, bottom:false, left:false, right:false };
+    p.isRod = true;
+    p.color = '#9aa0a6';
+    p.posMode = 'free';
+    p.x = round1(lp.x+ls.sx);
+    p.y = round1(y - d/2);
+    p.z = round1(z - d/2);
+    pieces.push(p);
+    selectedId = p.id;
+    overlay.classList.remove('open');
+    refreshAll();
+  });
+}
+document.getElementById('rodBtn').addEventListener('click', openRodModal);
+
 /* ---------- Medir: distancia exacta entre dos piezas cualquiera ---------- */
 function openMeasureModal(){
   const overlay = document.getElementById('modalOverlay');
@@ -2663,13 +2787,13 @@ function updateGroupActionBar(){
   document.getElementById('doGroupBtn').disabled = multiSelected.size < 2;
   document.getElementById('doGroupBtn').textContent = multiSelected.size >= 2
     ? `Agrupar (${multiSelected.size})` : 'Agrupar';
-  document.getElementById('doSpreadBtn').disabled = multiSelected.size < 2;
-  document.getElementById('doSpreadBtn').textContent = multiSelected.size >= 2
-    ? `↔ Repartir parejo (${multiSelected.size})` : '↔ Repartir parejo';
 }
 document.getElementById('multiSelectBtn').addEventListener('click', ()=>{
   multiSelectMode = true;
   multiSelected = new Set();
+  measureMode = false; // modos exclusivos
+  document.getElementById('measure3dBtn').classList.remove('primary');
+  document.getElementById('measure3dClear').style.display = 'none';
   document.getElementById('badge3dText').textContent = 'Clic en piezas para marcarlas, o arrastra un recuadro sobre varias · luego "Agrupar seleccionadas"';
   renderPieceList();
   updateGroupActionBar();
@@ -2687,7 +2811,6 @@ document.getElementById('doGroupBtn').addEventListener('click', ()=>{
   createGroupFromSelection();
   document.getElementById('badge3dText').textContent = 'Clic y arrastra una pieza para moverla (se pega si queda cerca) · mantén Ctrl para moverla libre sin imán · fondo: orbita · rueda: zoom · Ctrl+Z deshace · clic corto en una puerta la abre/cierra';
 });
-document.getElementById('doSpreadBtn').addEventListener('click', openSpreadModal);
 
 document.getElementById('resetCam').addEventListener('click', autoFitCamera);
 
@@ -2707,11 +2830,17 @@ document.getElementById('measure3dClear').addEventListener('click', clearMeasure
 
 function setDragMode(mode){
   dragMode = mode;
-  document.getElementById('dm-h').classList.toggle('on', mode==='horizontal');
-  document.getElementById('dm-v').classList.toggle('on', mode==='vertical');
+  ['dm-h','dm-v','dm-d','dm-f'].forEach(btnId=>{
+    document.getElementById(btnId).classList.remove('primary');
+    document.getElementById(btnId).classList.remove('on');
+  });
+  const map = { horizontal:'dm-h', vertical:'dm-v', depth:'dm-d', free:'dm-f' };
+  document.getElementById(map[mode]).classList.add('primary');
 }
 document.getElementById('dm-h').addEventListener('click', ()=>setDragMode('horizontal'));
 document.getElementById('dm-v').addEventListener('click', ()=>setDragMode('vertical'));
+document.getElementById('dm-d').addEventListener('click', ()=>setDragMode('depth'));
+document.getElementById('dm-f').addEventListener('click', ()=>setDragMode('free'));
 setDragMode('horizontal');
 
 // Sube o baja la cámara y el punto de mira juntos, para poder ver la parte de
@@ -2733,18 +2862,33 @@ function stepView(dir){ // dir = 1 (subir y acercar) · -1 (bajar y alejar)
   offset.setLength(dist);
   camera.position.copy(controls.target).add(offset);
 }
-function holdRepeat(btnId, dir){
+function holdRepeat(btnId, fn){
   const btn = document.getElementById(btnId);
   let interval = null;
-  const start = (e)=>{ e.preventDefault(); stepView(dir); interval = setInterval(()=>stepView(dir), 60); };
+  const start = (e)=>{ e.preventDefault(); fn(); interval = setInterval(fn, 60); };
   const stop = ()=>{ if(interval){ clearInterval(interval); interval=null; } };
   btn.addEventListener('pointerdown', start);
   btn.addEventListener('pointerup', stop);
   btn.addEventListener('pointerleave', stop);
   btn.addEventListener('pointercancel', stop);
 }
-holdRepeat('cc-up', 1);
-holdRepeat('cc-down', -1);
+holdRepeat('cc-up', ()=>stepView(1));
+holdRepeat('cc-down', ()=>stepView(-1));
+
+// Mueve la cámara y el punto de mira hacia el lado (izquierda/derecha) tal
+// como se está viendo ahora mismo, no en un eje fijo del mundo.
+function stepSideways(dir){ // dir = -1 (izquierda) · 1 (derecha)
+  const forward = new THREE.Vector3().subVectors(controls.target, camera.position);
+  forward.y = 0;
+  if(forward.lengthSq() < 0.0001) forward.set(0,0,1);
+  forward.normalize();
+  const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0,1,0)).normalize();
+  const offset = right.multiplyScalar(dir*16);
+  camera.position.add(offset);
+  controls.target.add(offset);
+}
+holdRepeat('cc-left', ()=>stepSideways(-1));
+holdRepeat('cc-right', ()=>stepSideways(1));
 
 // El abrir/cerrar del <details> lo maneja el navegador solo (nativo, nunca falla).
 // Este listener solo actualiza el texto del botón cuando se abre o cierra.
